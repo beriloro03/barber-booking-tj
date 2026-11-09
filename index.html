@@ -208,12 +208,12 @@ function render() {
         const price = document.createElement("strong");
         price.textContent = Number(service.price).toLocaleString() + " " + words.somoni;
         item.append(details, price);
-        const bookButton=document.createElement("button");bookButton.type="button";bookButton.className="book-btn";bookButton.textContent=words.book;item.append(bookButton);
+        const bookButton=document.createElement("button");bookButton.type="button";bookButton.className="book-btn";bookButton.dataset.serviceId=service.id;bookButton.textContent=words.book;item.append(bookButton);
         serviceSection.append(item);
       });
     }
     card.append(serviceSection);
-    if (shopServices.length) { const booking=createBookingPanel(shop,shopServices); card.append(booking.panel); shopServices.forEach(service=>{ const row=[...serviceSection.querySelectorAll(".service-item")].find(el=>el.querySelector("strong")?.textContent===service.name); const button=row?.querySelector(".book-btn"); if(button)button.addEventListener("click",()=>booking.open(service.id)); }); }
+    if (shopServices.length) { const booking=createBookingPanel(shop,shopServices); card.append(booking.panel); shopServices.forEach(service=>{ const button=serviceSection.querySelector(".book-btn[data-service-id=\""+service.id+"\"]"); if(button)button.addEventListener("click",()=>booking.open(service.id)); }); }
     if (shop.phone) {
       const phone = document.createElement("a");
       phone.href = "tel:" + shop.phone.replace(/[^0-9+]/g, "");
