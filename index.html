@@ -30,6 +30,7 @@
     .notice{background:#fff;border:1px dashed #cfc4e5;border-radius:14px;padding:16px;color:var(--muted);margin-top:18px}
     .shop-card h3{margin:0 0 8px;font-size:18px}.shop-card p{margin:6px 0;color:var(--muted);line-height:1.5}
     .shop-card a{color:var(--primary);font-weight:650;text-decoration:none}
+.service-list{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}.service-list h4{margin:0 0 9px;font-size:15px}.service-item{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}.service-item strong{white-space:nowrap;color:var(--primary)}.service-meta{font-size:13px;color:var(--muted);margin-top:3px}
     .shop-status{padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--muted);margin-top:16px}
     footer{max-width:1080px;margin:auto;padding:0 20px 30px;color:var(--muted);font-size:13px}
     @media(max-width:560px){main{padding:24px 14px}.hero{padding:25px 20px}.nav{padding:12px 14px}.brand{font-size:15px}}
@@ -96,15 +97,15 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 const list = document.getElementById("shopList");
 const statusBox = document.getElementById("shopStatus");
-let shops = [];
+let shops = [];\nlet servicesByShop = {};
 let loadState = "loading";
 
 function languageCopy() {
   const lang = document.documentElement.lang || "tg";
   const words = {
-    tg:{loading:"Маълумот бор шуда истодааст…",empty:"Ҳоло ягон марказ илова нашудааст. Баъдтар боз санҷед.",error:"Маълумот бор нашуд. Пайвасти интернетро санҷед ва саҳифаро нав кунед.",noAddress:"Суроға ҳоло нишон дода нашудааст.",call:"Тамос"},
-    ru:{loading:"Загрузка данных…",empty:"Пока ни одно заведение не добавлено. Проверьте позже.",error:"Не удалось загрузить данные. Проверьте интернет и обновите страницу.",noAddress:"Адрес пока не указан.",call:"Связаться"},
-    en:{loading:"Loading data…",empty:"No locations have been added yet. Please check again later.",error:"Could not load data. Check your internet connection and refresh the page.",noAddress:"Address not provided yet.",call:"Contact"}
+    tg:{serviceHeading:"Хизматрасониҳо ва нархҳо",noServices:"Ҳоло хизмат илова нашудааст.",somoni:"сомонӣ",minutes:"дақ.",loading:"Маълумот бор шуда истодааст…",empty:"Ҳоло ягон марказ илова нашудааст. Баъдтар боз санҷед.",error:"Маълумот бор нашуд. Пайвасти интернетро санҷед ва саҳифаро нав кунед.",noAddress:"Суроға ҳоло нишон дода нашудааст.",call:"Тамос"},
+    ru:{serviceHeading:"Услуги и цены",noServices:"Услуги пока не добавлены.",somoni:"сомони",minutes:"мин.",loading:"Загрузка данных…",empty:"Пока ни одно заведение не добавлено. Проверьте позже.",error:"Не удалось загрузить данные. Проверьте интернет и обновите страницу.",noAddress:"Адрес пока не указан.",call:"Связаться"},
+    en:{serviceHeading:"Services and prices",noServices:"No services have been added yet.",somoni:"TJS",minutes:"min",loading:"Loading data…",empty:"No locations have been added yet. Please check again later.",error:"Could not load data. Check your internet connection and refresh the page.",noAddress:"Address not provided yet.",call:"Contact"}
   };
   return words[lang] || words.tg;
 }
@@ -129,6 +130,36 @@ function render() {
     const location = document.createElement("p");
     location.textContent = [shop.city, shop.address].filter(Boolean).join(" · ") || words.noAddress;
     card.append(location);
+    const serviceSection = document.createElement("div");
+    serviceSection.className = "service-list";
+    const serviceHeading = document.createElement("h4");
+    serviceHeading.textContent = words.serviceHeading;
+    serviceSection.append(serviceHeading);
+    const shopServices = servicesByShop[shop.id] || [];
+    if (!shopServices.length) {
+      const none = document.createElement("p");
+      none.className = "muted";
+      none.textContent = words.noServices;
+      serviceSection.append(none);
+    } else {
+      shopServices.forEach(service => {
+        const item = document.createElement("div");
+        item.className = "service-item";
+        const details = document.createElement("div");
+        const serviceName = document.createElement("strong");
+        serviceName.textContent = service.name;
+        details.append(serviceName);
+        const meta = document.createElement("div");
+        meta.className = "service-meta";
+        meta.textContent = service.duration_minutes + " " + words.minutes;
+        details.append(meta);
+        const price = document.createElement("strong");
+        price.textContent = Number(service.price).toLocaleString() + " " + words.somoni;
+        item.append(details, price);
+        serviceSection.append(item);
+      });
+    }
+    card.append(serviceSection);
     if (shop.phone) {
       const phone = document.createElement("a");
       phone.href = "tel:" + shop.phone.replace(/[^0-9+]/g, "");
@@ -153,6 +184,23 @@ async function loadShops() {
     loadState = "error";
   } else {
     shops = data || [];
+    servicesByShop = {};
+    if (shops.length) {
+      const { data: serviceData, error: serviceError } = await supabase
+        .from("services")
+        .select("id,barbershop_id,name,description,duration_minutes,price")
+        .in("barbershop_id", shops.map(shop => shop.id))
+        .eq("is_active", true)
+        .order("name", { ascending: true });
+      if (serviceError) {
+        console.error("Supabase services query failed:", serviceError.message);
+      } else {
+        (serviceData || []).forEach(service => {
+          if (!servicesByShop[service.barbershop_id]) servicesByShop[service.barbershop_id] = [];
+          servicesByShop[service.barbershop_id].push(service);
+        });
+      }
+    }
     loadState = "ready";
   }
   render();
