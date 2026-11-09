@@ -117,6 +117,17 @@ async function loadBookings(){
   box.append(card);
  });
 }
+$("signupForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const email=$("newEmail").value.trim();
+ const password=$("newPassword").value;
+ if(password.length<12){status("Парол бояд на кам аз 12 аломат дошта бошад.",true);return;}
+ status("Ҳисоб сохта шуда истодааст…");
+ const {data,error}=await supabase.auth.signUp({email,password});
+ if(error){status("Сабти ном нашуд: "+error.message,true);return;}
+ if(data.session){status("Ҳисоб сохта шуд. Акнун маълумоти марказро пур кун.");await loadShop();}
+ else{status("Дархости сабти ном қабул шуд. Email-ро кушо, пайванди тасдиқи Supabase-ро пахш кун, баъд бо email ва пароли нав ворид шав.");}
+});
 $("togglePassword").addEventListener("click",()=>{const field=$("password");const visible=field.type==="password";field.type=visible?"text":"password";$("togglePassword").textContent=visible?"Пинҳон кардан":"Нишон додан";});
 $("loginForm").addEventListener("submit",async e=>{e.preventDefault();status("Ворид шуда истодаӣ…");const {error}=await supabase.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});if(error){const code=error.code||"";let message="Воридшавӣ нашуд.";if(code==="invalid_credentials"||/invalid login credentials/i.test(error.message||"")){message="Email ё парол нодуруст аст. Ҳарфҳои калон/хурд ва фосилаҳоро санҷ.";}else if(code==="email_not_confirmed"||/email not confirmed/i.test(error.message||"")){message="Email ҳанӯз тасдиқ нашудааст. Қуттии почтаатро барои паёми тасдиқи Supabase санҷ.";}else if(code==="user_not_found"){message="Ин email дар ин лоиҳаи Supabase ёфт нашуд.";}else{message+=" Сабаб: "+(error.message||code||"хатои номаълум");}status(message,true);return;}await loadShop();});
 $("logoutBtn").addEventListener("click",async()=>{await supabase.auth.signOut();shop=null;showDashboard(false);status("Аз ҳисоб баромадӣ.");});
