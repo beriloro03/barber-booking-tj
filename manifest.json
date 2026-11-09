@@ -1,0 +1,19 @@
+{
+  "name": "Марказҳои хизматрасонӣ — Сартарошхонаҳо",
+  "short_name": "Сартарошхонаҳо",
+  "description": "Ҷустуҷӯ ва навбатгирӣ ба сартарошхонаҳо дар Тоҷикистон",
+  "lang": "tg",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f5fb",
+  "theme_color": "#5b35b5",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
