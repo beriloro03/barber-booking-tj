@@ -142,12 +142,28 @@ function createBookingPanel(shop, shopServices) {
     const startsAt=new Date(dateInput.value+"T"+timeInput.value);
     if(!dateInput.value||!timeInput.value||Number.isNaN(startsAt.getTime())||startsAt<=new Date()){status.textContent=words.futureError;return;}
     submit.disabled=true;status.textContent=words.loading;
-    let {data:sessionData,error:sessionError}=await customerSupabase.auth.getSession();
-    let user=sessionData?.session?.user||null;
-    if(!user){
-      const signed=await customerSupabase.auth.signInAnonymously();
-      user=signed.data?.user||signed.data?.session?.user||null;
-      sessionError=signed.error;
+    let user=null;
+    let sessionError=null;
+    try {
+      const {data:sessionData,error:getSessionError}=await customerSupabase.auth.getSession();
+      sessionError=getSessionError;
+      const savedSession=sessionData?.session||null;
+      if(savedSession&&!sessionError){
+        const {data:verifiedData,error:verifyError}=await customerSupabase.auth.getUser();
+        if(!verifyError&&verifiedData?.user?.id===savedSession.user?.id){
+          user=verifiedData.user;
+        }else{
+          await customerSupabase.auth.signOut({scope:"local"});
+          sessionError=verifyError;
+        }
+      }
+      if(!user){
+        const signed=await customerSupabase.auth.signInAnonymously();
+        user=signed.data?.user||signed.data?.session?.user||null;
+        sessionError=signed.error;
+      }
+    } catch(authFailure) {
+      sessionError=authFailure;
     }
     if(sessionError||!user){
       status.textContent=words.authError+(sessionError?.message?" ("+sessionError.message+")":"");
