@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="tg">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#5b35b5">
+<title>Панели соҳибкор — Сартарошхонаҳо</title>
+<style>
+:root{--p:#5b35b5;--ink:#211b31;--muted:#716b7e;--bg:#f7f5fb;--line:#e9e4f1}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+header{background:#fff;border-bottom:1px solid var(--line);padding:16px}header div,main{max-width:850px;margin:auto}
+h1{font-size:25px;margin:8px 0}h2{font-size:20px;margin:0 0 14px}
+main{padding:24px 16px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+label{display:block;font-size:14px;font-weight:650;margin:12px 0 5px}input,textarea{width:100%;font:inherit;padding:11px;border:1px solid #d9d2e5;border-radius:10px;background:#fff;color:var(--ink)}
+textarea{min-height:76px;resize:vertical}button{font:inherit;border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:#fff;color:var(--ink);cursor:pointer}
+.primary{background:var(--p);border-color:var(--p);color:white}.danger{color:#a21d35;border-color:#efc7d0}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.row>*{flex:1}.muted{color:var(--muted);font-size:14px;line-height:1.5}
+#status{padding:12px;border-radius:10px;background:#f1edfa;color:var(--muted);margin:12px 0}.service{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}.service-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.service-top strong{overflow-wrap:anywhere}.hidden{display:none!important}
+a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14px}.row>*{min-width:100%}}
+</style></head>
+<body>
+<header><div><a href="./">← Сомонаи асосӣ</a><h1>Панели соҳибкор</h1><div class="muted">Идоракунии марказ ва хизматрасониҳо</div></div></header>
+<main>
+<section id="loginCard" class="card">
+<h2>Воридшавӣ</h2><p class="muted">Бо email ва пароли ҳисоби Supabase-и худ ворид шав.</p>
+<form id="loginForm">
+<label for="email">Email</label><input id="email" type="email" autocomplete="username" required>
+<label for="password">Парол</label><input id="password" type="password" autocomplete="current-password" required>
+<div class="row" style="margin-top:14px"><button class="primary" type="submit">Ворид шудан</button></div>
+</form></section>
+<div id="status" role="status">Барои оғоз ворид шав.</div>
+<section id="dashboard" class="hidden">
+<div class="card"><div class="row"><h2 style="flex:2">Маълумоти марказ</h2><button id="logoutBtn" type="button">Баромадан</button></div>
+<form id="shopForm">
+<label for="shopName">Номи марказ</label><input id="shopName" required maxlength="120">
+<label for="shopDescription">Тавсиф</label><textarea id="shopDescription" maxlength="500"></textarea>
+<label for="shopCity">Шаҳр</label><input id="shopCity" maxlength="100">
+<label for="shopAddress">Суроғаи марказ</label><input id="shopAddress" maxlength="250">
+<label for="shopPhone">Телефони кории марказ (ихтиёрӣ)</label><input id="shopPhone" type="tel" maxlength="40">
+<button class="primary" type="submit" style="margin-top:14px">Сабт кардани маълумот</button>
+</form></div>
+<div class="card"><h2>Хизматрасониҳо ва нархҳо</h2><p class="muted">Хизмат илова кун ё маълумоти хизматҳои мавҷударо таҳрир намо.</p>
+<form id="serviceForm">
+<label for="serviceName">Номи хизмат</label><input id="serviceName" required maxlength="120">
+<label for="serviceDescription">Тавсиф (ихтиёрӣ)</label><input id="serviceDescription" maxlength="300">
+<div class="row"><div><label for="serviceDuration">Давомнокӣ (дақиқа)</label><input id="serviceDuration" type="number" min="5" max="480" value="30" required></div><div><label for="servicePrice">Нарх (сомонӣ)</label><input id="servicePrice" type="number" min="0" step="0.01" value="0" required></div></div>
+<button class="primary" type="submit" style="margin-top:14px">Илова кардани хизмат</button>
+</form><div id="serviceList"></div></div>
+</section>
+</main>
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.119.0";
+const supabase=createClient("https://yjybilaaxqtzhlvaabwd.supabase.co","sb_publishable_yyeO2kZv9yRQyLUOl7fG6Q_j7ixPc1");
+const $=id=>document.getElementById(id);
+let shop=null,editingServiceId=null;
+function status(message,isError=false){$("status").textContent=message;$("status").style.background=isError?"#fff0f1":"#f1edfa";$("status").style.color=isError?"#9b1c31":"#716b7e";}
+function showDashboard(show){$("loginCard").classList.toggle("hidden",show);$("dashboard").classList.toggle("hidden",!show);}
+async function loadShop(){
+ const {data:userData,error:userError}=await supabase.auth.getUser();
+ if(userError||!userData.user){showDashboard(false);status("Лутфан ворид шав.",true);return;}
+ const {data,error}=await supabase.from("barbershops").select("id,name,description,address,city,phone").eq("owner_id",userData.user.id).limit(1).maybeSingle();
+ if(error){status("Марказ бор карда нашуд: "+error.message,true);return;}
+ if(!data){shop=null;showDashboard(true);status("Барои ин ҳисоб марказ ёфт нашуд. Ба администратор муроҷиат кун.");return;}
+ shop=data;$("shopName").value=data.name||"";$("shopDescription").value=data.description||"";$("shopCity").value=data.city||"";$("shopAddress").value=data.address||"";$("shopPhone").value=data.phone||"";
+ showDashboard(true);status("Марказ бор шуд. Тағйиротро танҳо соҳиби ин марказ сабт карда метавонад.");await loadServices();
+}
+async function loadServices(){
+ if(!shop)return;
+ const {data,error}=await supabase.from("services").select("id,name,description,duration_minutes,price,is_active").eq("barbershop_id",shop.id).order("name");
+ const box=$("serviceList");box.replaceChildren();
+ if(error){status("Хизматҳо бор нашуданд: "+error.message,true);return;}
+ if(!data.length){const p=document.createElement("p");p.className="muted";p.textContent="Ҳоло хизмат нест.";box.append(p);return;}
+ data.forEach(s=>{
+  const card=document.createElement("div");card.className="service";
+  const top=document.createElement("div");top.className="service-top";
+  const title=document.createElement("strong");title.textContent=s.name+" — "+Number(s.price).toLocaleString()+" сомонӣ";
+  const meta=document.createElement("span");meta.className="muted";meta.textContent=s.duration_minutes+" дақ.";
+  top.append(title,meta);card.append(top);
+  if(s.description){const d=document.createElement("p");d.className="muted";d.textContent=s.description;card.append(d);}
+  const actions=document.createElement("div");actions.className="row";
+  const edit=document.createElement("button");edit.type="button";edit.textContent="Таҳрир";edit.addEventListener("click",()=>{editingServiceId=s.id;$("serviceName").value=s.name;$("serviceDescription").value=s.description||"";$("serviceDuration").value=s.duration_minutes;$("servicePrice").value=s.price;$("serviceForm").querySelector("button[type=submit]").textContent="Сабт кардани тағйирот";$("serviceName").focus();});
+  const del=document.createElement("button");del.type="button";del.className="danger";del.textContent="Нест кардан";del.addEventListener("click",async()=>{if(!confirm("Ин хизматро нест кунем?"))return;const {error}=await supabase.from("services").delete().eq("id",s.id).eq("barbershop_id",shop.id);if(error)status("Нест карда нашуд: "+error.message,true);else{status("Хизмат нест карда шуд.");await loadServices();}});
+  actions.append(edit,del);card.append(actions);box.append(card);
+ });
+}
+$("loginForm").addEventListener("submit",async e=>{e.preventDefault();status("Ворид шуда истодаӣ…");const {error}=await supabase.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});if(error){status("Воридшавӣ нашуд. Email ва паролро санҷ.",true);return;}await loadShop();});
+$("logoutBtn").addEventListener("click",async()=>{await supabase.auth.signOut();shop=null;showDashboard(false);status("Аз ҳисоб баромадӣ.");});
+$("shopForm").addEventListener("submit",async e=>{e.preventDefault();if(!shop)return;const updates={name:$("shopName").value.trim(),description:$("shopDescription").value.trim()||null,city:$("shopCity").value.trim()||null,address:$("shopAddress").value.trim()||null,phone:$("shopPhone").value.trim()||null};const {data,error}=await supabase.from("barbershops").update(updates).eq("id",shop.id).select("id,name,description,address,city,phone").maybeSingle();if(error){status("Маълумот сабт нашуд: "+error.message,true);return;}if(!data){status("Тағйирот сабт нашуд. Иҷозати соҳибро санҷ.",true);return;}shop=data;status("Маълумоти марказ сабт шуд.");});
+$("serviceForm").addEventListener("submit",async e=>{e.preventDefault();if(!shop)return;const payload={barbershop_id:shop.id,name:$("serviceName").value.trim(),description:$("serviceDescription").value.trim()||null,duration_minutes:Number($("serviceDuration").value),price:Number($("servicePrice").value),is_active:true};let result;if(editingServiceId){result=await supabase.from("services").update(payload).eq("id",editingServiceId).eq("barbershop_id",shop.id);}else{result=await supabase.from("services").insert(payload);}if(result.error){status("Хизмат сабт нашуд: "+result.error.message,true);return;}editingServiceId=null;$("serviceForm").reset();$("serviceDuration").value=30;$("servicePrice").value=0;$("serviceForm").querySelector("button[type=submit]").textContent="Илова кардани хизмат";status("Хизмат сабт шуд.");await loadServices();});
+supabase.auth.getSession().then(({data})=>{if(data.session)loadShop();});
+</script></body></html>
