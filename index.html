@@ -97,7 +97,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 const list = document.getElementById("shopList");
 const statusBox = document.getElementById("shopStatus");
-let shops = [];\nlet servicesByShop = {};
+let shops = [];
+let servicesByShop = {};
 let loadState = "loading";
 
 function languageCopy() {
