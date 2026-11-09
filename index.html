@@ -25,9 +25,12 @@
     .actions .primary{color:#fff}.actions .secondary{border:1px solid var(--line);color:var(--ink);background:#fff}
     .section{margin-top:38px}.section h2{font-size:23px;margin-bottom:8px}.muted{color:var(--muted);line-height:1.6}
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:18px}
-    .tile{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+    .tile,.shop-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
     .tile .symbol{font-size:26px}.tile h3{margin:9px 0 5px;font-size:17px}.tile p{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
     .notice{background:#fff;border:1px dashed #cfc4e5;border-radius:14px;padding:16px;color:var(--muted);margin-top:18px}
+    .shop-card h3{margin:0 0 8px;font-size:18px}.shop-card p{margin:6px 0;color:var(--muted);line-height:1.5}
+    .shop-card a{color:var(--primary);font-weight:650;text-decoration:none}
+    .shop-status{padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--muted);margin-top:16px}
     footer{max-width:1080px;margin:auto;padding:0 20px 30px;color:var(--muted);font-size:13px}
     @media(max-width:560px){main{padding:24px 14px}.hero{padding:25px 20px}.nav{padding:12px 14px}.brand{font-size:15px}}
   </style>
@@ -47,9 +50,15 @@
     <h1 id="headline">Сартарошхонаи мувофиқро ёбед. Навбати худро осон гиред.</h1>
     <p class="lead" id="lead">Марказҳои хизматрасонӣ, хизматҳо, нархҳо ва вақти қабулро дар як ҷой пайдо кунед. Платформа барои муштариён ва соҳибкорони Тоҷикистон.</p>
     <div class="actions">
-      <a class="primary" href="#how" id="customerBtn">Чӣ гуна кор мекунад</a>
+      <a class="primary" href="#directory" id="customerBtn">Марказҳоро бинед</a>
       <a class="secondary" href="mailto:hello@barber-booking-tj.example" id="ownerBtn">Барои соҳибкорон</a>
     </div>
+  </section>
+  <section class="section" id="directory">
+    <h2 id="directoryTitle">Сартарошхонаҳо ва марказҳо</h2>
+    <p class="muted" id="directoryIntro">Рӯйхати марказҳои фаъол аз базаи маълумот гирифта мешавад.</p>
+    <div id="shopList" class="grid" aria-live="polite"></div>
+    <div id="shopStatus" class="shop-status" role="status">Маълумот бор шуда истодааст…</div>
   </section>
   <section class="section" id="how">
     <h2 id="servicesTitle">Имкониятҳои платформа</h2>
@@ -60,22 +69,95 @@
       <article class="tile"><div class="symbol">🗓️</div><h3 id="c3t">Навбатгирӣ</h3><p id="c3p">Вақти мувофиқро интихоб карда, дархости навбат фиристед.</p></article>
       <article class="tile"><div class="symbol">🌐</div><h3 id="c4t">Се забон</h3><p id="c4p">Тоҷикӣ, русӣ ва англисӣ барои истифодаи осон.</p></article>
     </div>
-    <div class="notice" id="notice">Ин версияи ибтидоии намоишӣ аст. Ҳоло марказҳои воқеӣ ва навбатгирии фаъол пайваст нашудаанд.</div>
+    <div class="notice" id="notice">Пайвастшавӣ ба база фаъол аст. Навбатгирии онлайн ҳоло дар марҳилаи таҳия мебошад.</div>
   </section>
 </main>
 <footer id="footer">© 2026 Марказҳои хизматрасонӣ — Сартарошхонаҳо</footer>
 <script>
 const copy={
- tg:{brand:"✂️ Сартарошхонаҳо",eyebrow:"ПЛАТФОРМАИ ХИЗМАТРАСОНӢ",headline:"Сартарошхонаи мувофиқро ёбед. Навбати худро осон гиред.",lead:"Марказҳои хизматрасонӣ, хизматҳо, нархҳо ва вақти қабулро дар як ҷой пайдо кунед. Платформа барои муштариён ва соҳибкорони Тоҷикистон.",customerBtn:"Чӣ гуна кор мекунад",ownerBtn:"Барои соҳибкорон",servicesTitle:"Имкониятҳои платформа",servicesIntro:"Ҳадафи мо содда кардани ҷустуҷӯ ва навбатгирӣ аст.",c1t:"Ҷустуҷӯи марказҳо",c1p:"Марказҳоро аз рӯйи шаҳр ва хизматрасонӣ пайдо кунед.",c2t:"Хизмат ва нархҳо",c2p:"Маълумот дар бораи хизматҳо, нархҳо ва кормандон.",c3t:"Навбатгирӣ",c3p:"Вақти мувофиқро интихоб карда, дархости навбат фиристед.",c4t:"Се забон",c4p:"Тоҷикӣ, русӣ ва англисӣ барои истифодаи осон.",notice:"Ин версияи ибтидоии намоишӣ аст. Ҳоло марказҳои воқеӣ ва навбатгирии фаъол пайваст нашудаанд.",footer:"© 2026 Марказҳои хизматрасонӣ — Сартарошхонаҳо"},
- ru:{brand:"✂️ Барбершопы",eyebrow:"ПЛАТФОРМА УСЛУГ",headline:"Найдите подходящий барбершоп. Запишитесь удобным способом.",lead:"Находите сервисные центры, услуги, цены и время приёма в одном месте. Платформа для клиентов и владельцев бизнеса в Таджикистане.",customerBtn:"Как это работает",ownerBtn:"Для владельцев",servicesTitle:"Возможности платформы",servicesIntro:"Наша цель — упростить поиск и запись.",c1t:"Поиск заведений",c1p:"Находите заведения по городу и услугам.",c2t:"Услуги и цены",c2p:"Информация об услугах, ценах и сотрудниках.",c3t:"Запись",c3p:"Выберите удобное время и отправьте запрос на запись.",c4t:"Три языка",c4p:"Таджикский, русский и английский языки.",notice:"Это начальная демонстрационная версия. Реальные заведения и активная запись пока не подключены.",footer:"© 2026 Платформа услуг — Барбершопы"},
- en:{brand:"✂️ Barber Shops",eyebrow:"SERVICE PLATFORM",headline:"Find a barber shop that suits you. Booking made simple.",lead:"Discover service centers, services, prices and available appointment times in one place. A platform for customers and business owners in Tajikistan.",customerBtn:"How it works",ownerBtn:"For business owners",servicesTitle:"Platform features",servicesIntro:"Our goal is to make finding and booking services easier.",c1t:"Find locations",c1p:"Discover shops by city and service.",c2t:"Services and prices",c2p:"View information about services, prices and staff.",c3t:"Appointments",c3p:"Choose a suitable time and send a booking request.",c4t:"Three languages",c4p:"Tajik, Russian and English language support.",notice:"This is an initial demo version. Real locations and live booking are not connected yet.",footer:"© 2026 Service Platform — Barber Shops"}
+ tg:{brand:"✂️ Сартарошхонаҳо",eyebrow:"ПЛАТФОРМАИ ХИЗМАТРАСОНӢ",headline:"Сартарошхонаи мувофиқро ёбед. Навбати худро осон гиред.",lead:"Марказҳои хизматрасонӣ, хизматҳо, нархҳо ва вақти қабулро дар як ҷой пайдо кунед. Платформа барои муштариён ва соҳибкорони Тоҷикистон.",customerBtn:"Марказҳоро бинед",ownerBtn:"Барои соҳибкорон",directoryTitle:"Сартарошхонаҳо ва марказҳо",directoryIntro:"Рӯйхати марказҳои фаъол аз базаи маълумот гирифта мешавад.",loading:"Маълумот бор шуда истодааст…",empty:"Ҳоло ягон марказ илова нашудааст. Баъдтар боз санҷед.",loadError:"Маълумот бор нашуд. Пайвасти интернетро санҷед ва саҳифаро нав кунед.",noAddress:"Суроға ҳоло нишон дода нашудааст.",call:"Тамос",servicesTitle:"Имкониятҳои платформа",servicesIntro:"Ҳадафи мо содда кардани ҷустуҷӯ ва навбатгирӣ аст.",c1t:"Ҷустуҷӯи марказҳо",c1p:"Марказҳоро аз рӯйи шаҳр ва хизматрасонӣ пайдо кунед.",c2t:"Хизмат ва нархҳо",c2p:"Маълумот дар бораи хизматҳо, нархҳо ва кормандон.",c3t:"Навбатгирӣ",c3p:"Вақти мувофиқро интихоб карда, дархости навбат фиристед.",c4t:"Се забон",c4p:"Тоҷикӣ, русӣ ва англисӣ барои истифодаи осон.",notice:"Пайвастшавӣ ба база фаъол аст. Навбатгирии онлайн ҳоло дар марҳилаи таҳия мебошад.",footer:"© 2026 Марказҳои хизматрасонӣ — Сартарошхонаҳо"},
+ ru:{brand:"✂️ Барбершопы",eyebrow:"ПЛАТФОРМА УСЛУГ",headline:"Найдите подходящий барбершоп. Запишитесь удобным способом.",lead:"Находите сервисные центры, услуги, цены и время приёма в одном месте. Платформа для клиентов и владельцев бизнеса в Таджикистане.",customerBtn:"Посмотреть заведения",ownerBtn:"Для владельцев",directoryTitle:"Барбершопы и центры",directoryIntro:"Список активных заведений загружается из базы данных.",loading:"Загрузка данных…",empty:"Пока ни одно заведение не добавлено. Проверьте позже.",loadError:"Не удалось загрузить данные. Проверьте интернет и обновите страницу.",noAddress:"Адрес пока не указан.",call:"Связаться",servicesTitle:"Возможности платформы",servicesIntro:"Наша цель — упростить поиск и запись.",c1t:"Поиск заведений",c1p:"Находите заведения по городу и услугам.",c2t:"Услуги и цены",c2p:"Информация об услугах, ценах и сотрудниках.",c3t:"Запись",c3p:"Выберите удобное время и отправьте запрос на запись.",c4t:"Три языка",c4p:"Таджикский, русский и английский языки.",notice:"Подключение к базе данных активно. Онлайн-запись пока находится в разработке.",footer:"© 2026 Платформа услуг — Барбершопы"},
+ en:{brand:"✂️ Barber Shops",eyebrow:"SERVICE PLATFORM",headline:"Find a barber shop that suits you. Booking made simple.",lead:"Discover service centers, services, prices and available appointment times in one place. A platform for customers and business owners in Tajikistan.",customerBtn:"Browse locations",ownerBtn:"For business owners",directoryTitle:"Barber shops and service centers",directoryIntro:"The list of active locations is loaded from the database.",loading:"Loading data…",empty:"No locations have been added yet. Please check again later.",loadError:"Could not load data. Check your internet connection and refresh the page.",noAddress:"Address not provided yet.",call:"Contact",servicesTitle:"Platform features",servicesIntro:"Our goal is to make finding and booking services easier.",c1t:"Find locations",c1p:"Discover shops by city and service.",c2t:"Services and prices",c2p:"View information about services, prices and staff.",c3t:"Appointments",c3p:"Choose a suitable time and send a booking request.",c4t:"Three languages",c4p:"Tajik, Russian and English language support.",notice:"Database connection is active. Online booking is still under development.",footer:"© 2026 Service Platform — Barber Shops"}
 };
 function setLanguage(lang){
  const d=copy[lang]||copy.tg;document.documentElement.lang=lang;
  Object.keys(d).forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=d[id]});
  document.querySelectorAll("[data-lang]").forEach(b=>b.classList.toggle("active",b.dataset.lang===lang));
+ document.dispatchEvent(new Event("app-language-change"));
 }
 document.querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",()=>setLanguage(b.dataset.lang)));
+</script>
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.119.0";
+
+const SUPABASE_URL = "https://yjybilaaxqtzhlvaabwd.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_yyeO2kZv9yRQyLUOl7fG6Q_j_7ixPc1";
+const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+const list = document.getElementById("shopList");
+const statusBox = document.getElementById("shopStatus");
+let shops = [];
+let loadState = "loading";
+
+function languageCopy() {
+  const lang = document.documentElement.lang || "tg";
+  const words = {
+    tg:{loading:"Маълумот бор шуда истодааст…",empty:"Ҳоло ягон марказ илова нашудааст. Баъдтар боз санҷед.",error:"Маълумот бор нашуд. Пайвасти интернетро санҷед ва саҳифаро нав кунед.",noAddress:"Суроға ҳоло нишон дода нашудааст.",call:"Тамос"},
+    ru:{loading:"Загрузка данных…",empty:"Пока ни одно заведение не добавлено. Проверьте позже.",error:"Не удалось загрузить данные. Проверьте интернет и обновите страницу.",noAddress:"Адрес пока не указан.",call:"Связаться"},
+    en:{loading:"Loading data…",empty:"No locations have been added yet. Please check again later.",error:"Could not load data. Check your internet connection and refresh the page.",noAddress:"Address not provided yet.",call:"Contact"}
+  };
+  return words[lang] || words.tg;
+}
+function render() {
+  const words = languageCopy();
+  list.replaceChildren();
+  if (loadState === "loading") { statusBox.textContent = words.loading; return; }
+  if (loadState === "error") { statusBox.textContent = words.error; return; }
+  if (!shops.length) { statusBox.textContent = words.empty; return; }
+  statusBox.hidden = true;
+  shops.forEach(shop => {
+    const card = document.createElement("article");
+    card.className = "shop-card";
+    const title = document.createElement("h3");
+    title.textContent = shop.name || "—";
+    card.append(title);
+    if (shop.description) {
+      const description = document.createElement("p");
+      description.textContent = shop.description;
+      card.append(description);
+    }
+    const location = document.createElement("p");
+    location.textContent = [shop.city, shop.address].filter(Boolean).join(" · ") || words.noAddress;
+    card.append(location);
+    if (shop.phone) {
+      const phone = document.createElement("a");
+      phone.href = "tel:" + shop.phone.replace(/[^0-9+]/g, "");
+      phone.textContent = words.call + ": " + shop.phone;
+      card.append(phone);
+    }
+    list.append(card);
+  });
+}
+document.addEventListener("app-language-change", render);
+
+async function loadShops() {
+  loadState = "loading";
+  render();
+  const { data, error } = await supabase
+    .from("barbershops")
+    .select("id,name,description,address,city,phone")
+    .eq("is_active", true)
+    .order("name", { ascending: true });
+  if (error) {
+    console.error("Supabase barbershops query failed:", error.message);
+    loadState = "error";
+  } else {
+    shops = data || [];
+    loadState = "ready";
+  }
+  render();
+}
+loadShops();
 </script>
 </body>
 </html>
