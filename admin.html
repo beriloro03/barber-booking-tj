@@ -56,7 +56,6 @@ a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14
 <div class="muted" style="margin-top:12px">Хизматҳои корманд</div><div id="staffServiceOptions"></div>
 <button class="primary" type="submit" style="margin-top:14px">Илова кардани корманд</button></form><div id="staffList"></div></div>
 <div id="hoursCard" class="card hidden"><h2>Рӯзҳо ва соатҳои корӣ</h2><p class="muted">Марказ ҳамаи 7 рӯзи ҳафта кор мекунад. Соҳибкор метавонад барои ҳар рӯз соати оғоз ва анҷоми корро мустақилона интихоб кунад. Рӯзи истироҳат пешбинӣ нашудааст.</p><form id="hoursForm"><div id="hoursList"></div><button class="primary" type="submit" style="margin-top:14px">Сабт кардани соатҳои корӣ</button></form></div>
-<div id="notificationCard" class="card hidden"><h2>Огоҳӣ аз навбатҳои нав</h2><p class="muted">Ҳангоми кушода будани панели соҳибкор, навбатҳои нав ҳар 30 сония санҷида мешаванд.</p><div class="row"><button id="enableNotificationsBtn" type="button" class="primary">Фаъол кардани огоҳӣ</button><span id="notificationStatus" class="muted">Огоҳӣ фаъол нест.</span></div></div>
 <div id="bookingStatsCard" class="card hidden"><h2>Омори навбатҳо</h2><p class="muted">Омори навбатҳо барои имрӯз.</p><div id="bookingStats" class="stats-grid"><div class="service">Ҳисоб шуда истодааст…</div></div></div>
 <div id="revenueStatsCard" class="card hidden"><h2>Ҳисоботи даромад</h2><p class="muted">Танҳо навбатҳои «Анҷомёфта» ҳисоб мешаванд. Маблағ аз рӯйи нархи сабтшудаи ҳар навбат ҷамъ карда мешавад.</p><div id="revenueStats" class="stats-grid"><div class="service">Ҳисоб шуда истодааст…</div></div></div>
 <div id="bookingCard" class="card hidden"><h2>Дархостҳои навбат</h2><p class="muted">Дархостҳои «Интизор» ва «Тасдиқшуда» вақтро банд мекунанд. Агар марказ дархостро рад кунад, вақт боз озод мешавад.</p><div class="row"><div><label for="bookingSearch">Ҷустуҷӯ</label><input id="bookingSearch" type="search" placeholder="Ном, телефон ё хизмат"></div><div><label for="bookingPeriod">Давра</label><select id="bookingPeriod"><option value="today">Имрӯз</option><option value="week">7 рӯзи охир</option><option value="all">Ҳама</option></select></div></div><div class="row"><div><label for="bookingStatusFilter">Ҳолат</label><select id="bookingStatusFilter"><option value="all">Ҳамаи ҳолатҳо</option><option value="pending">Интизор</option><option value="confirmed">Тасдиқшуда</option><option value="completed">Анҷомёфта</option><option value="cancelled">Радшуда</option></select></div><div><label for="bookingStaffFilter">Корманд</label><select id="bookingStaffFilter"><option value="all">Ҳамаи кормандон</option></select></div></div><div class="row" style="margin:14px 0"><button id="exportBookingsBtn" type="button" class="primary">Зеркашии ҳисобот (CSV)</button></div><div id="bookingList" class="muted">Дархостҳо бор шуда истодаанд…</div></div>
@@ -66,7 +65,7 @@ a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.119.0";
 const supabase=createClient("https://yjybilaaxqtzhlvaabwd.supabase.co","sb_publishable_yyeO2kZv9yRQyLUOl7fG6Q_j_7ixPc1");
 const $=id=>document.getElementById(id);
-let shop=null,editingServiceId=null,knownPendingIds=null,pollingBusy=false;
+let shop=null,editingServiceId=null;
 function status(message,isError=false){$("status").textContent=message;$("status").style.background=isError?"#fff0f1":"#f1edfa";$("status").style.color=isError?"#9b1c31":"#716b7e";}
 function showDashboard(show){$("loginCard").classList.toggle("hidden",show);$("dashboard").classList.toggle("hidden",!show);}
 async function loadShop(){
@@ -76,7 +75,7 @@ async function loadShop(){
  if(error){status("Марказ бор карда нашуд: "+error.message,true);return;}
  if(!data){shop=null;$("shopForm").reset();$("serviceCard").classList.add("hidden");$("staffCard").classList.add("hidden");$("bookingCard").classList.add("hidden");$("bookingStatsCard").classList.add("hidden");$("revenueStatsCard").classList.add("hidden");$("hoursCard").classList.add("hidden");showDashboard(true);status("Ҳисоби соҳибкор омода аст. Маълумоти маркази худро пур карда, сабт кун. Марказ то санҷиш дар рӯйхати умумӣ намоён намешавад.");return;}
  shop=data;$("shopName").value=data.name||"";$("shopDescription").value=data.description||"";$("shopCity").value=data.city||"";$("shopAddress").value=data.address||"";$("shopPhone").value=data.phone||"";
- showDashboard(true);$("notificationCard").classList.remove("hidden");$("serviceCard").classList.remove("hidden");$("bookingCard").classList.remove("hidden");$("hoursCard").classList.remove("hidden");status("Марказ бор шуд. Тағйиротро танҳо соҳиби ин марказ сабт карда метавонад.");await loadServices();$("staffCard").classList.remove("hidden");await loadStaff();await loadBusinessHours();await loadBookings();
+ showDashboard(true);$("serviceCard").classList.remove("hidden");$("bookingCard").classList.remove("hidden");$("hoursCard").classList.remove("hidden");status("Марказ бор шуд. Тағйиротро танҳо соҳиби ин марказ сабт карда метавонад.");await loadServices();$("staffCard").classList.remove("hidden");await loadStaff();await loadBusinessHours();await loadBookings();
 }
 async function loadServices(){
  if(!shop)return;
@@ -237,7 +236,6 @@ async function loadBookings(){
  if(error){box.textContent="Дархостҳо бор нашуданд: "+error.message;return;}
  box.replaceChildren();
  if(!data||!data.length){box.textContent="Ҳоло дархости навбат нест.";return;}
- if(knownPendingIds===null)knownPendingIds=new Set(data.filter(b=>b.status==="pending").map(b=>b.id));
  const assignedIds=[...new Set(data.map(b=>b.staff_id).filter(Boolean))];
  let staffNames=new Map();
  if(assignedIds.length){const {data:staffRows,error:staffError}=await supabase.from("staff").select("id,full_name").in("id",assignedIds);if(!staffError)staffNames=new Map((staffRows||[]).map(person=>[person.id,person.full_name]));}
@@ -312,40 +310,6 @@ $("hoursForm").addEventListener("submit",async e=>{
  status("Соатҳои кории интихобкардаи соҳибкор барои ҳамаи 7 рӯз сабт шуданд.");
 });
 $("serviceForm").addEventListener("submit",async e=>{e.preventDefault();if(!shop)return;const payload={barbershop_id:shop.id,name:$("serviceName").value.trim(),description:$("serviceDescription").value.trim()||null,duration_minutes:Number($("serviceDuration").value),price:Number($("servicePrice").value),is_active:true};let result;if(editingServiceId){result=await supabase.from("services").update(payload).eq("id",editingServiceId).eq("barbershop_id",shop.id);}else{result=await supabase.from("services").insert(payload);}if(result.error){status("Хизмат сабт нашуд: "+result.error.message,true);return;}editingServiceId=null;$("serviceForm").reset();$("serviceDuration").value=30;$("servicePrice").value=0;$("serviceForm").querySelector("button[type=submit]").textContent="Илова кардани хизмат";status("Хизмат сабт шуд.");await loadServices();});
-
-function updateNotificationStatus(){
- const el=$("notificationStatus");
- if(!("Notification" in window)){el.textContent="Ин браузер огоҳии системавиро дастгирӣ намекунад; навбатҳо дар панел нав мешаванд.";return;}
- el.textContent=Notification.permission==="granted"?"Огоҳии браузер фаъол аст.":Notification.permission==="denied"?"Огоҳии браузер баста шудааст; иҷозатро аз танзимоти браузер тағйир деҳ.":"Барои огоҳии системавӣ тугмаро пахш кун.";
-}
-$("enableNotificationsBtn").addEventListener("click",async()=>{
- if(!("Notification" in window)){updateNotificationStatus();return;}
- try{const permission=await Notification.requestPermission();updateNotificationStatus();if(permission==="granted")status("Огоҳӣ фаъол шуд. Панелро кушода нигоҳ дор, то навбатҳои нав санҷида шаванд.");else status("Иҷозати огоҳӣ дода нашуд. Навбатҳо ҳангоми кушода будани панел боз ҳам нав мешаванд.",true);}catch(error){status("Огоҳӣ фаъол нашуд: "+error.message,true);}
-});
-async function checkForNewBookings(){
- if(!shop||pollingBusy||document.hidden)return;
- pollingBusy=true;
- try{
-  const {data,error}=await supabase.from("bookings").select("id,customer_name,starts_at").eq("barbershop_id",shop.id).eq("status","pending").order("starts_at",{ascending:false}).limit(100);
-  if(error){console.warn("Booking notification check failed:",error.message);return;}
-  const current=new Set((data||[]).map(item=>item.id));
-  if(knownPendingIds===null){knownPendingIds=current;return;}
-  const fresh=(data||[]).filter(item=>!knownPendingIds.has(item.id));
-  knownPendingIds=current;
-  if(fresh.length){
-   const newest=fresh[0];
-   const customer=newest.customer_name||"Муштарии нав";
-   const when=new Date(newest.starts_at).toLocaleString("tg-TJ",{timeZone:"Asia/Dushanbe",dateStyle:"medium",timeStyle:"short"});
-   status("Навбати нав! "+customer+" — "+when);
-   if("Notification" in window&&Notification.permission==="granted"){
-    try{const n=new Notification("Навбати нав — Сартарошхонаҳо ТҶ",{body:customer+" · "+when,tag:"booking-"+newest.id});n.onclick=()=>{window.focus();n.close();};}catch(error){console.warn("Browser notification failed:",error);}
-   }
-   await loadBookings();
-  }
- }finally{pollingBusy=false;}
-}
-updateNotificationStatus();
-setInterval(checkForNewBookings,30000);
 
 supabase.auth.getSession().then(({data})=>{if(data.session)loadShop();});
 </script></body></html>
