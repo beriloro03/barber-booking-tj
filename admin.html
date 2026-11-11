@@ -148,10 +148,13 @@ async function loadBusinessHours(){
 async function loadBookings(){
  if(!shop)return;
  const box=$("bookingList");box.textContent="Дархостҳо бор шуда истодаанд…";
- const {data,error}=await supabase.from("bookings").select("id,service_name_snapshot,price_snapshot,duration_minutes_snapshot,starts_at,ends_at,status,customer_name,customer_phone,customer_note").eq("barbershop_id",shop.id).order("starts_at",{ascending:false}).limit(100);
+ const {data,error}=await supabase.from("bookings").select("id,service_name_snapshot,price_snapshot,duration_minutes_snapshot,starts_at,ends_at,status,customer_name,customer_phone,customer_note,staff_id").eq("barbershop_id",shop.id).order("starts_at",{ascending:false}).limit(100);
  if(error){box.textContent="Дархостҳо бор нашуданд: "+error.message;return;}
  box.replaceChildren();
  if(!data||!data.length){box.textContent="Ҳоло дархости навбат нест.";return;}
+ const assignedIds=[...new Set(data.map(b=>b.staff_id).filter(Boolean))];
+ let staffNames=new Map();
+ if(assignedIds.length){const {data:staffRows,error:staffError}=await supabase.from("staff").select("id,full_name").in("id",assignedIds);if(!staffError)staffNames=new Map((staffRows||[]).map(person=>[person.id,person.full_name]));}
  data.forEach(b=>{
   const card=document.createElement("div");card.className="service";
   const title=document.createElement("strong");title.textContent=b.service_name_snapshot||"Хизматрасонӣ";
@@ -159,6 +162,7 @@ async function loadBookings(){
   const date=document.createElement("p");date.className="muted";date.textContent=new Date(b.starts_at).toLocaleString("tg-TJ",{dateStyle:"medium",timeStyle:"short"});
   const customer=document.createElement("p");customer.textContent=(b.customer_name||"")+(b.customer_phone?" · "+b.customer_phone:"");
   card.append(title,price,date,customer);
+  if(b.staff_id){const staffLine=document.createElement("p");staffLine.className="muted";staffLine.textContent="Корманд: "+(staffNames.get(b.staff_id)||"—");card.append(staffLine);}
   if(b.customer_note){const note=document.createElement("p");note.className="muted";note.textContent="Эзоҳ: "+b.customer_note;card.append(note);}
   const state=document.createElement("p");state.className="muted";state.textContent="Ҳолат: "+({pending:"Интизор",confirmed:"Тасдиқшуда",cancelled:"Радшуда",completed:"Анҷомёфта"}[b.status]||b.status);card.append(state);
   if(b.status==="pending"||b.status==="confirmed"){
