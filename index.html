@@ -237,7 +237,8 @@ async function loadMyBookings() {
     const card=document.createElement("article");card.className="my-booking-card";
     const title=document.createElement("strong");title.textContent=b.service_name_snapshot||"Хизматрасонӣ";card.append(title);
     const shop=document.createElement("p");shop.textContent=words.shopLabel+": "+(b.barbershop_name_snapshot||"—");card.append(shop);
-    if(b.staff_id){const staffLine=document.createElement("p");staffLine.textContent=words.staffLabel+": "+(assignedStaffNames.get(b.staff_id)||"—");card.append(staffLine);}\n    const when=document.createElement("p");when.textContent=new Date(b.starts_at).toLocaleString(document.documentElement.lang==="ru"?"ru-RU":document.documentElement.lang==="en"?"en-US":"tg-TJ",{dateStyle:"medium",timeStyle:"short"});card.append(when);
+    if(b.staff_id){const staffLine=document.createElement("p");staffLine.textContent=words.staffLabel+": "+(assignedStaffNames.get(b.staff_id)||"—");card.append(staffLine);}
+    const when=document.createElement("p");when.textContent=new Date(b.starts_at).toLocaleString(document.documentElement.lang==="ru"?"ru-RU":document.documentElement.lang==="en"?"en-US":"tg-TJ",{dateStyle:"medium",timeStyle:"short"});card.append(when);
     if(b.price_snapshot!==null){const price=document.createElement("p");price.textContent=words.priceLabel+": "+Number(b.price_snapshot).toLocaleString()+" сомонӣ";card.append(price);}
     const state=document.createElement("p");state.className="booking-state";state.textContent=words.statusLabel+": "+(statusNames[b.status]||b.status);card.append(state);
     box.append(card);
