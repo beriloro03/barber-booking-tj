@@ -57,7 +57,7 @@ a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14
 <button class="primary" type="submit" style="margin-top:14px">Илова кардани корманд</button></form><div id="staffList"></div></div>
 <div id="hoursCard" class="card hidden"><h2>Рӯзҳо ва соатҳои корӣ</h2><p class="muted">Марказ ҳамаи 7 рӯзи ҳафта кор мекунад. Соҳибкор метавонад барои ҳар рӯз соати оғоз ва анҷоми корро мустақилона интихоб кунад. Рӯзи истироҳат пешбинӣ нашудааст.</p><form id="hoursForm"><div id="hoursList"></div><button class="primary" type="submit" style="margin-top:14px">Сабт кардани соатҳои корӣ</button></form></div>
 <div id="bookingStatsCard" class="card hidden"><h2>Омори навбатҳо</h2><p class="muted">Омори навбатҳо барои имрӯз.</p><div id="bookingStats" class="stats-grid"><div class="service">Ҳисоб шуда истодааст…</div></div></div>
-<div id="bookingCard" class="card hidden"><h2>Дархостҳои навбат</h2><p class="muted">Дархостҳои «Интизор» ва «Тасдиқшуда» вақтро банд мекунанд. Агар марказ дархостро рад кунад, вақт боз озод мешавад.</p><div id="bookingList" class="muted">Дархостҳо бор шуда истодаанд…</div></div>
+<div id="bookingCard" class="card hidden"><h2>Дархостҳои навбат</h2><p class="muted">Дархостҳои «Интизор» ва «Тасдиқшуда» вақтро банд мекунанд. Агар марказ дархостро рад кунад, вақт боз озод мешавад.</p><div class="row"><div><label for="bookingSearch">Ҷустуҷӯ</label><input id="bookingSearch" type="search" placeholder="Ном, телефон ё хизмат"></div><div><label for="bookingPeriod">Давра</label><select id="bookingPeriod"><option value="today">Имрӯз</option><option value="week">7 рӯзи охир</option><option value="all">Ҳама</option></select></div></div><div class="row"><div><label for="bookingStatusFilter">Ҳолат</label><select id="bookingStatusFilter"><option value="all">Ҳамаи ҳолатҳо</option><option value="pending">Интизор</option><option value="confirmed">Тасдиқшуда</option><option value="completed">Анҷомёфта</option><option value="cancelled">Радшуда</option></select></div><div><label for="bookingStaffFilter">Корманд</label><select id="bookingStaffFilter"><option value="all">Ҳамаи кормандон</option></select></div></div><div id="bookingList" class="muted">Дархостҳо бор шуда истодаанд…</div></div>
 </section>
 </main>
 <script type="module">
@@ -161,6 +161,28 @@ async function loadBookingStats(){
  const items=[["Ҳамаи навбатҳо",counts.total],["Интизор",counts.pending],["Тасдиқшуда",counts.confirmed],["Анҷомёфта",counts.completed],["Радшуда",counts.cancelled]];
  items.forEach(([label,value])=>{const item=document.createElement("div");item.className="service";const name=document.createElement("span");name.className="muted";name.textContent=label;const number=document.createElement("strong");number.className="stats-number";number.textContent=String(value);item.append(name,number);box.append(item);});
 }
+function applyBookingFilters(){
+ const query=$("bookingSearch").value.trim().toLocaleLowerCase();
+ const period=$("bookingPeriod").value;
+ const state=$("bookingStatusFilter").value;
+ const staff=$("bookingStaffFilter").value;
+ const now=new Date();
+ const todayParts=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Dushanbe",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(now);
+ const getPart=type=>todayParts.find(x=>x.type===type)?.value;
+ const today=getPart("year")+"-"+getPart("month")+"-"+getPart("day");
+ const todayStart=new Date(today+"T00:00:00+05:00");
+ const weekStart=new Date(todayStart.getTime()-6*86400000);
+ [...$("bookingList").children].forEach(card=>{
+  const date=new Date(card.dataset.start);
+  const cardDay=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Dushanbe",year:"numeric",month:"2-digit",day:"2-digit"}).format(date);
+  const periodMatch=period==="all"||(period==="today"&&cardDay===today)||(period==="week"&&date>=weekStart&&date<=now);
+  const searchMatch=!query||(card.dataset.search||"").includes(query);
+  const statusMatch=state==="all"||card.dataset.status===state;
+  const staffMatch=staff==="all"||card.dataset.staff===staff;
+  card.classList.toggle("hidden",!(periodMatch&&searchMatch&&statusMatch&&staffMatch));
+ });
+}
+["bookingSearch","bookingPeriod","bookingStatusFilter","bookingStaffFilter"].forEach(id=>$(id).addEventListener(id==="bookingSearch"?"input":"change",applyBookingFilters));
 async function loadBookings(){
  if(!shop)return;
  await loadBookingStats();
@@ -172,8 +194,14 @@ async function loadBookings(){
  const assignedIds=[...new Set(data.map(b=>b.staff_id).filter(Boolean))];
  let staffNames=new Map();
  if(assignedIds.length){const {data:staffRows,error:staffError}=await supabase.from("staff").select("id,full_name").in("id",assignedIds);if(!staffError)staffNames=new Map((staffRows||[]).map(person=>[person.id,person.full_name]));}
+ const staffFilter=$("bookingStaffFilter"),selectedStaff=staffFilter.value;
+ staffFilter.replaceChildren();const allStaffOption=document.createElement("option");allStaffOption.value="all";allStaffOption.textContent="Ҳамаи кормандон";staffFilter.append(allStaffOption);
+ [...staffNames.entries()].sort((a,b)=>a[1].localeCompare(b[1],"tg")).forEach(([id,name])=>{const option=document.createElement("option");option.value=id;option.textContent=name;staffFilter.append(option);});
+ staffFilter.value=[...staffFilter.options].some(option=>option.value===selectedStaff)?selectedStaff:"all";
  data.forEach(b=>{
   const card=document.createElement("div");card.className="service";
+  card.dataset.status=b.status||"";card.dataset.staff=b.staff_id||"";card.dataset.start=b.starts_at||"";
+  card.dataset.search=[b.customer_name,b.customer_phone,b.service_name_snapshot,staffNames.get(b.staff_id)||""].filter(Boolean).join(" ").toLocaleLowerCase();
   const title=document.createElement("strong");title.textContent=b.service_name_snapshot||"Хизматрасонӣ";
   const price=document.createElement("p");price.className="muted";price.textContent="Нарх: "+(b.price_snapshot===null?"—":Number(b.price_snapshot).toLocaleString()+" сомонӣ")+" · "+(b.duration_minutes_snapshot||"—")+" дақ.";
   const date=document.createElement("p");date.className="muted";date.textContent=new Date(b.starts_at).toLocaleString("tg-TJ",{dateStyle:"medium",timeStyle:"short"});
@@ -200,6 +228,7 @@ async function loadBookings(){
   }
   box.append(card);
  });
+ applyBookingFilters();
 }
 $("signupForm").addEventListener("submit",async e=>{
  e.preventDefault();
