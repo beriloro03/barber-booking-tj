@@ -13,7 +13,7 @@ label{display:block;font-size:14px;font-weight:650;margin:12px 0 5px}input,texta
 textarea{min-height:76px;resize:vertical}button{font:inherit;border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:#fff;color:var(--ink);cursor:pointer}
 .primary{background:var(--p);border-color:var(--p);color:white}.danger{color:#a21d35;border-color:#efc7d0}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.row>*{flex:1}.muted{color:var(--muted);font-size:14px;line-height:1.5}
 #status{padding:12px;border-radius:10px;background:#f1edfa;color:var(--muted);margin:12px 0}.service{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}.hours-row{display:grid;grid-template-columns:1fr 100px 100px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}.hours-row label{margin:0}.hours-row input{min-width:0;padding:8px}@media(max-width:520px){.hours-row{grid-template-columns:1fr 1fr 1fr}.hours-row label{grid-column:1/-1}}.service-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.service-top strong{overflow-wrap:anywhere}.hidden{display:none!important}
-.platform-summary{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}.platform-stat{background:#f7f5fb;border:1px solid var(--line);border-radius:10px;padding:10px;flex:1;min-width:110px}.platform-stat strong{display:block;font-size:22px}.platform-shop{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}.platform-shop p{margin:6px 0}.platform-status{font-weight:700}.platform-status.active{color:#167344}.platform-status.inactive{color:#a15b00}a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14px}.row>*{min-width:100%}}
+a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14px}.row>*{min-width:100%}}
 </style></head>
 <body>
 <header><div><a href="./">← Сомонаи асосӣ</a><h1>Панели соҳибкор</h1><div class="muted">Идоракунии марказ ва хизматрасониҳо</div></div></header>
@@ -34,8 +34,6 @@ textarea{min-height:76px;resize:vertical}button{font:inherit;border:1px solid va
 </form></section>
 <div id="status" role="status">Барои оғоз ворид шав.</div>
 <section id="dashboard" class="hidden">
-<div id="platformAdminCard" class="card hidden"><h2>Маъмурияти платформа</h2><p class="muted">Ин амал танҳо барои ҳисоби соҳиби платформа дастрас аст. Пас аз таъини нақш, барои нав кардани иҷозатҳо аз ҳисоб баромада, дубора ворид шав.</p><button id="enablePlatformAdminBtn" class="primary" type="button">Фаъол кардани Super Admin</button></div>
-<div id="platformDashboardCard" class="card hidden"><h2>Панели Super Admin</h2><p class="muted">Идоракунии ҳамаи марказҳо ва маъмурони онҳо. Танҳо марказҳои тасдиқшуда дар сомонаи умумӣ намоён мешаванд.</p><div id="platformSummary" class="platform-summary"></div><h3>Ҳамаи марказҳо</h3><div id="platformShopList" class="muted">Маълумот бор мешавад…</div><h3 style="margin-top:22px">Маъмурони марказҳо</h3><div id="platformAdminList" class="muted">Маълумот бор мешавад…</div></div>
 <div class="card"><div class="row"><h2 style="flex:2">Маълумоти марказ</h2><button id="logoutBtn" type="button">Баромадан</button></div>
 <form id="shopForm">
 <label for="shopName">Номи марказ</label><input id="shopName" required maxlength="120">
@@ -60,21 +58,17 @@ textarea{min-height:76px;resize:vertical}button{font:inherit;border:1px solid va
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.119.0";
 const supabase=createClient("https://yjybilaaxqtzhlvaabwd.supabase.co","sb_publishable_yyeO2kZv9yRQyLUOl7fG6Q_j_7ixPc1");
 const $=id=>document.getElementById(id);
-const PLATFORM_OWNER_ID="c44daf0b-50cd-444c-98d7-fa69d309b675";
 let shop=null,editingServiceId=null;
 function status(message,isError=false){$("status").textContent=message;$("status").style.background=isError?"#fff0f1":"#f1edfa";$("status").style.color=isError?"#9b1c31":"#716b7e";}
 function showDashboard(show){$("loginCard").classList.toggle("hidden",show);$("dashboard").classList.toggle("hidden",!show);}
 async function loadShop(){
  const {data:userData,error:userError}=await supabase.auth.getUser();
  if(userError||!userData.user){showDashboard(false);status("Лутфан ворид шав.",true);return;}
- const isPlatformAdmin=userData.user.app_metadata?.role==="platform_admin";
- $("platformAdminCard").classList.toggle("hidden",userData.user.id!==PLATFORM_OWNER_ID||isPlatformAdmin);
- $("platformDashboardCard").classList.toggle("hidden",!isPlatformAdmin);
  const {data,error}=await supabase.from("barbershops").select("id,name,description,address,city,phone").eq("owner_id",userData.user.id).limit(1).maybeSingle();
  if(error){status("Марказ бор карда нашуд: "+error.message,true);return;}
- if(!data){shop=null;$("shopForm").reset();$("serviceCard").classList.add("hidden");$("bookingCard").classList.add("hidden");$("hoursCard").classList.add("hidden");showDashboard(true);status("Ҳисоби соҳибкор омода аст. Маълумоти маркази худро пур карда, сабт кун. Марказ то санҷиш дар рӯйхати умумӣ намоён намешавад.");await loadPlatformDashboard();return;}
+ if(!data){shop=null;$("shopForm").reset();$("serviceCard").classList.add("hidden");$("bookingCard").classList.add("hidden");$("hoursCard").classList.add("hidden");showDashboard(true);status("Ҳисоби соҳибкор омода аст. Маълумоти маркази худро пур карда, сабт кун. Марказ то санҷиш дар рӯйхати умумӣ намоён намешавад.");return;}
  shop=data;$("shopName").value=data.name||"";$("shopDescription").value=data.description||"";$("shopCity").value=data.city||"";$("shopAddress").value=data.address||"";$("shopPhone").value=data.phone||"";
- showDashboard(true);$("serviceCard").classList.remove("hidden");$("bookingCard").classList.remove("hidden");$("hoursCard").classList.remove("hidden");status("Марказ бор шуд. Тағйиротро танҳо соҳиби ин марказ сабт карда метавонад.");await loadServices();await loadBusinessHours();await loadBookings();await loadPlatformDashboard();
+ showDashboard(true);$("serviceCard").classList.remove("hidden");$("bookingCard").classList.remove("hidden");$("hoursCard").classList.remove("hidden");status("Марказ бор шуд. Тағйиротро танҳо соҳиби ин марказ сабт карда метавонад.");await loadServices();await loadBusinessHours();await loadBookings();
 }
 async function loadServices(){
  if(!shop)return;
@@ -141,35 +135,6 @@ async function loadBookings(){
   box.append(card);
  });
 }
-async function loadPlatformDashboard(){
- const card=$("platformDashboardCard");
- if(card.classList.contains("hidden"))return;
- const shopBox=$("platformShopList"),adminBox=$("platformAdminList"),summary=$("platformSummary");
- shopBox.textContent="Марказҳо бор шуда истодаанд…";adminBox.textContent="Маъмурон бор шуда истодаанд…";
- const {data:shops,error}=await supabase.from("barbershops").select("id,owner_id,name,city,address,phone,is_active,created_at").order("created_at",{ascending:false});
- if(error){shopBox.textContent="Марказҳо бор нашуданд: "+error.message;adminBox.textContent="";return;}
- const rows=shops||[],ownerIds=[...new Set(rows.map(s=>s.owner_id).filter(Boolean))];
- let profiles=[];
- if(ownerIds.length){const result=await supabase.from("profiles").select("id,full_name,phone").in("id",ownerIds);if(result.error){adminBox.textContent="Маъмурон бор нашуданд: "+result.error.message;}else profiles=result.data||[];}
- const profileMap=Object.fromEntries(profiles.map(p=>[p.id,p]));
- const active=rows.filter(s=>s.is_active).length,inactive=rows.length-active;
- summary.replaceChildren();
- [["Ҳамаи марказҳо",rows.length],["Тасдиқшуда",active],["Интизор / ғайрифаъол",inactive],["Маъмурон",ownerIds.length]].forEach(([label,value])=>{const item=document.createElement("div");item.className="platform-stat";const strong=document.createElement("strong");strong.textContent=String(value);const small=document.createElement("span");small.className="muted";small.textContent=label;item.append(strong,small);summary.append(item);});
- shopBox.replaceChildren();
- if(!rows.length){shopBox.textContent="Ҳоло марказ сабт нашудааст.";}else rows.forEach(s=>{
-  const item=document.createElement("div");item.className="platform-shop";
-  const title=document.createElement("strong");title.textContent=s.name||"Маркази бе ном";item.append(title);
-  const place=document.createElement("p");place.className="muted";place.textContent=[s.city,s.address].filter(Boolean).join(" · ")||"Суроға нишон дода нашудааст";item.append(place);
-  const owner=profileMap[s.owner_id];const ownerLine=document.createElement("p");ownerLine.className="muted";ownerLine.textContent="Маъмур: "+(owner?.full_name||"Ном сабт нашудааст")+(owner?.phone?" · "+owner.phone:"")+" · ID: "+String(s.owner_id||"").slice(0,8)+"…";item.append(ownerLine);
-  if(s.phone){const phone=document.createElement("p");phone.className="muted";phone.textContent="Телефони марказ: "+s.phone;item.append(phone);}
-  const statusLine=document.createElement("p");statusLine.className="platform-status "+(s.is_active?"active":"inactive");statusLine.textContent=s.is_active?"Ҳолат: Тасдиқшуда ва фаъол":"Ҳолат: Тасдиқ нашуда / ғайрифаъол";item.append(statusLine);
-  const action=document.createElement("button");action.type="button";action.className=s.is_active?"danger":"primary";action.textContent=s.is_active?"Ғайрифаъол кардан":"Тасдиқ ва фаъол кардан";
-  action.addEventListener("click",async()=>{const next=!s.is_active;const question=next?"Ин марказ тасдиқ ва фаъол карда шавад? Он дар сомонаи умумӣ намоён мешавад.":"Ин марказ ғайрифаъол карда шавад? Он аз сомонаи умумӣ пинҳон мешавад.";if(!confirm(question))return;action.disabled=true;const {data,error}=await supabase.from("barbershops").update({is_active:next}).eq("id",s.id).select("id,is_active").maybeSingle();if(error){status("Ҳолати марказ тағйир наёфт: "+error.message,true);action.disabled=false;return;}if(!data){status("Тағйирот иҷро нашуд. Иҷозати Super Admin-ро санҷ.",true);action.disabled=false;return;}status(next?"Марказ тасдиқ ва фаъол шуд.":"Марказ ғайрифаъол шуд.");await loadPlatformDashboard();});
-  item.append(action);shopBox.append(item);
- });
- adminBox.replaceChildren();
- if(!ownerIds.length){adminBox.textContent="Ҳоло маъмуре нест.";}else ownerIds.forEach(id=>{const p=profileMap[id];const line=document.createElement("div");line.className="platform-shop";const name=document.createElement("strong");name.textContent=p?.full_name||"Маъмури марказ";const detail=document.createElement("p");detail.className="muted";detail.textContent=(p?.phone||"Телефон сабт нашудааст")+" · ID: "+id;line.append(name,detail);adminBox.append(line);});
-}
 $("signupForm").addEventListener("submit",async e=>{
  e.preventDefault();
  const email=$("newEmail").value.trim();
@@ -183,7 +148,6 @@ $("signupForm").addEventListener("submit",async e=>{
 });
 $("togglePassword").addEventListener("click",()=>{const field=$("password");const visible=field.type==="password";field.type=visible?"text":"password";$("togglePassword").textContent=visible?"Пинҳон кардан":"Нишон додан";});
 $("loginForm").addEventListener("submit",async e=>{e.preventDefault();status("Ворид шуда истодаӣ…");const {error}=await supabase.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});if(error){const code=error.code||"";let message="Воридшавӣ нашуд.";if(code==="invalid_credentials"||/invalid login credentials/i.test(error.message||"")){message="Email ё парол нодуруст аст. Ҳарфҳои калон/хурд ва фосилаҳоро санҷ.";}else if(code==="email_not_confirmed"||/email not confirmed/i.test(error.message||"")){message="Email ҳанӯз тасдиқ нашудааст. Қуттии почтаатро барои паёми тасдиқи Supabase санҷ.";}else if(code==="user_not_found"){message="Ин email дар ин лоиҳаи Supabase ёфт нашуд.";}else{message+=" Сабаб: "+(error.message||code||"хатои номаълум");}status(message,true);return;}await loadShop();});
-$("enablePlatformAdminBtn").addEventListener("click",async()=>{const button=$("enablePlatformAdminBtn");button.disabled=true;status("Нақши Super Admin фаъол карда шуда истодааст…");const {data,error}=await supabase.functions.invoke("bootstrap-platform-admin",{body:{}});if(error||!data?.success){status("Нақш фаъол нашуд. "+(data?.error||error?.message||"Хатои номаълум"),true);button.disabled=false;return;}status("Нақши Super Admin таъин шуд. Ҳоло аз ҳисоб баромада, дубора ворид шав, то иҷозатҳо нав шаванд.");button.textContent="Super Admin таъин шуд";});
 $("logoutBtn").addEventListener("click",async()=>{await supabase.auth.signOut();shop=null;showDashboard(false);status("Аз ҳисоб баромадӣ.");});
 $("shopForm").addEventListener("submit",async e=>{e.preventDefault();const updates={name:$("shopName").value.trim(),description:$("shopDescription").value.trim()||null,city:$("shopCity").value.trim()||null,address:$("shopAddress").value.trim()||null,phone:$("shopPhone").value.trim()||null};if(!updates.name){status("Номи марказро навис.",true);return;}let result;if(shop){result=await supabase.from("barbershops").update(updates).eq("id",shop.id).select("id,name,description,address,city,phone").maybeSingle();}else{const {data:userData,error:userError}=await supabase.auth.getUser();if(userError||!userData.user){status("Аввал ба ҳисоб ворид шав.",true);return;}result=await supabase.from("barbershops").insert({...updates,owner_id:userData.user.id,is_active:false}).select("id,name,description,address,city,phone").single();}if(result.error){status("Маълумот сабт нашуд: "+result.error.message,true);return;}if(!result.data){status("Марказ сабт нашуд. Иҷозати соҳибро санҷ.",true);return;}shop=result.data;$("serviceCard").classList.remove("hidden");$("bookingCard").classList.remove("hidden");status("Марказ сабт шуд. Он то санҷиш аз ҷониби маъмури платформа дар рӯйхати умумӣ намоён намешавад.");await loadServices();await loadBookings();});
 $("hoursForm").addEventListener("submit",async e=>{
