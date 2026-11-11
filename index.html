@@ -107,9 +107,9 @@ let loadState = "loading";
 function languageCopy() {
   const lang = document.documentElement.lang || "tg";
   const words = {
-    tg:{staffHeading:"Кормандони марказ",noStaff:"Маълумот дар бораи кормандон ҳоло илова нашудааст.",staffServices:"Хизматҳо",hoursHeading:"Соатҳои корӣ",hoursNotSet:"Соатҳои корӣ ҳоло муайян нашудаанд.",hoursError:"Соатҳои кориро бор карда натавонистем.",closed:"Рӯзи истироҳат",days:["Якшанбе","Душанбе","Сешанбе","Чоршанбе","Панҷшанбе","Ҷумъа","Шанбе"],serviceHeading:"Хизматрасониҳо ва нархҳо",noServices:"Ҳоло хизмат илова нашудааст.",somoni:"сомонӣ",minutes:"дақ.",loading:"Маълумот бор шуда истодааст…",empty:"Ҳоло ягон марказ илова нашудааст. Баъдтар боз санҷед.",error:"Маълумот бор нашуд. Пайвасти интернетро санҷед ва саҳифаро нав кунед.",noAddress:"Суроға ҳоло нишон дода нашудааст.",call:"Тамос",book:"Навбат гирифтан",bookingTitle:"Дархости навбат",serviceLabel:"Хизматрасонӣ",dateLabel:"Сана",timeLabel:"Вақт",nameLabel:"Ному насаб",phoneLabel:"Рақами телефон",noteLabel:"Эзоҳ (ихтиёрӣ)",sendBooking:"Фиристодани дархост",bookingNotice:"Дархостҳои «Интизор» ва «Тасдиқшуда» вақтро банд мекунанд. Вақти бандро интихоб карда намешавад.",bookingSent:"Дархост фиристода шуд. Ин вақт то тасдиқ ё рад кардани марказ банд мемонад.",myBookingsLoading:"Навбатҳо бор шуда истодаанд…",myBookingsNoSession:"Барои дидани навбатҳо аз ҳамон браузере истифода баред, ки дар он дархост фиристода будед.",myBookingsEmpty:"Ҳоло дархости навбат надоред.",myBookingsError:"Навбатҳо бор нашуданд. Саҳифаро нав кунед.",shopLabel:"Марказ",priceLabel:"Нарх",statusLabel:"Ҳолат",pendingStatus:"Интизор",confirmedStatus:"Тасдиқшуда",cancelledStatus:"Радшуда",completedStatus:"Анҷомёфта",bookingError:"Дархост фиристода нашуд. Баъдтар аз нав кӯшиш кун.",timeBusy:"Ин вақт аллакай банд аст. Лутфан вақти дигар интихоб кунед.",outsideHours:"Ин вақт ба соатҳои кории муайянкардаи марказ дохил намешавад.",hoursCheckError:"Соатҳои кориро санҷида натавонистем. Интернетро санҷида, аз нав кӯшиш кунед.",availabilityError:"Вақти холиро санҷида натавонистем. Интернетро санҷида, аз нав кӯшиш кунед.",futureError:"Сана ва вақт бояд дар оянда бошанд.",authError:"Барои фармоиш сабти муваққатӣ фаъол нашуд. Танзимоти воридшавии меҳмононро санҷед."},
-    ru:{staffHeading:"Сотрудники заведения",noStaff:"Информация о сотрудниках пока не добавлена.",staffServices:"Услуги",hoursHeading:"Часы работы",hoursNotSet:"Часы работы пока не указаны.",hoursError:"Не удалось загрузить часы работы.",closed:"Выходной",days:["Воскресенье","Понедельник","Вторник","Среда","Четверг","Пятница","Суббота"],serviceHeading:"Услуги и цены",noServices:"Услуги пока не добавлены.",somoni:"сомони",minutes:"мин.",loading:"Загрузка данных…",empty:"Пока ни одно заведение не добавлено. Проверьте позже.",error:"Не удалось загрузить данные. Проверьте интернет и обновите страницу.",noAddress:"Адрес пока не указан.",call:"Связаться",book:"Записаться",bookingTitle:"Заявка на запись",serviceLabel:"Услуга",dateLabel:"Дата",timeLabel:"Время",nameLabel:"Имя и фамилия",phoneLabel:"Номер телефона",noteLabel:"Примечание (необязательно)",sendBooking:"Отправить заявку",bookingNotice:"Заявки со статусом «Ожидает» и «Подтверждена» занимают это время. Занятое время выбрать нельзя.",bookingSent:"Заявка отправлена. Это время занято до подтверждения или отклонения заведением.",myBookingsLoading:"Загрузка записей…",myBookingsNoSession:"Откройте этот сайт в том же браузере, где отправляли заявку.",myBookingsEmpty:"У вас пока нет заявок.",myBookingsError:"Не удалось загрузить записи. Обновите страницу.",shopLabel:"Заведение",priceLabel:"Цена",statusLabel:"Статус",pendingStatus:"Ожидает",confirmedStatus:"Подтверждена",cancelledStatus:"Отклонена",completedStatus:"Завершена",bookingError:"Не удалось отправить заявку. Попробуйте позже.",timeBusy:"Это время уже занято. Пожалуйста, выберите другое.",outsideHours:"Это время не входит в установленные заведением часы работы.",hoursCheckError:"Не удалось проверить часы работы. Проверьте интернет и попробуйте снова.",availabilityError:"Не удалось проверить свободное время. Проверьте интернет и попробуйте снова.",futureError:"Дата и время должны быть в будущем.",authError:"Не удалось включить временный вход гостя. Проверьте настройки гостевого входа."},
-    en:{staffHeading:"Our staff",noStaff:"Staff information has not been added yet.",staffServices:"Services",hoursHeading:"Opening hours",hoursNotSet:"Opening hours have not been set yet.",hoursError:"Could not load opening hours.",closed:"Closed",days:["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],serviceHeading:"Services and prices",noServices:"No services have been added yet.",somoni:"TJS",minutes:"min",loading:"Loading data…",empty:"No locations have been added yet. Please check again later.",error:"Could not load data. Check your internet connection and refresh the page.",noAddress:"Address not provided yet.",call:"Contact",myBookingsLoading:"Loading bookings…",myBookingsNoSession:"Use the same browser where you sent the booking request.",myBookingsEmpty:"You have no booking requests yet.",myBookingsError:"Could not load bookings. Refresh the page.",shopLabel:"Location",priceLabel:"Price",statusLabel:"Status",pendingStatus:"Pending",confirmedStatus:"Confirmed",cancelledStatus:"Declined",completedStatus:"Completed"}
+    tg:{staffHeading:staffLabel:"Корманд",selectStaff:"Кормандро интихоб кунед",anyStaff:"Корманд барои ин хизмат таъин нашудааст",chooseDateService:"Аввал сана ва хизматро интихоб кунед",loadingSlots:"Вақтҳои дастрас бор мешаванд…",selectStaffFirst:"Аввал кормандро интихоб кунед",slotsError:"Хатои санҷиши вақтҳо",noFreeTime:"Вақти холӣ нест",chooseTime:"Вақтро интихоб кунед","Кормандони марказ",noStaff:"Маълумот дар бораи кормандон ҳоло илова нашудааст.",staffServices:"Хизматҳо",hoursHeading:"Соатҳои корӣ",hoursNotSet:"Соатҳои корӣ ҳоло муайян нашудаанд.",hoursError:"Соатҳои кориро бор карда натавонистем.",closed:"Рӯзи истироҳат",days:["Якшанбе","Душанбе","Сешанбе","Чоршанбе","Панҷшанбе","Ҷумъа","Шанбе"],serviceHeading:"Хизматрасониҳо ва нархҳо",noServices:"Ҳоло хизмат илова нашудааст.",somoni:"сомонӣ",minutes:"дақ.",loading:"Маълумот бор шуда истодааст…",empty:"Ҳоло ягон марказ илова нашудааст. Баъдтар боз санҷед.",error:"Маълумот бор нашуд. Пайвасти интернетро санҷед ва саҳифаро нав кунед.",noAddress:"Суроға ҳоло нишон дода нашудааст.",call:"Тамос",book:"Навбат гирифтан",bookingTitle:"Дархости навбат",serviceLabel:"Хизматрасонӣ",dateLabel:"Сана",timeLabel:"Вақт",nameLabel:"Ному насаб",phoneLabel:"Рақами телефон",noteLabel:"Эзоҳ (ихтиёрӣ)",sendBooking:"Фиристодани дархост",bookingNotice:"Дархостҳои «Интизор» ва «Тасдиқшуда» вақтро банд мекунанд. Вақти бандро интихоб карда намешавад.",bookingSent:"Дархост фиристода шуд. Ин вақт то тасдиқ ё рад кардани марказ банд мемонад.",myBookingsLoading:"Навбатҳо бор шуда истодаанд…",myBookingsNoSession:"Барои дидани навбатҳо аз ҳамон браузере истифода баред, ки дар он дархост фиристода будед.",myBookingsEmpty:"Ҳоло дархости навбат надоред.",myBookingsError:"Навбатҳо бор нашуданд. Саҳифаро нав кунед.",shopLabel:"Марказ",priceLabel:"Нарх",statusLabel:"Ҳолат",pendingStatus:"Интизор",confirmedStatus:"Тасдиқшуда",cancelledStatus:"Радшуда",completedStatus:"Анҷомёфта",bookingError:"Дархост фиристода нашуд. Баъдтар аз нав кӯшиш кун.",timeBusy:"Ин вақт аллакай банд аст. Лутфан вақти дигар интихоб кунед.",outsideHours:"Ин вақт ба соатҳои кории муайянкардаи марказ дохил намешавад.",hoursCheckError:"Соатҳои кориро санҷида натавонистем. Интернетро санҷида, аз нав кӯшиш кунед.",availabilityError:"Вақти холиро санҷида натавонистем. Интернетро санҷида, аз нав кӯшиш кунед.",futureError:"Сана ва вақт бояд дар оянда бошанд.",authError:"Барои фармоиш сабти муваққатӣ фаъол нашуд. Танзимоти воридшавии меҳмононро санҷед."},
+    ru:{staffHeading:staffLabel:"Сотрудник",selectStaff:"Выберите сотрудника",anyStaff:"Сотрудник для этой услуги не назначен",chooseDateService:"Сначала выберите дату и услугу",loadingSlots:"Загрузка свободного времени…",selectStaffFirst:"Сначала выберите сотрудника",slotsError:"Ошибка проверки времени",noFreeTime:"Нет свободного времени",chooseTime:"Выберите время","Сотрудники заведения",noStaff:"Информация о сотрудниках пока не добавлена.",staffServices:"Услуги",hoursHeading:"Часы работы",hoursNotSet:"Часы работы пока не указаны.",hoursError:"Не удалось загрузить часы работы.",closed:"Выходной",days:["Воскресенье","Понедельник","Вторник","Среда","Четверг","Пятница","Суббота"],serviceHeading:"Услуги и цены",noServices:"Услуги пока не добавлены.",somoni:"сомони",minutes:"мин.",loading:"Загрузка данных…",empty:"Пока ни одно заведение не добавлено. Проверьте позже.",error:"Не удалось загрузить данные. Проверьте интернет и обновите страницу.",noAddress:"Адрес пока не указан.",call:"Связаться",book:"Записаться",bookingTitle:"Заявка на запись",serviceLabel:"Услуга",dateLabel:"Дата",timeLabel:"Время",nameLabel:"Имя и фамилия",phoneLabel:"Номер телефона",noteLabel:"Примечание (необязательно)",sendBooking:"Отправить заявку",bookingNotice:"Заявки со статусом «Ожидает» и «Подтверждена» занимают это время. Занятое время выбрать нельзя.",bookingSent:"Заявка отправлена. Это время занято до подтверждения или отклонения заведением.",myBookingsLoading:"Загрузка записей…",myBookingsNoSession:"Откройте этот сайт в том же браузере, где отправляли заявку.",myBookingsEmpty:"У вас пока нет заявок.",myBookingsError:"Не удалось загрузить записи. Обновите страницу.",shopLabel:"Заведение",priceLabel:"Цена",statusLabel:"Статус",pendingStatus:"Ожидает",confirmedStatus:"Подтверждена",cancelledStatus:"Отклонена",completedStatus:"Завершена",bookingError:"Не удалось отправить заявку. Попробуйте позже.",timeBusy:"Это время уже занято. Пожалуйста, выберите другое.",outsideHours:"Это время не входит в установленные заведением часы работы.",hoursCheckError:"Не удалось проверить часы работы. Проверьте интернет и попробуйте снова.",availabilityError:"Не удалось проверить свободное время. Проверьте интернет и попробуйте снова.",futureError:"Дата и время должны быть в будущем.",authError:"Не удалось включить временный вход гостя. Проверьте настройки гостевого входа."},
+    en:{staffHeading:staffLabel:"Staff member",selectStaff:"Choose a staff member",anyStaff:"No staff member assigned to this service",chooseDateService:"Choose a date and service first",loadingSlots:"Loading available times…",selectStaffFirst:"Choose a staff member first",slotsError:"Could not check available times",noFreeTime:"No available times",chooseTime:"Choose a time","Our staff",noStaff:"Staff information has not been added yet.",staffServices:"Services",hoursHeading:"Opening hours",hoursNotSet:"Opening hours have not been set yet.",hoursError:"Could not load opening hours.",closed:"Closed",days:["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],serviceHeading:"Services and prices",noServices:"No services have been added yet.",somoni:"TJS",minutes:"min",loading:"Loading data…",empty:"No locations have been added yet. Please check again later.",error:"Could not load data. Check your internet connection and refresh the page.",noAddress:"Address not provided yet.",call:"Contact",myBookingsLoading:"Loading bookings…",myBookingsNoSession:"Use the same browser where you sent the booking request.",myBookingsEmpty:"You have no booking requests yet.",myBookingsError:"Could not load bookings. Refresh the page.",shopLabel:"Location",priceLabel:"Price",statusLabel:"Status",pendingStatus:"Pending",confirmedStatus:"Confirmed",cancelledStatus:"Declined",completedStatus:"Completed"}
   };
   return words[lang] || words.tg;
 }
@@ -117,7 +117,7 @@ function localDateString() {
   const d = new Date();
   return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
 }
-function createBookingPanel(shop, shopServices) {
+function createBookingPanel(shop, shopServices, shopStaff) {
   const words = languageCopy();
   const panel = document.createElement("section");
   panel.className = "booking-panel";
@@ -128,105 +128,95 @@ function createBookingPanel(shop, shopServices) {
   const makeLabel = (txt, control) => { const label=document.createElement("label"); label.textContent=txt; label.append(control); return label; };
   const serviceSelect=document.createElement("select"); serviceSelect.required=true;
   shopServices.forEach(s=>{const o=document.createElement("option");o.value=s.id;o.textContent=s.name+" — "+s.duration_minutes+" "+words.minutes+" — "+Number(s.price).toLocaleString()+" "+words.somoni;serviceSelect.append(o);});
+  const staffSelect=document.createElement("select");
+  const staffLabel=makeLabel(words.staffLabel,staffSelect);
+  const refreshStaffOptions=()=>{
+    const availableStaff=(shopStaff||[]).filter(person=>(person.services||[]).some(service=>service.id===serviceSelect.value));
+    staffSelect.replaceChildren();
+    const first=document.createElement("option");first.value="";
+    if(availableStaff.length){
+      first.textContent=words.selectStaff;
+      staffSelect.required=true;staffSelect.disabled=false;staffLabel.hidden=false;
+      staffSelect.append(first);
+      availableStaff.forEach(person=>{const option=document.createElement("option");option.value=person.id;option.textContent=person.full_name;staffSelect.append(option);});
+    }else{
+      first.textContent=words.anyStaff;
+      staffSelect.append(first);staffSelect.value="";staffSelect.required=false;staffSelect.disabled=true;staffLabel.hidden=true;
+    }
+  };
   const dateInput=document.createElement("input");dateInput.type="date";dateInput.min=localDateString();dateInput.required=true;
   const timeInput=document.createElement("select");timeInput.required=true;timeInput.disabled=true;
-  const timePlaceholder=document.createElement("option");timePlaceholder.value="";timePlaceholder.textContent="Аввал сана ва хизматро интихоб кунед";timeInput.append(timePlaceholder);
-  let slotRequestNumber=0;
-  const loadAvailableSlots=async()=>{
-    const requestNumber=++slotRequestNumber;
-    timeInput.replaceChildren();
-    const placeholder=document.createElement("option");placeholder.value="";placeholder.textContent="Вақтҳои дастрас бор мешаванд…";timeInput.append(placeholder);
-    timeInput.disabled=true;
-    status.textContent="";
-    if(!dateInput.value||!serviceSelect.value){
-      placeholder.textContent="Аввал сана ва хизматро интихоб кунед";
-      return;
-    }
-    const {data,error}=await supabase.rpc("get_available_booking_slots",{
-      p_barbershop_id:shop.id,
-      p_service_id:serviceSelect.value,
-      p_booking_date:dateInput.value
-    });
-    if(requestNumber!==slotRequestNumber)return;
-    timeInput.replaceChildren();
-    const first=document.createElement("option");first.value="";first.textContent="";
-    timeInput.append(first);
-    if(error){
-      first.textContent="Хатои санҷиши вақтҳо";
-      status.textContent=words.availabilityError||"Вақтҳои дастрасро санҷида натавонистем.";
-      return;
-    }
-    if(!data||!data.length){
-      first.textContent="Вақти холӣ нест";
-      return;
-    }
-    first.textContent="Вақтро интихоб кунед";
-    data.forEach(row=>{
-      const value=String(row.slot_time).slice(0,5);
-      const option=document.createElement("option");
-      option.value=value;option.textContent=value;timeInput.append(option);
-    });
-    timeInput.disabled=false;
-  };
-  dateInput.addEventListener("change",loadAvailableSlots);
-  serviceSelect.addEventListener("change",loadAvailableSlots);
+  const timePlaceholder=document.createElement("option");timePlaceholder.value="";timePlaceholder.textContent=words.chooseDateService;timeInput.append(timePlaceholder);
   const nameInput=document.createElement("input");nameInput.type="text";nameInput.maxLength=120;nameInput.autocomplete="name";nameInput.required=true;
   const phoneInput=document.createElement("input");phoneInput.type="tel";phoneInput.maxLength=40;phoneInput.autocomplete="tel";phoneInput.required=true;
   const noteInput=document.createElement("textarea");noteInput.maxLength=500;
   const submit=document.createElement("button");submit.type="submit";submit.className="primary";submit.textContent=words.sendBooking;
   const status=document.createElement("div");status.className="booking-status";status.setAttribute("role","status");
-  form.append(makeLabel(words.serviceLabel,serviceSelect),makeLabel(words.dateLabel,dateInput),makeLabel(words.timeLabel,timeInput),makeLabel(words.nameLabel,nameInput),makeLabel(words.phoneLabel,phoneInput),makeLabel(words.noteLabel,noteInput),submit,status);
+  let slotRequestNumber=0;
+  const loadAvailableSlots=async()=>{
+    const requestNumber=++slotRequestNumber;
+    timeInput.replaceChildren();
+    const placeholder=document.createElement("option");placeholder.value="";placeholder.textContent=words.loadingSlots;timeInput.append(placeholder);
+    timeInput.disabled=true;status.textContent="";
+    if(!dateInput.value||!serviceSelect.value){placeholder.textContent=words.chooseDateService;return;}
+    if(staffSelect.required&&!staffSelect.value){placeholder.textContent=words.selectStaffFirst;return;}
+    const {data,error}=await supabase.rpc("get_available_booking_slots_for_staff",{
+      p_barbershop_id:shop.id,
+      p_service_id:serviceSelect.value,
+      p_staff_id:staffSelect.value||null,
+      p_booking_date:dateInput.value
+    });
+    if(requestNumber!==slotRequestNumber)return;
+    timeInput.replaceChildren();
+    const first=document.createElement("option");first.value="";first.textContent="";timeInput.append(first);
+    if(error){first.textContent=words.slotsError;status.textContent=words.availabilityError;return;}
+    if(!data||!data.length){first.textContent=words.noFreeTime;return;}
+    first.textContent=words.chooseTime;
+    data.forEach(row=>{const value=String(row.slot_time).slice(0,5);const option=document.createElement("option");option.value=value;option.textContent=value;timeInput.append(option);});
+    timeInput.disabled=false;
+  };
+  refreshStaffOptions();
+  dateInput.addEventListener("change",loadAvailableSlots);
+  serviceSelect.addEventListener("change",()=>{refreshStaffOptions();loadAvailableSlots();});
+  staffSelect.addEventListener("change",loadAvailableSlots);
+  form.append(makeLabel(words.serviceLabel,serviceSelect),staffLabel,makeLabel(words.dateLabel,dateInput),makeLabel(words.timeLabel,timeInput),makeLabel(words.nameLabel,nameInput),makeLabel(words.phoneLabel,phoneInput),makeLabel(words.noteLabel,noteInput),submit,status);
   panel.append(heading,notice,form);
   form.addEventListener("submit",async event=>{
     event.preventDefault();
     const selected=shopServices.find(s=>s.id===serviceSelect.value);
     if(!selected)return;
+    if(staffSelect.required&&!staffSelect.value){status.textContent=words.selectStaffFirst;return;}
     const startsAt=new Date(dateInput.value+"T"+timeInput.value+":00+05:00");
     if(!dateInput.value||!timeInput.value||Number.isNaN(startsAt.getTime())||startsAt<=new Date()){status.textContent=words.futureError;return;}
     submit.disabled=true;status.textContent=words.loading;
-    let user=null;
-    let sessionError=null;
+    let user=null;let sessionError=null;
     try {
       const {data:sessionData,error:getSessionError}=await customerSupabase.auth.getSession();
       sessionError=getSessionError;
       const savedSession=sessionData?.session||null;
       if(savedSession&&!sessionError){
         const {data:verifiedData,error:verifyError}=await customerSupabase.auth.getUser();
-        if(!verifyError&&verifiedData?.user?.id===savedSession.user?.id){
-          user=verifiedData.user;
-        }else{
-          await customerSupabase.auth.signOut({scope:"local"});
-          sessionError=verifyError;
-        }
+        if(!verifyError&&verifiedData?.user?.id===savedSession.user?.id){user=verifiedData.user;}
+        else{await customerSupabase.auth.signOut({scope:"local"});sessionError=verifyError;}
       }
-      if(!user){
-        const signed=await customerSupabase.auth.signInAnonymously();
-        user=signed.data?.user||signed.data?.session?.user||null;
-        sessionError=signed.error;
-      }
-    } catch(authFailure) {
-      sessionError=authFailure;
-    }
-    if(sessionError||!user){
-      status.textContent=words.authError+(sessionError?.message?" ("+sessionError.message+")":"");
-      submit.disabled=false;return;
-    }
+      if(!user){const signed=await customerSupabase.auth.signInAnonymously();user=signed.data?.user||signed.data?.session?.user||null;sessionError=signed.error;}
+    } catch(authFailure){sessionError=authFailure;}
+    if(sessionError||!user){status.textContent=words.authError+(sessionError?.message?" ("+sessionError.message+")":"");submit.disabled=false;return;}
     const endsAt=new Date(startsAt.getTime()+Number(selected.duration_minutes)*60000);
-    const dayKey=dateInput.value;
-    const weekday=new Date(dayKey+"T12:00:00Z").getUTCDay();
+    const dayKey=dateInput.value;const weekday=new Date(dayKey+"T12:00:00Z").getUTCDay();
     const startMinute=Number(timeInput.value.slice(0,2))*60+Number(timeInput.value.slice(3,5));
     const endMinute=startMinute+Number(selected.duration_minutes);
     const {data:hoursRow,error:hoursError}=await supabase.from("business_hours").select("opens_at,closes_at,is_closed").eq("barbershop_id",shop.id).eq("weekday",weekday).maybeSingle();
-    if(hoursError||!hoursRow){status.textContent=words.hoursCheckError||"Could not check business hours.";submit.disabled=false;return;}
+    if(hoursError||!hoursRow){status.textContent=words.hoursCheckError;submit.disabled=false;return;}
     const openMinute=Number(hoursRow.opens_at.slice(0,2))*60+Number(hoursRow.opens_at.slice(3,5));
     const closeMinute=Number(hoursRow.closes_at.slice(0,2))*60+Number(hoursRow.closes_at.slice(3,5));
-    if(hoursRow.is_closed||startMinute<openMinute||endMinute>closeMinute||endMinute>1440){status.textContent=words.outsideHours||"Bookings are only accepted during business hours.";submit.disabled=false;return;}
-    const payload={barbershop_id:shop.id,service_id:selected.id,staff_id:null,customer_id:user.id,starts_at:startsAt.toISOString(),ends_at:endsAt.toISOString(),status:"pending",customer_name:nameInput.value.trim(),customer_phone:phoneInput.value.trim(),customer_note:noteInput.value.trim()||null};
+    if(hoursRow.is_closed||startMinute<openMinute||endMinute>closeMinute||endMinute>1440){status.textContent=words.outsideHours;submit.disabled=false;return;}
+    const payload={barbershop_id:shop.id,service_id:selected.id,staff_id:staffSelect.value||null,customer_id:user.id,starts_at:startsAt.toISOString(),ends_at:endsAt.toISOString(),status:"pending",customer_name:nameInput.value.trim(),customer_phone:phoneInput.value.trim(),customer_note:noteInput.value.trim()||null};
     const {error}=await customerSupabase.from("bookings").insert(payload);
-    if(error){status.textContent=error.code==="23P01"?(words.timeBusy||"This time is already taken. Please choose another."):error.code==="22023"?(words.outsideHours||"Bookings are only accepted during business hours."):words.bookingError+" ("+error.message+")";submit.disabled=false;return;}
-    status.textContent=words.bookingSent;form.reset();dateInput.min=localDateString();submit.disabled=false;await loadAvailableSlots();await loadMyBookings();
+    if(error){status.textContent=error.code==="23P01"?(words.timeBusy):error.code==="22023"?(error.message||words.bookingError):words.bookingError+" ("+error.message+")";submit.disabled=false;return;}
+    status.textContent=words.bookingSent;form.reset();dateInput.min=localDateString();refreshStaffOptions();submit.disabled=false;await loadAvailableSlots();await loadMyBookings();
   });
-  return {panel,open(serviceId){serviceSelect.value=serviceId;panel.hidden=false;panel.scrollIntoView({behavior:"smooth",block:"center"});}};
+  return {panel,open(serviceId){serviceSelect.value=serviceId;refreshStaffOptions();panel.hidden=false;panel.scrollIntoView({behavior:"smooth",block:"center"});}};
 }
 async function loadMyBookings() {
   const box=document.getElementById("myBookingsList");
@@ -235,7 +225,7 @@ async function loadMyBookings() {
   box.textContent=words.myBookingsLoading;
   const {data:userData,error:userError}=await customerSupabase.auth.getUser();
   if(userError||!userData?.user){box.textContent=words.myBookingsNoSession;return;}
-  const {data:bookings,error}=await customerSupabase.from("bookings").select("id,barbershop_name_snapshot,service_name_snapshot,price_snapshot,duration_minutes_snapshot,starts_at,status").eq("customer_id",userData.user.id).order("starts_at",{ascending:false}).limit(50);
+  const {data:bookings,error}=await customerSupabase.from("bookings").select("id,barbershop_name_snapshot,service_name_snapshot,price_snapshot,duration_minutes_snapshot,starts_at,status,staff_id").eq("customer_id",userData.user.id).order("starts_at",{ascending:false}).limit(50);
   if(error){box.textContent=words.myBookingsError+" ("+error.message+")";return;}
   if(!bookings||!bookings.length){box.textContent=words.myBookingsEmpty;return;}
   const statusNames={pending:words.pendingStatus,confirmed:words.confirmedStatus,cancelled:words.cancelledStatus,completed:words.completedStatus};
@@ -244,7 +234,7 @@ async function loadMyBookings() {
     const card=document.createElement("article");card.className="my-booking-card";
     const title=document.createElement("strong");title.textContent=b.service_name_snapshot||"Хизматрасонӣ";card.append(title);
     const shop=document.createElement("p");shop.textContent=words.shopLabel+": "+(b.barbershop_name_snapshot||"—");card.append(shop);
-    const when=document.createElement("p");when.textContent=new Date(b.starts_at).toLocaleString(document.documentElement.lang==="ru"?"ru-RU":document.documentElement.lang==="en"?"en-US":"tg-TJ",{dateStyle:"medium",timeStyle:"short"});card.append(when);
+    if(b.staff_id){const assignedStaff=(staffByShop[Object.keys(staffByShop).find(shopId=>(staffByShop[shopId]||[]).some(person=>person.id===b.staff_id))]||[]).find(person=>person.id===b.staff_id);const staffLine=document.createElement("p");staffLine.textContent=words.staffLabel+": "+(assignedStaff?.full_name||"—");card.append(staffLine);}\n    const when=document.createElement("p");when.textContent=new Date(b.starts_at).toLocaleString(document.documentElement.lang==="ru"?"ru-RU":document.documentElement.lang==="en"?"en-US":"tg-TJ",{dateStyle:"medium",timeStyle:"short"});card.append(when);
     if(b.price_snapshot!==null){const price=document.createElement("p");price.textContent=words.priceLabel+": "+Number(b.price_snapshot).toLocaleString()+" сомонӣ";card.append(price);}
     const state=document.createElement("p");state.className="booking-state";state.textContent=words.statusLabel+": "+(statusNames[b.status]||b.status);card.append(state);
     box.append(card);
@@ -316,7 +306,7 @@ function render() {
       });
     }
     card.append(serviceSection);
-    if (shopServices.length) { const booking=createBookingPanel(shop,shopServices); card.append(booking.panel); shopServices.forEach(service=>{ const button=serviceSection.querySelector(".book-btn[data-service-id=\""+service.id+"\"]"); if(button)button.addEventListener("click",()=>booking.open(service.id)); }); }
+    if (shopServices.length) { const booking=createBookingPanel(shop,shopServices,shopStaff); card.append(booking.panel); shopServices.forEach(service=>{ const button=serviceSection.querySelector(".book-btn[data-service-id=\""+service.id+"\"]"); if(button)button.addEventListener("click",()=>booking.open(service.id)); }); }
     if (shop.phone) {
       const phone = document.createElement("a");
       phone.href = "tel:" + shop.phone.replace(/[^0-9+]/g, "");
