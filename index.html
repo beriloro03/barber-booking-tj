@@ -127,7 +127,47 @@ function createBookingPanel(shop, shopServices) {
   const serviceSelect=document.createElement("select"); serviceSelect.required=true;
   shopServices.forEach(s=>{const o=document.createElement("option");o.value=s.id;o.textContent=s.name+" — "+s.duration_minutes+" "+words.minutes+" — "+Number(s.price).toLocaleString()+" "+words.somoni;serviceSelect.append(o);});
   const dateInput=document.createElement("input");dateInput.type="date";dateInput.min=localDateString();dateInput.required=true;
-  const timeInput=document.createElement("input");timeInput.type="time";timeInput.required=true;
+  const timeInput=document.createElement("select");timeInput.required=true;timeInput.disabled=true;
+  const timePlaceholder=document.createElement("option");timePlaceholder.value="";timePlaceholder.textContent="Аввал сана ва хизматро интихоб кунед";timeInput.append(timePlaceholder);
+  let slotRequestNumber=0;
+  const loadAvailableSlots=async()=>{
+    const requestNumber=++slotRequestNumber;
+    timeInput.replaceChildren();
+    const placeholder=document.createElement("option");placeholder.value="";placeholder.textContent="Вақтҳои дастрас бор мешаванд…";timeInput.append(placeholder);
+    timeInput.disabled=true;
+    status.textContent="";
+    if(!dateInput.value||!serviceSelect.value){
+      placeholder.textContent="Аввал сана ва хизматро интихоб кунед";
+      return;
+    }
+    const {data,error}=await supabase.rpc("get_available_booking_slots",{
+      p_barbershop_id:shop.id,
+      p_service_id:serviceSelect.value,
+      p_booking_date:dateInput.value
+    });
+    if(requestNumber!==slotRequestNumber)return;
+    timeInput.replaceChildren();
+    const first=document.createElement("option");first.value="";first.textContent="";
+    timeInput.append(first);
+    if(error){
+      first.textContent="Хатои санҷиши вақтҳо";
+      status.textContent=words.availabilityError||"Вақтҳои дастрасро санҷида натавонистем.";
+      return;
+    }
+    if(!data||!data.length){
+      first.textContent="Вақти холӣ нест";
+      return;
+    }
+    first.textContent="Вақтро интихоб кунед";
+    data.forEach(row=>{
+      const value=String(row.slot_time).slice(0,5);
+      const option=document.createElement("option");
+      option.value=value;option.textContent=value;timeInput.append(option);
+    });
+    timeInput.disabled=false;
+  };
+  dateInput.addEventListener("change",loadAvailableSlots);
+  serviceSelect.addEventListener("change",loadAvailableSlots);
   const nameInput=document.createElement("input");nameInput.type="text";nameInput.maxLength=120;nameInput.autocomplete="name";nameInput.required=true;
   const phoneInput=document.createElement("input");phoneInput.type="tel";phoneInput.maxLength=40;phoneInput.autocomplete="tel";phoneInput.required=true;
   const noteInput=document.createElement("textarea");noteInput.maxLength=500;
@@ -139,7 +179,7 @@ function createBookingPanel(shop, shopServices) {
     event.preventDefault();
     const selected=shopServices.find(s=>s.id===serviceSelect.value);
     if(!selected)return;
-    const startsAt=new Date(dateInput.value+"T"+timeInput.value);
+    const startsAt=new Date(dateInput.value+"T"+timeInput.value+":00+05:00");
     if(!dateInput.value||!timeInput.value||Number.isNaN(startsAt.getTime())||startsAt<=new Date()){status.textContent=words.futureError;return;}
     submit.disabled=true;status.textContent=words.loading;
     let user=null;
@@ -182,7 +222,7 @@ function createBookingPanel(shop, shopServices) {
     const payload={barbershop_id:shop.id,service_id:selected.id,staff_id:null,customer_id:user.id,starts_at:startsAt.toISOString(),ends_at:endsAt.toISOString(),status:"pending",customer_name:nameInput.value.trim(),customer_phone:phoneInput.value.trim(),customer_note:noteInput.value.trim()||null};
     const {error}=await customerSupabase.from("bookings").insert(payload);
     if(error){status.textContent=error.code==="23P01"?(words.timeBusy||"This time is already taken. Please choose another."):error.code==="22023"?(words.outsideHours||"Bookings are only accepted during business hours."):words.bookingError+" ("+error.message+")";submit.disabled=false;return;}
-    status.textContent=words.bookingSent;form.reset();dateInput.min=localDateString();submit.disabled=false;await loadMyBookings();
+    status.textContent=words.bookingSent;form.reset();dateInput.min=localDateString();submit.disabled=false;await loadAvailableSlots();await loadMyBookings();
   });
   return {panel,open(serviceId){serviceSelect.value=serviceId;panel.hidden=false;panel.scrollIntoView({behavior:"smooth",block:"center"});}};
 }
