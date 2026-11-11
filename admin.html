@@ -52,7 +52,7 @@ textarea{min-height:76px;resize:vertical}button{font:inherit;border:1px solid va
 <div class="row"><div><label for="serviceDuration">Давомнокӣ (дақиқа)</label><input id="serviceDuration" type="number" min="5" max="480" value="30" required></div><div><label for="servicePrice">Нарх (сомонӣ)</label><input id="servicePrice" type="number" min="0" step="0.01" value="0" required></div></div>
 <button class="primary" type="submit" style="margin-top:14px">Илова кардани хизмат</button>
 </form><div id="serviceList"></div></div>
-<div id="hoursCard" class="card hidden"><h2>Рӯзҳо ва соатҳои корӣ</h2><p class="muted">Марказ ҳар рӯз аз соати 08:00 то 21:00 кор мекунад. Агар лозим шавад, вақтҳоро иваз карда, сабт кун.</p><form id="hoursForm"><div id="hoursList"></div><button class="primary" type="submit" style="margin-top:14px">Сабт кардани соатҳои корӣ</button></form></div>
+<div id="hoursCard" class="card hidden"><h2>Рӯзҳо ва соатҳои корӣ</h2><p class="muted">Марказ ҳамаи 7 рӯзи ҳафта кор мекунад. Соҳибкор метавонад барои ҳар рӯз соати оғоз ва анҷоми корро мустақилона интихоб кунад. Рӯзи истироҳат пешбинӣ нашудааст.</p><form id="hoursForm"><div id="hoursList"></div><button class="primary" type="submit" style="margin-top:14px">Сабт кардани соатҳои корӣ</button></form></div>
 <div id="bookingCard" class="card hidden"><h2>Дархостҳои навбат</h2><p class="muted">Дархостҳои «Интизор» ва «Тасдиқшуда» вақтро банд мекунанд. Агар марказ дархостро рад кунад, вақт боз озод мешавад.</p><div id="bookingList" class="muted">Дархостҳо бор шуда истодаанд…</div></div>
 </section>
 </main>
@@ -194,7 +194,7 @@ $("hoursForm").addEventListener("submit",async e=>{
  const {error}=await supabase.from("business_hours").upsert(payload,{onConflict:"barbershop_id,weekday"});
  button.disabled=false;
  if(error){status("Соатҳои корӣ сабт нашуданд: "+error.message,true);return;}
- status("Соатҳои корӣ барои ҳамаи 7 рӯз сабт шуданд: 08:00–21:00.");
+ status("Соатҳои кории интихобкардаи соҳибкор барои ҳамаи 7 рӯз сабт шуданд.");
 });
 $("serviceForm").addEventListener("submit",async e=>{e.preventDefault();if(!shop)return;const payload={barbershop_id:shop.id,name:$("serviceName").value.trim(),description:$("serviceDescription").value.trim()||null,duration_minutes:Number($("serviceDuration").value),price:Number($("servicePrice").value),is_active:true};let result;if(editingServiceId){result=await supabase.from("services").update(payload).eq("id",editingServiceId).eq("barbershop_id",shop.id);}else{result=await supabase.from("services").insert(payload);}if(result.error){status("Хизмат сабт нашуд: "+result.error.message,true);return;}editingServiceId=null;$("serviceForm").reset();$("serviceDuration").value=30;$("servicePrice").value=0;$("serviceForm").querySelector("button[type=submit]").textContent="Илова кардани хизмат";status("Хизмат сабт шуд.");await loadServices();});
 supabase.auth.getSession().then(({data})=>{if(data.session)loadShop();});
