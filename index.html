@@ -187,6 +187,49 @@
       .shop-card h3{font-size:20px}
     }
 
+
+    /* Forest green + mint refresh, with larger mobile-friendly typography. */
+    :root{--primary:#176b52;--ink:#18352d;--muted:#526b62;--bg:#f1f8f4;--line:#d8e9df}
+    body{background:radial-gradient(ellipse at 8% 0%,#dcefe3 0,transparent 38%),linear-gradient(180deg,#f8fcf9 0%,#edf6f0 100%);color:#18352d;font-size:18px}
+    header{border-bottom-color:#d8e9df}
+    .brand,.shop-card a,.service-item strong{color:#176b52}
+    button.active,.primary{background:#176b52;border-color:#176b52}
+    .hero{background:linear-gradient(125deg,#123d31 0%,#176b52 58%,#43a47c 100%);box-shadow:0 18px 45px rgba(23,107,82,.2)}
+    .eyebrow{color:#c8f1dc;font-size:15px}
+    h1{font-size:clamp(34px,5.5vw,52px)}
+    .lead{font-size:21px;line-height:1.75}
+    .actions .primary{background:linear-gradient(135deg,#d9f6e6,#a6e2c1);color:#174635;border-color:#b8e9cc}
+    .actions .secondary{border-color:rgba(226,255,239,.5);color:#f4fff8;background:rgba(255,255,255,.1)}
+    .tile .symbol{background:#e1f3e8}
+    .section h2{font-size:clamp(25px,3.5vw,30px)}
+    .tile h3{font-size:21px}
+    .tile p,.shop-card p,.muted{font-size:17px;line-height:1.7}
+    .shop-card h3{font-size:23px}
+    .service-list h4,.staff-list h4,.hours-list h4{font-size:19px}
+    .service-item,.hours-row{font-size:18px}
+    .service-meta,.staff-meta{font-size:16px}
+    .staff-item strong{font-size:19px}
+    .booking-panel{background:linear-gradient(180deg,#eff9f3,#fff);border-color:#c5e5d2}
+    .booking-panel label{font-size:18px}
+    .booking-panel input,.booking-panel select,.booking-panel textarea{font-size:18px;min-height:50px;border-color:#cfe4d7}
+    .booking-panel input:focus,.booking-panel select:focus,.booking-panel textarea:focus{border-color:#32946d;box-shadow:0 0 0 3px rgba(50,148,109,.15)}
+    .book-btn,button.primary{background:linear-gradient(135deg,#21845f,#145c47);border-color:#176b52;box-shadow:0 5px 14px rgba(23,107,82,.2);font-size:17px}
+    .booking-state{color:#145c47!important;background:#def3e6}
+    .booking-status,.my-booking-card p,.notice,.shop-status{font-size:17px;line-height:1.65}
+    .tile,.shop-card,.my-booking-card{border-color:#d8e9df}
+    .service-list,.staff-list,.hours-list{border-color:#dfede4}
+    .booking-panel input,.booking-panel select,.booking-panel textarea{border-color:#cfe4d7}
+    footer{font-size:16px}
+    @media(max-width:560px){
+      body{font-size:17px}
+      .brand{font-size:17px}
+      .lead{font-size:19px}
+      .tile p,.shop-card p,.muted{font-size:16px}
+      .shop-card h3{font-size:21px}
+      .booking-panel label{font-size:17px}
+      .booking-panel input,.booking-panel select,.booking-panel textarea{font-size:17px}
+    }
+
   </style>
 </head>
 <body>
