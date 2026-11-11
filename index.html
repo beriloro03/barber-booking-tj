@@ -34,6 +34,64 @@
     .shop-status{padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--muted);margin-top:16px}.book-btn{margin-top:9px;background:var(--primary);color:#fff;border-color:var(--primary)}.booking-panel{margin-top:14px;padding:15px;border:1px solid #d9cff0;border-radius:14px;background:#fbfaff}.booking-panel h4{margin:0 0 6px}.booking-panel label{display:block;font-size:14px;font-weight:650;margin:10px 0 5px}.booking-panel input,.booking-panel select,.booking-panel textarea{width:100%;font:inherit;padding:10px;border:1px solid #d9d2e5;border-radius:9px;background:#fff;color:var(--ink)}.booking-panel textarea{min-height:65px}.booking-panel button{margin-top:12px}.booking-status{margin-top:10px;font-size:14px;color:var(--muted);line-height:1.5}.my-bookings-list{display:grid;gap:10px;margin-top:14px}.my-booking-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px}.my-booking-card p{margin:7px 0;color:var(--muted)}.my-booking-card strong{color:var(--ink)}.booking-state{font-weight:700;color:var(--primary)!important}
     footer{max-width:1080px;margin:auto;padding:0 20px 30px;color:var(--muted);font-size:13px}
     @media(max-width:560px){main{padding:24px 14px}.hero{padding:25px 20px}.nav{padding:12px 14px}.brand{font-size:15px}}
+  
+    /* Visual refresh: presentation only; booking logic and database remain unchanged. */
+    body{background:radial-gradient(ellipse at 8% 0%,#eee8ff 0,transparent 34%),linear-gradient(180deg,#faf9ff 0%,#f5f2fb 100%)}
+    header{background:rgba(255,255,255,.92);backdrop-filter:blur(14px);box-shadow:0 5px 22px rgba(42,25,78,.05)}
+    .brand{letter-spacing:-.03em}
+    .lang button{min-width:42px;font-weight:700;transition:background .2s,border-color .2s,transform .2s}
+    .lang button:hover{transform:translateY(-1px)}
+    main{padding-top:36px}
+    .hero{position:relative;overflow:hidden;background:linear-gradient(125deg,#4d269e 0%,#7048c5 54%,#9876e3 100%);border:0;border-radius:28px;padding:clamp(28px,5vw,54px);box-shadow:0 18px 45px rgba(76,42,145,.2);color:#fff}
+    .hero:after{content:"✂";position:absolute;right:5%;bottom:-42px;font-size:clamp(130px,24vw,250px);line-height:1;color:rgba(255,255,255,.09);transform:rotate(-18deg);pointer-events:none}
+    .hero>*{position:relative;z-index:1}
+    .eyebrow{color:#e5d9ff;font-size:12px;letter-spacing:.12em}
+    h1{max-width:760px;letter-spacing:-.04em}
+    .lead{color:rgba(255,255,255,.84);font-size:clamp(15px,2vw,18px)}
+    .actions a{transition:transform .2s,box-shadow .2s}
+    .actions a:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(25,12,55,.18)}
+    .actions .primary{background:#fff;color:#542ca6;border-color:#fff}
+    .actions .secondary{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35);color:#fff}
+    .section{margin-top:42px}
+    .section h2{letter-spacing:-.025em;font-size:clamp(21px,3vw,26px)}
+    .muted{max-width:720px}
+    .tile,.shop-card,.my-booking-card{border-color:#e8e1f2;border-radius:20px;box-shadow:0 8px 26px rgba(42,25,78,.055);transition:transform .2s,box-shadow .2s}
+    .tile:hover,.shop-card:hover,.my-booking-card:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(42,25,78,.1)}
+    .tile{padding:21px}
+    .tile .symbol{display:grid;place-items:center;width:48px;height:48px;border-radius:15px;background:#f1ebff}
+    .shop-card{padding:clamp(17px,3vw,24px)}
+    .shop-card h3{font-size:20px;letter-spacing:-.02em}
+    .service-list,.staff-list,.hours-list{border-color:#eee9f5}
+    .service-item{align-items:center;flex-wrap:wrap}
+    .service-item>div{min-width:0}
+    .service-item strong{color:#5930a9}
+    .staff-item{padding:12px 0}
+    .staff-item strong{font-size:15px}
+    .book-btn,button.primary{font-weight:700;box-shadow:0 5px 14px rgba(91,53,181,.16);transition:transform .18s,box-shadow .18s}
+    .book-btn:hover,button.primary:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(91,53,181,.24)}
+    .booking-panel{background:linear-gradient(180deg,#fbf9ff,#fff);border-color:#dcd0f2;border-radius:18px;padding:18px}
+    .booking-panel input,.booking-panel select,.booking-panel textarea{min-height:44px;border-color:#ded7eb;border-radius:11px;outline:none;transition:border-color .18s,box-shadow .18s}
+    .booking-panel input:focus,.booking-panel select:focus,.booking-panel textarea:focus{border-color:#7650c4;box-shadow:0 0 0 3px rgba(118,80,196,.13)}
+    .booking-panel button{min-height:44px;padding:10px 16px}
+    #refreshMyBookings{margin-top:6px}
+    .my-booking-card{padding:17px}
+    .booking-state{display:inline-block;padding:6px 10px;border-radius:999px;background:#f0eaff}
+    .notice,.shop-status{border-radius:16px;background:#fff}
+    footer{padding-top:12px}
+    @media(max-width:560px){
+      main{padding:20px 13px 30px}
+      .hero{padding:27px 20px;border-radius:22px}
+      .hero:after{right:-10px;bottom:-22px;font-size:145px}
+      .section{margin-top:32px}
+      .grid{grid-template-columns:1fr;gap:12px}
+      .shop-card{border-radius:17px}
+      .service-item{align-items:flex-start}
+      .book-btn{width:100%}
+      .booking-panel{padding:14px}
+      .lang{gap:4px}
+      .lang button{padding:7px 9px;min-width:38px}
+    }
+
   </style>
 </head>
 <body>
