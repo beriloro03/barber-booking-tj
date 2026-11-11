@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="tg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#5b35b5">
+<title>Панели Super Admin — Сартарошхонаҳо</title>
+<style>
+:root{--p:#5b35b5;--ink:#211b31;--muted:#716b7e;--bg:#f7f5fb;--line:#e9e4f1}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+header{background:#fff;border-bottom:1px solid var(--line);padding:16px}header div,main{max-width:900px;margin:auto}
+main{padding:24px 16px}h1{font-size:25px;margin:8px 0}h2{font-size:20px;margin:0 0 12px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+label{display:block;font-size:14px;font-weight:650;margin:12px 0 5px}
+input{width:100%;font:inherit;padding:11px;border:1px solid #d9d2e5;border-radius:10px;background:#fff;color:var(--ink)}
+button{font:inherit;border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:#fff;color:var(--ink);cursor:pointer}
+button:disabled{opacity:.55;cursor:wait}.primary{background:var(--p);border-color:var(--p);color:white}.danger{color:#a21d35;border-color:#efc7d0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.row>*{flex:1}
+.muted{color:var(--muted);font-size:14px;line-height:1.5}
+#status{padding:12px;border-radius:10px;background:#f1edfa;color:var(--muted);margin:12px 0}
+.hidden{display:none!important}.summary{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.stat{background:#f7f5fb;border:1px solid var(--line);border-radius:10px;padding:10px;flex:1;min-width:110px}
+.stat strong{display:block;font-size:22px}.shop{border:1px solid var(--line);border-radius:12px;padding:13px;margin-top:10px}
+.shop p{margin:6px 0}.active{color:#167344;font-weight:700}.inactive{color:#a15b00;font-weight:700}
+a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14px}.row>*{min-width:100%}}
+</style>
+</head>
+<body>
+<header><div><a href="./">← Сомонаи муштариён</a><h1>Панели Super Admin</h1><div class="muted">Идоракунии марказҳои тамоми платформа</div></div></header>
+<main>
+<section id="loginCard" class="card">
+<h2>Воридшавии Super Admin</h2>
+<p class="muted">Танҳо ҳисоби дорои нақши махсуси platform_admin метавонад ба ин панел ворид шавад.</p>
+<form id="loginForm">
+<label for="email">Email</label><input id="email" type="email" autocomplete="username" required>
+<label for="password">Парол</label><input id="password" type="password" autocomplete="current-password" required>
+<button class="primary" type="submit" style="margin-top:14px">Ворид шудан</button>
+</form>
+</section>
+<div id="status" role="status">Барои оғоз ворид шав.</div>
+<section id="dashboard" class="hidden">
+<div class="card">
+<div class="row"><h2 style="flex:2">Ҳамаи марказҳо</h2><button id="logoutBtn" type="button">Баромадан</button></div>
+<div id="summary" class="summary"></div>
+<div id="shopList" class="muted">Маълумот бор шуда истодааст…</div>
+</div>
+<div class="card"><h2>Маъмурони марказҳо</h2><div id="adminList" class="muted">Маълумот бор шуда истодааст…</div></div>
+</section>
+</main>
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.119.0";
+const supabase=createClient("https://yjybilaaxqtzhlvaabwd.supabase.co","sb_publishable_yyeO2kZv9yRQyLUOl7fG6Q_j7ixPc1");
+const $=id=>document.getElementById(id);
+function status(message,isError=false){$("status").textContent=message;$("status").style.background=isError?"#fff0f1":"#f1edfa";$("status").style.color=isError?"#9b1c31":"#716b7e";}
+function showDashboard(show){$("loginCard").classList.toggle("hidden",show);$("dashboard").classList.toggle("hidden",!show);}
+async function checkSuperAdmin(){
+ const {data,error}=await supabase.auth.getUser();
+ if(error||!data.user){showDashboard(false);return false;}
+ if(data.user.app_metadata?.role!=="platform_admin"){
+  await supabase.auth.signOut();
+  showDashboard(false);
+  status("Ин ҳисоб иҷозати Super Admin надорад. Ба панели соҳибкор ворид шав.",true);
+  return false;
+ }
+ showDashboard(true);
+ await loadDashboard();
+ return true;
+}
+async function loadDashboard(){
+ const shopBox=$("shopList"),adminBox=$("adminList"),summary=$("summary");
+ shopBox.textContent="Марказҳо бор шуда истодаанд…";adminBox.textContent="Маъмурон бор шуда истодаанд…";
+ const {data:shops,error}=await supabase.from("barbershops").select("id,owner_id,name,city,address,phone,is_active,created_at").order("created_at",{ascending:false});
+ if(error){shopBox.textContent="Марказҳо бор нашуданд: "+error.message;adminBox.textContent="";return;}
+ const rows=shops||[],ownerIds=[...new Set(rows.map(s=>s.owner_id).filter(Boolean))];
+ let profiles=[];
+ if(ownerIds.length){
+  const result=await supabase.from("profiles").select("id,full_name,phone").in("id",ownerIds);
+  if(result.error){adminBox.textContent="Маъмурон бор нашуданд: "+result.error.message;}else profiles=result.data||[];
+ }
+ const profileMap=Object.fromEntries(profiles.map(p=>[p.id,p]));
+ const active=rows.filter(s=>s.is_active).length,inactive=rows.length-active;
+ summary.replaceChildren();
+ [["Ҳамаи марказҳо",rows.length],["Фаъол",active],["Ғайрифаъол",inactive],["Маъмурон",ownerIds.length]].forEach(([label,value])=>{
+  const item=document.createElement("div");item.className="stat";
+  const strong=document.createElement("strong");strong.textContent=String(value);
+  const small=document.createElement("span");small.className="muted";small.textContent=label;
+  item.append(strong,small);summary.append(item);
+ });
+ shopBox.replaceChildren();
+ if(!rows.length){shopBox.textContent="Ҳоло марказ сабт нашудааст.";}
+ else rows.forEach(s=>{
+  const item=document.createElement("div");item.className="shop";
+  const title=document.createElement("strong");title.textContent=s.name||"Маркази бе ном";item.append(title);
+  const place=document.createElement("p");place.className="muted";place.textContent=[s.city,s.address].filter(Boolean).join(" · ")||"Суроға нишон дода нашудааст";item.append(place);
+  const owner=profileMap[s.owner_id];
+  const ownerLine=document.createElement("p");ownerLine.className="muted";
+  ownerLine.textContent="Маъмур: "+(owner?.full_name||"Ном сабт нашудааст")+(owner?.phone?" · "+owner.phone:"")+" · ID: "+String(s.owner_id||"").slice(0,8)+"…";item.append(ownerLine);
+  if(s.phone){const phone=document.createElement("p");phone.className="muted";phone.textContent="Телефони марказ: "+s.phone;item.append(phone);}
+  const state=document.createElement("p");state.className=s.is_active?"active":"inactive";state.textContent=s.is_active?"Ҳолат: Фаъол ва тасдиқшуда":"Ҳолат: Ғайрифаъол / тасдиқ нашуда";item.append(state);
+  const action=document.createElement("button");action.type="button";action.className=s.is_active?"danger":"primary";
+  action.textContent=s.is_active?"Ғайрифаъол кардан":"Тасдиқ ва фаъол кардан";
+  action.addEventListener("click",async()=>{
+   const next=!s.is_active;
+   const question=next?"Ин марказ тасдиқ ва фаъол карда шавад? Он дар сомонаи муштариён намоён мешавад.":"Ин марказ ғайрифаъол карда шавад? Он аз рӯйхати муштариён пинҳон мешавад.";
+   if(!confirm(question))return;
+   action.disabled=true;
+   const {data,error}=await supabase.from("barbershops").update({is_active:next}).eq("id",s.id).select("id,is_active").maybeSingle();
+   if(error){status("Ҳолати марказ тағйир наёфт: "+error.message,true);action.disabled=false;return;}
+   if(!data){status("Тағйирот иҷро нашуд. Иҷозати Super Admin-ро санҷ.",true);action.disabled=false;return;}
+   status(next?"Марказ тасдиқ ва фаъол шуд.":"Марказ ғайрифаъол шуд.");
+   await loadDashboard();
+  });
+  item.append(action);shopBox.append(item);
+ });
+ adminBox.replaceChildren();
+ if(!ownerIds.length){adminBox.textContent="Ҳоло маъмуре нест.";}
+ else ownerIds.forEach(id=>{
+  const p=profileMap[id],line=document.createElement("div");line.className="shop";
+  const name=document.createElement("strong");name.textContent=p?.full_name||"Маъмури марказ";
+  const detail=document.createElement("p");detail.className="muted";detail.textContent=(p?.phone||"Телефон сабт нашудааст")+" · ID: "+id;
+  line.append(name,detail);adminBox.append(line);
+ });
+}
+$("loginForm").addEventListener("submit",async e=>{
+ e.preventDefault();status("Ворид шуда истодаӣ…");
+ const {error}=await supabase.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});
+ if(error){status("Воридшавӣ нашуд. Email ё паролро санҷ. "+(error.message||""),true);return;}
+ await checkSuperAdmin();
+});
+$("logoutBtn").addEventListener("click",async()=>{
+ await supabase.auth.signOut();showDashboard(false);status("Аз ҳисоб баромадӣ.");
+});
+supabase.auth.getSession().then(({data})=>{if(data.session)checkSuperAdmin();});
+</script>
+</body>
+</html>
