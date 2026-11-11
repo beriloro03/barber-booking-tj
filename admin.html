@@ -172,6 +172,11 @@ async function loadBookings(){
     accept.addEventListener("click",async()=>{accept.disabled=true;const {error}=await supabase.from("bookings").update({status:"confirmed"}).eq("id",b.id).eq("barbershop_id",shop.id);if(error){status("Дархост тасдиқ нашуд: "+error.message,true);accept.disabled=false;}else{status("Дархост тасдиқ шуд.");await loadBookings();}});
     actions.append(accept);
    }
+   if(b.status==="confirmed"&&new Date(b.ends_at)<=new Date()){
+    const complete=document.createElement("button");complete.type="button";complete.className="primary";complete.textContent="Анҷом ёфт";
+    complete.addEventListener("click",async()=>{if(!confirm("Ин навбат воқеан анҷом ёфт?"))return;complete.disabled=true;const {error}=await supabase.from("bookings").update({status:"completed"}).eq("id",b.id).eq("barbershop_id",shop.id).eq("status","confirmed");if(error){status("Навбат анҷомёфта қайд нашуд: "+error.message,true);complete.disabled=false;}else{status("Навбат ҳамчун анҷомёфта сабт шуд.");await loadBookings();}});
+    actions.append(complete);
+   }
    const reject=document.createElement("button");reject.type="button";reject.className="danger";reject.textContent="Рад кардан";
    reject.addEventListener("click",async()=>{if(!confirm("Ин дархост рад карда шавад?"))return;reject.disabled=true;const {error}=await supabase.from("bookings").update({status:"cancelled"}).eq("id",b.id).eq("barbershop_id",shop.id);if(error){status("Дархост рад карда нашуд: "+error.message,true);reject.disabled=false;}else{status("Дархост рад карда шуд.");await loadBookings();}});
    actions.append(reject);card.append(actions);
