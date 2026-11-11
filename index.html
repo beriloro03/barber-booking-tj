@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#5b35b5">
+  <meta name="theme-color" content="#087f8c">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <meta name="description" content="Платформаи ҷустуҷӯ ва навбатгирӣ ба сартарошхонаҳо дар Тоҷикистон.">
@@ -116,7 +116,29 @@
     .service-list,.staff-list,.hours-list{border-color:#eee5d2}
     .booking-panel input,.booking-panel select,.booking-panel textarea{border-color:#e4dac4}
 
-  </style>
+
+    /* Ocean teal theme: visual styling only; booking logic is unchanged. */
+    :root{--primary:#087f8c;--ink:#172b35;--muted:#627780;--bg:#f2f8f8;--line:#dce9e9}
+    body{background:radial-gradient(ellipse at 8% 0%,#d9f0ef 0,transparent 38%),linear-gradient(180deg,#f7fbfb 0%,#eef6f6 100%);color:var(--ink)}
+    header{border-bottom-color:#dce9e9}
+    .brand,.shop-card a,.service-item strong{color:#087f8c}
+    button.active,.primary{background:#087f8c;border-color:#087f8c}
+    .hero{background:linear-gradient(125deg,#123b4a 0%,#087f8c 58%,#36aaa5 100%);box-shadow:0 18px 45px rgba(8,92,101,.2)}
+    .eyebrow{color:#b9f0e9}
+    .actions .primary{background:linear-gradient(135deg,#d8fbf3,#8de0d2);color:#12424a;border-color:#b4eee4}
+    .actions .secondary{border-color:rgba(220,255,250,.45);color:#f2fffd;background:rgba(255,255,255,.1)}
+    .tile .symbol{background:#e0f4f1}
+    .booking-panel{background:linear-gradient(180deg,#effaf8,#fff);border-color:#bfe3de}
+    .booking-panel input,.booking-panel select,.booking-panel textarea{border-color:#d3e5e3}
+    .booking-panel input:focus,.booking-panel select:focus,.booking-panel textarea:focus{border-color:#159b9b;box-shadow:0 0 0 3px rgba(21,155,155,.14)}
+    .book-btn,button.primary{background:linear-gradient(135deg,#0c9296,#08727e);border-color:#087f8c;box-shadow:0 5px 14px rgba(8,127,140,.2)}
+    .book-btn:hover,button.primary:hover{box-shadow:0 8px 18px rgba(8,127,140,.28)}
+    .booking-state{color:#086b70!important;background:#dff5ef}
+    .notice{border-color:#c9e6e2}
+    .shop-status{border-color:#dce9e9}
+    .tile,.shop-card,.my-booking-card{border-color:#dce9e9}
+    .service-list,.staff-list,.hours-list{border-color:#e1eeee}
+\n  </style>
 </head>
 <body>
 <header><div class="nav">
