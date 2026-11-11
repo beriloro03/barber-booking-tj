@@ -180,16 +180,6 @@ function createBookingPanel(shop, shopServices) {
     const openMinute=Number(hoursRow.opens_at.slice(0,2))*60+Number(hoursRow.opens_at.slice(3,5));
     const closeMinute=Number(hoursRow.closes_at.slice(0,2))*60+Number(hoursRow.closes_at.slice(3,5));
     if(hoursRow.is_closed||startMinute<openMinute||endMinute>closeMinute||endMinute>1440){status.textContent=words.outsideHours||"Bookings are only accepted during business hours.";submit.disabled=false;return;}
-    const dayStart=new Date(dateInput.value+"T00:00:00");
-    const dayEnd=new Date(dayStart.getTime()+24*60*60*1000);
-    const {data:busyIntervals,error:availabilityError}=await customerSupabase.rpc("get_booked_intervals",{
-      p_barbershop_id:shop.id,
-      p_day_start:dayStart.toISOString(),
-      p_day_end:dayEnd.toISOString()
-    });
-    if(availabilityError){status.textContent=words.availabilityError||"Could not check availability. Please try again.";submit.disabled=false;return;}
-    const overlaps=(busyIntervals||[]).some(b=>startsAt<new Date(b.ends_at)&&endsAt>new Date(b.starts_at));
-    if(overlaps){status.textContent=words.timeBusy||"This time is already taken. Please choose another.";submit.disabled=false;return;}
     const payload={barbershop_id:shop.id,service_id:selected.id,staff_id:null,customer_id:user.id,starts_at:startsAt.toISOString(),ends_at:endsAt.toISOString(),status:"pending",customer_name:nameInput.value.trim(),customer_phone:phoneInput.value.trim(),customer_note:noteInput.value.trim()||null};
     const {error}=await customerSupabase.from("bookings").insert(payload);
     if(error){status.textContent=error.code==="23P01"?(words.timeBusy||"This time is already taken. Please choose another."):error.code==="22023"?(words.outsideHours||"Bookings are only accepted during business hours."):words.bookingError+" ("+error.message+")";submit.disabled=false;return;}
@@ -204,26 +194,17 @@ async function loadMyBookings() {
   box.textContent=words.myBookingsLoading;
   const {data:userData,error:userError}=await customerSupabase.auth.getUser();
   if(userError||!userData?.user){box.textContent=words.myBookingsNoSession;return;}
-  const {data:bookings,error}=await customerSupabase.from("bookings").select("id,barbershop_id,service_id,starts_at,status").eq("customer_id",userData.user.id).order("starts_at",{ascending:false}).limit(50);
+  const {data:bookings,error}=await customerSupabase.from("bookings").select("id,barbershop_name_snapshot,service_name_snapshot,price_snapshot,duration_minutes_snapshot,starts_at,status").eq("customer_id",userData.user.id).order("starts_at",{ascending:false}).limit(50);
   if(error){box.textContent=words.myBookingsError+" ("+error.message+")";return;}
   if(!bookings||!bookings.length){box.textContent=words.myBookingsEmpty;return;}
-  const shopIds=[...new Set(bookings.map(b=>b.barbershop_id))];
-  const serviceIds=[...new Set(bookings.map(b=>b.service_id))];
-  const [{data:shopRows},{data:serviceRows}]=await Promise.all([
-    supabase.from("barbershops").select("id,name").in("id",shopIds),
-    supabase.from("services").select("id,name,price").in("id",serviceIds)
-  ]);
-  const shopNames=Object.fromEntries((shopRows||[]).map(s=>[s.id,s.name]));
-  const serviceMap=Object.fromEntries((serviceRows||[]).map(s=>[s.id,s]));
   const statusNames={pending:words.pendingStatus,confirmed:words.confirmedStatus,cancelled:words.cancelledStatus,completed:words.completedStatus};
   box.replaceChildren();
   bookings.forEach(b=>{
     const card=document.createElement("article");card.className="my-booking-card";
-    const service=serviceMap[b.service_id];
-    const title=document.createElement("strong");title.textContent=service?.name||"Хизматрасонӣ";card.append(title);
-    const shop=document.createElement("p");shop.textContent=words.shopLabel+": "+(shopNames[b.barbershop_id]||"—");card.append(shop);
+    const title=document.createElement("strong");title.textContent=b.service_name_snapshot||"Хизматрасонӣ";card.append(title);
+    const shop=document.createElement("p");shop.textContent=words.shopLabel+": "+(b.barbershop_name_snapshot||"—");card.append(shop);
     const when=document.createElement("p");when.textContent=new Date(b.starts_at).toLocaleString(document.documentElement.lang==="ru"?"ru-RU":document.documentElement.lang==="en"?"en-US":"tg-TJ",{dateStyle:"medium",timeStyle:"short"});card.append(when);
-    if(service){const price=document.createElement("p");price.textContent=words.priceLabel+": "+Number(service.price).toLocaleString()+" сомонӣ";card.append(price);}
+    if(b.price_snapshot!==null){const price=document.createElement("p");price.textContent=words.priceLabel+": "+Number(b.price_snapshot).toLocaleString()+" сомонӣ";card.append(price);}
     const state=document.createElement("p");state.className="booking-state";state.textContent=words.statusLabel+": "+(statusNames[b.status]||b.status);card.append(state);
     box.append(card);
   });
