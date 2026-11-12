@@ -536,7 +536,7 @@ function render() {
     const staffHeading=document.createElement("h4");staffHeading.textContent=words.staffHeading;staffSection.append(staffHeading);
     const shopStaff=staffByShop[shop.id]||[];
     if(!shopStaff.length){const none=document.createElement("p");none.className="muted";none.textContent=words.noStaff;staffSection.append(none);}
-    else{shopStaff.forEach(person=>{const item=document.createElement("div");item.className="staff-item";const name=document.createElement("strong");name.textContent=person.full_name;item.append(name);if(person.phone){const phone=document.createElement("div");phone.className="staff-meta";phone.textContent=person.phone;item.append(phone);}const serviceNames=(person.services||[]).map(s=>s.name);if(serviceNames.length){const services=document.createElement("div");services.className="staff-meta";services.textContent=words.staffServices+": "+serviceNames.join(", ");item.append(services);}staffSection.append(item);});}
+    else{shopStaff.forEach(person=>{const item=document.createElement("div");item.className="staff-item";const name=document.createElement("strong");name.textContent=person.full_name;item.append(name);const serviceNames=(person.services||[]).map(s=>s.name);if(serviceNames.length){const services=document.createElement("div");services.className="staff-meta";services.textContent=words.staffServices+": "+serviceNames.join(", ");item.append(services);}staffSection.append(item);});}
     card.append(staffSection);
     const serviceSection = document.createElement("div");
     serviceSection.className = "service-list";
