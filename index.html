@@ -615,7 +615,7 @@ async function loadShops() {
       const {data:hoursData,error:hoursError}=await supabase.from("business_hours").select("barbershop_id,weekday,opens_at,closes_at,is_closed").in("barbershop_id",shops.map(shop=>shop.id)).order("weekday",{ascending:true});
       if(hoursError){console.error("Supabase business_hours query failed:",hoursError.message);}
       else {(hoursData||[]).forEach(row=>{if(!hoursByShop[row.barbershop_id])hoursByShop[row.barbershop_id]=[];hoursByShop[row.barbershop_id].push(row);});}
-      const {data:staffData,error:staffError}=await supabase.from("staff").select("id,barbershop_id,full_name,phone").in("barbershop_id",shops.map(shop=>shop.id)).eq("is_active",true).order("full_name",{ascending:true});
+      const {data:staffData,error:staffError}=await supabase.from("staff").select("id,barbershop_id,full_name").in("barbershop_id",shops.map(shop=>shop.id)).eq("is_active",true).order("full_name",{ascending:true});
       if(staffError){console.error("Supabase staff query failed:",staffError.message);}
       else{
         const staffIds=(staffData||[]).map(person=>person.id);
