@@ -59,7 +59,7 @@ a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14
 <div id="bookingStatsCard" class="card hidden"><h2>Омори навбатҳо</h2><p class="muted">Омори навбатҳо барои имрӯз.</p><div id="bookingStats" class="stats-grid"><div class="service">Ҳисоб шуда истодааст…</div></div></div>
 <div id="staffBookingStatsCard" class="card hidden"><h2>Навбатҳо аз рӯи корманд</h2><p class="muted">Шумора аз рӯи 100 навбати охирин ҳисоб мешавад.</p><div id="staffBookingStats" class="stats-grid"></div></div>
 <div id="revenueStatsCard" class="card hidden"><h2>Ҳисоботи даромад</h2><p class="muted">Танҳо навбатҳои «Анҷомёфта» ҳисоб мешаванд. Маблағ аз рӯйи нархи сабтшудаи ҳар навбат ҷамъ карда мешавад.</p><div id="revenueStats" class="stats-grid"><div class="service">Ҳисоб шуда истодааст…</div></div></div>
-<div id="monthlyStaffReportCard" class="card hidden"><h2>Ҳисоботи моҳона аз рӯи корманд</h2><p class="muted">Ҳамаи навбатҳои моҳи интихобшуда ҳисоб мешаванд. Даромад танҳо аз навбатҳои «Анҷомёфта» ҷамъ карда мешавад.</p><div class="row"><div><label for="reportMonth">Моҳ</label><input id="reportMonth" type="month"></div><div style="align-self:end"><button id="loadMonthlyReportBtn" type="button" class="primary">Нишон додани ҳисобот</button></div></div><div id="monthlyStaffReport" class="stats-grid" style="margin-top:12px"></div></div>
+<div id="monthlyStaffReportCard" class="card hidden"><h2>Ҳисоботи моҳона аз рӯи корманд</h2><p class="muted">Ҳамаи навбатҳои моҳи интихобшуда ҳисоб мешаванд. Даромад танҳо аз навбатҳои «Анҷомёфта» ҷамъ карда мешавад.</p><div class="row"><div><label for="reportMonth">Моҳ</label><input id="reportMonth" type="month"></div><div style="align-self:end"><button id="loadMonthlyReportBtn" type="button" class="primary">Нишон додани ҳисобот</button><button id="exportMonthlyStaffReportBtn" type="button">Зеркашии ҳисоботи моҳона (CSV)</button></div></div><div id="monthlyStaffReport" class="stats-grid" style="margin-top:12px"></div></div>
 <div id="bookingCard" class="card hidden"><h2>Дархостҳои навбат</h2><p class="muted">Дархостҳои «Интизор» ва «Тасдиқшуда» вақтро банд мекунанд. Агар марказ дархостро рад кунад, вақт боз озод мешавад.</p><div class="row"><div><label for="bookingSearch">Ҷустуҷӯ</label><input id="bookingSearch" type="search" placeholder="Ном, телефон ё хизмат"></div><div><label for="bookingPeriod">Давра</label><select id="bookingPeriod"><option value="today">Имрӯз</option><option value="week">7 рӯзи охир</option><option value="all">Ҳама</option></select></div></div><div class="row"><div><label for="bookingStatusFilter">Ҳолат</label><select id="bookingStatusFilter"><option value="all">Ҳамаи ҳолатҳо</option><option value="pending">Интизор</option><option value="confirmed">Тасдиқшуда</option><option value="completed">Анҷомёфта</option><option value="cancelled">Радшуда</option></select></div><div><label for="bookingStaffFilter">Корманд</label><select id="bookingStaffFilter"><option value="all">Ҳамаи кормандон</option></select></div></div><div class="row" style="margin:14px 0"><button id="exportBookingsBtn" type="button" class="primary">Зеркашии ҳисобот (CSV)</button></div><div id="bookingList" class="muted">Дархостҳо бор шуда истодаанд…</div></div>
 </section>
 </main>
@@ -67,7 +67,7 @@ a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.119.0";
 const supabase=createClient("https://yjybilaaxqtzhlvaabwd.supabase.co","sb_publishable_yyeO2kZv9yRQyLUOl7fG6Q_j_7ixPc1");
 const $=id=>document.getElementById(id);
-let shop=null,editingServiceId=null;
+let shop=null,editingServiceId=null,monthlyReportRows=[],monthlyReportMonth="";
 function status(message,isError=false){$("status").textContent=message;$("status").style.background=isError?"#fff0f1":"#f1edfa";$("status").style.color=isError?"#9b1c31":"#716b7e";}
 function showDashboard(show){$("loginCard").classList.toggle("hidden",show);$("dashboard").classList.toggle("hidden",!show);}
 async function loadShop(){
@@ -193,6 +193,7 @@ async function loadRevenueStats(){
 async function loadMonthlyStaffReport(){
  if(!shop)return;
  const card=$("monthlyStaffReportCard"),box=$("monthlyStaffReport"),monthInput=$("reportMonth");
+ monthlyReportRows=[];monthlyReportMonth="";$("exportMonthlyStaffReportBtn").disabled=true;
  card.classList.remove("hidden");box.replaceChildren();
  if(!monthInput.value){
   const parts=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Dushanbe",year:"numeric",month:"2-digit"}).formatToParts(new Date());
@@ -233,6 +234,7 @@ async function loadMonthlyStaffReport(){
  summary.append(summaryTitle,summaryCount,summaryRevenue);box.append(summary);
  const rows=[...counts.values()].sort((a,b)=>a.name.localeCompare(b.name,"tg"));
  if(unassigned.total)rows.push(unassigned);
+ monthlyReportRows=rows.map(item=>({...item}));monthlyReportMonth=monthInput.value;$("exportMonthlyStaffReportBtn").disabled=false;
  if(!rows.length){const empty=document.createElement("p");empty.className="muted";empty.textContent="Дар ин моҳ корманд ё навбат нест.";box.append(empty);return;}
  rows.forEach(item=>{
   const panel=document.createElement("div");panel.className="service";
@@ -260,6 +262,18 @@ $("exportBookingsBtn").addEventListener("click",()=>{
  link.download="hisoboti-navbat-"+new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Dushanbe"}).format(new Date())+".csv";
  document.body.append(link);link.click();link.remove();URL.revokeObjectURL(url);
  status("Ҳисоботи навбатҳои намоён ба файл омода шуд.");
+});
+$("exportMonthlyStaffReportBtn").addEventListener("click",()=>{
+ if(!monthlyReportMonth||!monthlyReportRows.length){status("Аввал ҳисоботи моҳонаро нишон деҳ.",true);return;}
+ const headings=["Моҳ","Корманд","Ҳамаи навбатҳо","Интизор","Тасдиқшуда","Анҷомёфта","Радшуда","Даромад (сомонӣ)"];
+ const totalRow=["Ҳамагӣ","Ҳамаи кормандон",monthlyReportRows.reduce((s,x)=>s+x.total,0),monthlyReportRows.reduce((s,x)=>s+x.pending,0),monthlyReportRows.reduce((s,x)=>s+x.confirmed,0),monthlyReportRows.reduce((s,x)=>s+x.completed,0),monthlyReportRows.reduce((s,x)=>s+x.cancelled,0),monthlyReportRows.reduce((s,x)=>s+x.revenue,0).toFixed(2)];
+ const rows=monthlyReportRows.map(item=>[monthlyReportMonth,item.name,item.total,item.pending,item.confirmed,item.completed,item.cancelled,Number(item.revenue||0).toFixed(2)]);
+ const csv="\\uFEFF"+[headings,totalRow,...rows].map(row=>row.map(csvCell).join(",")).join("\\r\\n");
+ const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+ const url=URL.createObjectURL(blob);
+ const link=document.createElement("a");link.href=url;link.download="hisoboti-mohonai-kormandon-"+monthlyReportMonth+".csv";
+ document.body.append(link);link.click();link.remove();URL.revokeObjectURL(url);
+ status("Ҳисоботи моҳонаи кормандон ба файл омода шуд.");
 });
 function applyBookingFilters(){
  const query=$("bookingSearch").value.trim().toLocaleLowerCase();
