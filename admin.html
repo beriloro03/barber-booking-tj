@@ -52,7 +52,10 @@ a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14
 </form><div id="serviceList"></div></div>
 <div id="staffCard" class="card hidden"><h2>Кормандони марказ</h2><p class="muted">Номи кормандро илова кун ва хизматҳоеро интихоб намо, ки ӯ иҷро мекунад. Маълумот дар сомонаи муштариён нишон дода мешавад.</p>
 <form id="staffForm"><label for="staffName">Ному насаби корманд</label><input id="staffName" maxlength="120" required>
-<label for="staffPhone">Телефон (ихтиёрӣ)</label><input id="staffPhone" type="tel" maxlength="40">
+<label for="staffPhone">Телефон (ихтиёрӣ, танҳо барои идоракунӣ)</label><input id="staffPhone" type="tel" maxlength="40">
+<label for="staffBio">Маълумоти кӯтоҳ дар бораи корманд (ихтиёрӣ)</label><textarea id="staffBio" maxlength="500" placeholder="Таҷриба, ихтисос ё маълумоти кӯтоҳ"></textarea>
+<label for="staffPhoto">Акси корманд (JPG, PNG ё WEBP; то 2 МБ)</label><input id="staffPhoto" type="file" accept="image/jpeg,image/png,image/webp">
+<div id="staffPhotoPreview" class="muted" style="margin-top:8px"></div>
 <div class="muted" style="margin-top:12px">Хизматҳои корманд</div><div id="staffServiceOptions"></div>
 <button class="primary" type="submit" style="margin-top:14px">Илова кардани корманд</button></form><div id="staffList"></div></div>
 <div id="hoursCard" class="card hidden"><h2>Рӯзҳо ва соатҳои корӣ</h2><p class="muted">Марказ ҳамаи 7 рӯзи ҳафта кор мекунад. Соҳибкор метавонад барои ҳар рӯз соати оғоз ва анҷоми корро мустақилона интихоб кунад. Рӯзи истироҳат пешбинӣ нашудааст.</p><form id="hoursForm"><div id="hoursList"></div><button class="primary" type="submit" style="margin-top:14px">Сабт кардани соатҳои корӣ</button></form></div>
@@ -69,7 +72,7 @@ a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.119.0";
 const supabase=createClient("https://yjybilaaxqtzhlvaabwd.supabase.co","sb_publishable_yyeO2kZv9yRQyLUOl7fG6Q_j_7ixPc1");
 const $=id=>document.getElementById(id);
-let shop=null,editingServiceId=null,monthlyReportRows=[],monthlyReportMonth="";
+let shop=null,editingServiceId=null,editingStaffId=null,monthlyReportRows=[],monthlyReportMonth="";
 function status(message,isError=false){$("status").textContent=message;$("status").style.background=isError?"#fff0f1":"#f1edfa";$("status").style.color=isError?"#9b1c31":"#716b7e";}
 function showDashboard(show){$("loginCard").classList.toggle("hidden",show);$("dashboard").classList.toggle("hidden",!show);}
 async function loadShop(){
@@ -161,33 +164,76 @@ async function loadStaff(){
  if(serviceError){status("Хизматҳо барои кормандон бор нашуданд: "+serviceError.message,true);return;}
  if(!services||!services.length){const p=document.createElement("p");p.className="muted";p.textContent="Аввал дар қисми хизматрасониҳо хизмат илова кун.";options.append(p);}
  else services.forEach(service=>{const label=document.createElement("label");label.style.fontWeight="500";const check=document.createElement("input");check.type="checkbox";check.value=service.id;check.style.width="auto";check.style.marginRight="8px";label.append(check,document.createTextNode(service.name));options.append(label);});
- const {data:people,error}=await supabase.from("staff").select("id,full_name,phone,is_active").eq("barbershop_id",shop.id).order("full_name");
+ const {data:people,error}=await supabase.from("staff").select("id,full_name,phone,bio,photo_url,is_active").eq("barbershop_id",shop.id).order("full_name");
  if(error){status("Кормандон бор нашуданд: "+error.message,true);return;}
  const active=(people||[]).filter(person=>person.is_active);
  if(!active.length){const p=document.createElement("p");p.className="muted";p.textContent="Ҳоло корманд илова нашудааст.";box.append(p);return;}
  for(const person of active){
   const card=document.createElement("div");card.className="service";
+  if(person.photo_url){const photo=document.createElement("img");photo.src=person.photo_url;photo.alt=person.full_name;photo.loading="lazy";photo.style.cssText="width:76px;height:76px;object-fit:cover;border-radius:12px;display:block;margin-bottom:10px";card.append(photo);}
   const title=document.createElement("strong");title.textContent=person.full_name;card.append(title);
-  if(person.phone){const phone=document.createElement("p");phone.className="muted";phone.textContent=person.phone;card.append(phone);}
+  if(person.bio){const bio=document.createElement("p");bio.className="muted";bio.textContent=person.bio;card.append(bio);}
+  if(person.phone){const phone=document.createElement("p");phone.className="muted";phone.textContent="Телефони дохилӣ: "+person.phone;card.append(phone);}
   const {data:links,error:linkError}=await supabase.from("staff_services").select("service_id").eq("staff_id",person.id);
   if(linkError){status("Хизматҳои корманд бор нашуданд: "+linkError.message,true);return;}
   const names=(links||[]).map(link=>services.find(service=>service.id===link.service_id)?.name).filter(Boolean);
   const serviceText=document.createElement("p");serviceText.className="muted";serviceText.textContent="Хизматҳо: "+(names.join(", ")||"Муайян нашудааст");card.append(serviceText);
   await addStaffScheduleEditor(person,card);
+  const edit=document.createElement("button");edit.type="button";edit.textContent="Таҳрири профил";edit.addEventListener("click",async()=>{editingStaffId=person.id;$("staffName").value=person.full_name||"";$("staffPhone").value=person.phone||"";$("staffBio").value=person.bio||"";$("staffPhoto").value="";$("staffPhotoPreview").textContent=person.photo_url?"Акси ҳозира нигоҳ дошта мешавад, агар акси нав интихоб нашавад.":"Акси ҳоло гузошта нашудааст.";const {data:currentLinks,error:currentLinksError}=await supabase.from("staff_services").select("service_id").eq("staff_id",person.id);if(currentLinksError){status("Хизматҳои корманд бор нашуданд: "+currentLinksError.message,true);return;}const chosen=new Set((currentLinks||[]).map(link=>link.service_id));$("staffServiceOptions").querySelectorAll("input[type=checkbox]").forEach(input=>{input.checked=chosen.has(input.value);});$("staffForm").querySelector("button[type=submit]").textContent="Сабт кардани тағйирот";$("staffName").focus();});
+  card.append(edit);
   const remove=document.createElement("button");remove.type="button";remove.className="danger";remove.textContent="Ғайрифаъол кардан";remove.addEventListener("click",async()=>{if(!confirm("Ин корманд аз рӯйхати фаъол пинҳон карда шавад?"))return;remove.disabled=true;const {error:updateError}=await supabase.from("staff").update({is_active:false}).eq("id",person.id).eq("barbershop_id",shop.id);if(updateError){status("Корманд ғайрифаъол нашуд: "+updateError.message,true);remove.disabled=false;}else{status("Корманд ғайрифаъол карда шуд.");await loadStaff();}});
   card.append(remove);box.append(card);
  }
 }
+async function uploadStaffPhoto(personId,file){
+ if(!file)return null;
+ const allowed=["image/jpeg","image/png","image/webp"];
+ if(!allowed.includes(file.type))throw new Error("Формати акс бояд JPG, PNG ё WEBP бошад.");
+ if(file.size>2*1024*1024)throw new Error("Акс набояд аз 2 МБ калон бошад.");
+ const ext=file.type==="image/png"?"png":file.type==="image/webp"?"webp":"jpg";
+ const path=shop.id+"/"+personId+"/"+Date.now()+"."+ext;
+ const {error}=await supabase.storage.from("staff-photos").upload(path,file,{contentType:file.type,cacheControl:"3600",upsert:false});
+ if(error)throw error;
+ const {data}=supabase.storage.from("staff-photos").getPublicUrl(path);
+ return data.publicUrl;
+}
+$("staffPhoto").addEventListener("change",()=>{
+ const file=$("staffPhoto").files?.[0],box=$("staffPhotoPreview");box.replaceChildren();
+ if(!file){box.textContent="Акси нав интихоб нашудааст.";return;}
+ if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>2*1024*1024){box.textContent="Формат ё андозаи акс нодуруст аст. То 2 МБ, JPG/PNG/WEBP интихоб кун.";return;}
+ const preview=document.createElement("img");preview.src=URL.createObjectURL(file);preview.alt="Пешнамоиши акс";preview.style.cssText="width:88px;height:88px;object-fit:cover;border-radius:12px";box.append(preview);
+});
 $("staffForm").addEventListener("submit",async event=>{
  event.preventDefault();if(!shop)return;
- const full_name=$("staffName").value.trim(),phone=$("staffPhone").value.trim()||null;
+ const full_name=$("staffName").value.trim(),phone=$("staffPhone").value.trim()||null,bio=$("staffBio").value.trim()||null,file=$("staffPhoto").files?.[0]||null;
  if(!full_name){status("Номи кормандро навис.",true);return;}
+ if(file&&(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>2*1024*1024)){status("Акс бояд JPG, PNG ё WEBP ва то 2 МБ бошад.",true);return;}
  const serviceIds=[...$("staffServiceOptions").querySelectorAll('input[type="checkbox"]:checked')].map(input=>input.value);
  const button=$("staffForm").querySelector('button[type="submit"]');button.disabled=true;
- const {data:person,error}=await supabase.from("staff").insert({barbershop_id:shop.id,full_name,phone,is_active:true}).select("id").single();
- if(error){status("Корманд илова нашуд: "+error.message,true);button.disabled=false;return;}
- if(serviceIds.length){const rows=serviceIds.map(service_id=>({staff_id:person.id,service_id}));const {error:linkError}=await supabase.from("staff_services").insert(rows);if(linkError){status("Корманд илова шуд, аммо пайвасти хизматҳо ноком шуд: "+linkError.message,true);button.disabled=false;await loadStaff();return;}}
- $("staffForm").reset();button.disabled=false;status("Корманд илова шуд.");await loadStaff();
+ let personId=editingStaffId,oldPhotoUrl=null;
+ if(editingStaffId){
+  const {data:oldPerson,error:oldError}=await supabase.from("staff").select("photo_url").eq("id",editingStaffId).eq("barbershop_id",shop.id).single();
+  if(oldError){status("Маълумоти корманд бор нашуд: "+oldError.message,true);button.disabled=false;return;}
+  oldPhotoUrl=oldPerson.photo_url;
+  const {error}=await supabase.from("staff").update({full_name,phone,bio}).eq("id",editingStaffId).eq("barbershop_id",shop.id);
+  if(error){status("Профили корманд нав нашуд: "+error.message,true);button.disabled=false;return;}
+ }else{
+  const {data:person,error}=await supabase.from("staff").insert({barbershop_id:shop.id,full_name,phone,bio,is_active:true}).select("id").single();
+  if(error){status("Корманд илова нашуд: "+error.message,true);button.disabled=false;return;}
+  personId=person.id;
+ }
+ if(file){
+  try{
+   const photoUrl=await uploadStaffPhoto(personId,file);
+   const {error:photoError}=await supabase.from("staff").update({photo_url:photoUrl}).eq("id",personId).eq("barbershop_id",shop.id);
+   if(photoError)throw photoError;
+   if(oldPhotoUrl){const marker="/storage/v1/object/public/staff-photos/";const at=oldPhotoUrl.indexOf(marker);if(at>=0){const oldPath=decodeURIComponent(oldPhotoUrl.slice(at+marker.length).split("?")[0]);await supabase.storage.from("staff-photos").remove([oldPath]);}}
+  }catch(photoError){status("Маълумоти корманд сабт шуд, аммо акс бор нашуд: "+photoError.message,true);button.disabled=false;await loadStaff();return;}
+ }
+ const {error:deleteLinksError}=await supabase.from("staff_services").delete().eq("staff_id",personId);
+ if(deleteLinksError){status("Профил сабт шуд, аммо хизматҳои пешина нав нашуданд: "+deleteLinksError.message,true);button.disabled=false;await loadStaff();return;}
+ if(serviceIds.length){const rows=serviceIds.map(service_id=>({staff_id:personId,service_id}));const {error:linkError}=await supabase.from("staff_services").insert(rows);if(linkError){status("Профил сабт шуд, аммо пайвасти хизматҳо ноком шуд: "+linkError.message,true);button.disabled=false;await loadStaff();return;}}
+ editingStaffId=null;$("staffForm").reset();$("staffForm").querySelector('button[type="submit"]').textContent="Илова кардани корманд";$("staffPhotoPreview").textContent="";button.disabled=false;status("Профили корманд сабт шуд.");await loadStaff();
 });
 
 async function loadBusinessHours(){
