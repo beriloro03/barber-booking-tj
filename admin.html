@@ -268,7 +268,7 @@ $("exportMonthlyStaffReportBtn").addEventListener("click",()=>{
  const headings=["Моҳ","Корманд","Ҳамаи навбатҳо","Интизор","Тасдиқшуда","Анҷомёфта","Радшуда","Даромад (сомонӣ)"];
  const totalRow=["Ҳамагӣ","Ҳамаи кормандон",monthlyReportRows.reduce((s,x)=>s+x.total,0),monthlyReportRows.reduce((s,x)=>s+x.pending,0),monthlyReportRows.reduce((s,x)=>s+x.confirmed,0),monthlyReportRows.reduce((s,x)=>s+x.completed,0),monthlyReportRows.reduce((s,x)=>s+x.cancelled,0),monthlyReportRows.reduce((s,x)=>s+x.revenue,0).toFixed(2)];
  const rows=monthlyReportRows.map(item=>[monthlyReportMonth,item.name,item.total,item.pending,item.confirmed,item.completed,item.cancelled,Number(item.revenue||0).toFixed(2)]);
- const csv="\\uFEFF"+[headings,totalRow,...rows].map(row=>row.map(csvCell).join(",")).join("\\r\\n");
+ const csv="\uFEFF"+[headings,totalRow,...rows].map(row=>row.map(csvCell).join(",")).join("\r\n");
  const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
  const url=URL.createObjectURL(blob);
  const link=document.createElement("a");link.href=url;link.download="hisoboti-mohonai-kormandon-"+monthlyReportMonth+".csv";
