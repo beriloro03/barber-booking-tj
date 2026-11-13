@@ -40,6 +40,22 @@ a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14
 <label for="shopDescription">Тавсиф</label><textarea id="shopDescription" maxlength="500"></textarea>
 <label for="shopCity">Шаҳр</label><input id="shopCity" maxlength="100"><label for="shopDistrict">Ноҳия</label><input id="shopDistrict" maxlength="100" placeholder="Масалан: Мастчоҳ">
 <label for="shopAddress">Суроғаи марказ</label><input id="shopAddress" maxlength="250" placeholder="Масалан: назди бозор, кӯчаи марказӣ">
+<div style="margin-top:10px">
+ <button id="openShopMapBtn" type="button">📍 Интихоби ҷой дар харита</button>
+ <div id="shopMapPanel" class="hidden" style="margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:12px">
+  <p class="muted">Ба харита ламс кун, то ҷойи марказ интихоб шавад. Нишонаро низ ҳаракат дода метавонӣ.</p>
+  <div class="row" style="margin:10px 0">
+   <button id="myLocationBtn" type="button">◎ Ҷойгиршавии ман</button>
+   <button id="closeShopMapBtn" type="button">Пӯшидан</button>
+  </div>
+  <div id="shopMapMessage" class="muted" role="status">Харита ҳангоми кушодан бор мешавад.</div>
+  <div id="shopMap" style="height:280px;width:100%;border-radius:10px;overflow:hidden;background:#eee;margin-top:8px"></div>
+  <div id="shopMapCoordinates" class="muted" style="margin-top:8px">Ҷой интихоб нашудааст.</div>
+ </div>
+ <input id="shopLatitude" type="hidden">
+ <input id="shopLongitude" type="hidden">
+ <p class="muted" style="margin:6px 0 0">Интихоби харита ихтиёрӣ аст. Ҷой танҳо баъди пахши «Сабт кардани маълумот» нигоҳ дошта мешавад.</p>
+</div>
 <label for="shopPhone">Телефони кории марказ (ихтиёрӣ)</label><input id="shopPhone" type="tel" maxlength="40">
 <button class="primary" type="submit" style="margin-top:14px">Сабт кардани маълумот</button>
 </form></div>
@@ -79,10 +95,10 @@ function showDashboard(show){$("loginCard").classList.toggle("hidden",show);$("d
 async function loadShop(){
  const {data:userData,error:userError}=await supabase.auth.getUser();
  if(userError||!userData.user){showDashboard(false);status("Лутфан ворид шав.",true);return;}
- const {data,error}=await supabase.from("barbershops").select("id,name,description,address,city,district,phone").eq("owner_id",userData.user.id).limit(1).maybeSingle();
+ const {data,error}=await supabase.from("barbershops").select("id,name,description,address,city,district,phone,latitude,longitude").eq("owner_id",userData.user.id).limit(1).maybeSingle();
  if(error){status("Марказ бор карда нашуд: "+error.message,true);return;}
  if(!data){shop=null;$("shopForm").reset();$("serviceCard").classList.add("hidden");$("staffCard").classList.add("hidden");$("bookingCard").classList.add("hidden");$("bookingStatsCard").classList.add("hidden");$("revenueStatsCard").classList.add("hidden");$("monthlyStaffReportCard").classList.add("hidden");$("hoursCard").classList.add("hidden");showDashboard(true);status("Ҳисоби соҳибкор омода аст. Маълумоти маркази худро пур карда, сабт кун. Марказ то санҷиш дар рӯйхати умумӣ намоён намешавад.");return;}
- shop=data;$("shopName").value=data.name||"";$("shopDescription").value=data.description||"";$("shopCity").value=data.city||"";$("shopDistrict").value=data.district||"";$("shopAddress").value=data.address||"";$("shopPhone").value=data.phone||"";
+ shop=data;$("shopName").value=data.name||"";$("shopDescription").value=data.description||"";$("shopCity").value=data.city||"";$("shopDistrict").value=data.district||"";$("shopAddress").value=data.address||"";$("shopPhone").value=data.phone||"";$("shopLatitude").value=data.latitude??"";$("shopLongitude").value=data.longitude??"";
  showDashboard(true);$("serviceCard").classList.remove("hidden");$("bookingCard").classList.remove("hidden");$("hoursCard").classList.remove("hidden");$("reviewsCard").classList.remove("hidden");status("Марказ бор шуд. Тағйиротро танҳо соҳиби ин марказ сабт карда метавонад.");await loadServices();$("staffCard").classList.remove("hidden");await loadStaff();await loadBusinessHours();await loadBookings();await loadReviews();
 }
 async function loadServices(){
@@ -645,7 +661,57 @@ $("loadMonthlyReportBtn").addEventListener("click",loadMonthlyStaffReport);
 $("loadCalendarBtn").addEventListener("click",loadBookingCalendar);
 $("calendarStaffFilter").addEventListener("change",loadBookingCalendar);
 $("calendarStatusFilter").addEventListener("change",loadBookingCalendar);
-$("shopForm").addEventListener("submit",async e=>{e.preventDefault();const updates={name:$("shopName").value.trim(),description:$("shopDescription").value.trim()||null,city:$("shopCity").value.trim()||null,district:$("shopDistrict").value.trim()||null,address:$("shopAddress").value.trim()||null,phone:$("shopPhone").value.trim()||null};if(!updates.name){status("Номи марказро навис.",true);return;}let result;if(shop){result=await supabase.from("barbershops").update(updates).eq("id",shop.id).select("id,name,description,address,city,phone,latitude,longitude").maybeSingle();}else{const {data:userData,error:userError}=await supabase.auth.getUser();if(userError||!userData.user){status("Аввал ба ҳисоб ворид шав.",true);return;}result=await supabase.from("barbershops").insert({...updates,owner_id:userData.user.id,is_active:false}).select("id,name,description,address,city,phone,latitude,longitude").single();}if(result.error){status("Маълумот сабт нашуд: "+result.error.message,true);return;}if(!result.data){status("Марказ сабт нашуд. Иҷозати соҳибро санҷ.",true);return;}shop=result.data;$("serviceCard").classList.remove("hidden");$("bookingCard").classList.remove("hidden");status("Марказ сабт шуд. Он то санҷиш аз ҷониби маъмури платформа дар рӯйхати умумӣ намоён намешавад.");await loadServices();$("staffCard").classList.remove("hidden");await loadStaff();await loadBookings();});
+$("shopForm").addEventListener("submit",async e=>{e.preventDefault();const latValue=$("shopLatitude").value.trim(),lngValue=$("shopLongitude").value.trim();const hasLat=latValue!==""&&lngValue!=="";const updates={name:$("shopName").value.trim(),description:$("shopDescription").value.trim()||null,city:$("shopCity").value.trim()||null,district:$("shopDistrict").value.trim()||null,address:$("shopAddress").value.trim()||null,phone:$("shopPhone").value.trim()||null,latitude:hasLat?Number(latValue):null,longitude:hasLat?Number(lngValue):null};if(!updates.name){status("Номи марказро навис.",true);return;}let result;if(shop){result=await supabase.from("barbershops").update(updates).eq("id",shop.id).select("id,name,description,address,city,phone,latitude,longitude").maybeSingle();}else{const {data:userData,error:userError}=await supabase.auth.getUser();if(userError||!userData.user){status("Аввал ба ҳисоб ворид шав.",true);return;}result=await supabase.from("barbershops").insert({...updates,owner_id:userData.user.id,is_active:false}).select("id,name,description,address,city,phone,latitude,longitude").single();}if(result.error){status("Маълумот сабт нашуд: "+result.error.message,true);return;}if(!result.data){status("Марказ сабт нашуд. Иҷозати соҳибро санҷ.",true);return;}shop=result.data;$("serviceCard").classList.remove("hidden");$("bookingCard").classList.remove("hidden");status("Марказ сабт шуд. Он то санҷиш аз ҷониби маъмури платформа дар рӯйхати умумӣ намоён намешавад.");await loadServices();$("staffCard").classList.remove("hidden");await loadStaff();await loadBookings();});
+
+let shopMapInstance=null,shopMapMarker=null,shopMapLoading=null;
+function setShopMapPoint(lat,lng){
+ $("shopLatitude").value=Number(lat).toFixed(7);$("shopLongitude").value=Number(lng).toFixed(7);
+ $("shopMapCoordinates").textContent="Ҷой интихоб шуд: "+Number(lat).toFixed(5)+", "+Number(lng).toFixed(5);
+ if(shopMapMarker)shopMapMarker.setLatLng([lat,lng]);
+}
+async function ensureShopMapLibrary(){
+ if(window.L)return window.L;
+ if(shopMapLoading)return shopMapLoading;
+ shopMapLoading=new Promise((resolve,reject)=>{
+  if(!document.getElementById("leaflet-css")){
+   const css=document.createElement("link");css.id="leaflet-css";css.rel="stylesheet";css.href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";document.head.append(css);
+  }
+  const script=document.createElement("script");script.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";script.onload=()=>window.L?resolve(window.L):reject(new Error("Харита дастрас нашуд."));script.onerror=()=>reject(new Error("Харита бор нашуд. Интернетро санҷ ва аз нав кӯшиш кун."));document.head.append(script);
+ });
+ try{return await shopMapLoading;}catch(error){shopMapLoading=null;throw error;}
+}
+async function openShopMap(){
+ $("shopMapPanel").classList.remove("hidden");$("shopMapMessage").textContent="Харита бор шуда истодааст…";
+ try{
+  const L=await ensureShopMapLibrary();
+  if(!shopMapInstance){
+   const lat=Number($("shopLatitude").value)||39.0,lng=Number($("shopLongitude").value)||69.5;
+   shopMapInstance=L.map("shopMap").setView([lat,lng],$("shopLatitude").value?16:7);
+   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(shopMapInstance);
+   shopMapMarker=L.marker([lat,lng],{draggable:true}).addTo(shopMapInstance);
+   shopMapMarker.on("dragend",()=>{const p=shopMapMarker.getLatLng();setShopMapPoint(p.lat,p.lng);});
+   shopMapInstance.on("click",event=>{setShopMapPoint(event.latlng.lat,event.latlng.lng);});
+   if($("shopLatitude").value)setShopMapPoint(lat,lng);
+  }
+  $("shopMapMessage").textContent="Ба харита ламс кун ё нишонаро ҳаракат деҳ.";
+  setTimeout(()=>shopMapInstance&&shopMapInstance.invalidateSize(),120);
+ }catch(error){$("shopMapMessage").textContent=error.message||"Харита бор нашуд."; }
+}
+$("openShopMapBtn").addEventListener("click",openShopMap);
+$("closeShopMapBtn").addEventListener("click",()=>$("shopMapPanel").classList.add("hidden"));
+$("myLocationBtn").addEventListener("click",()=>{
+ if(!navigator.geolocation){$("shopMapMessage").textContent="Ин браузер ҷойгиршавиро дастгирӣ намекунад.";return;}
+ $("myLocationBtn").disabled=true;$("shopMapMessage").textContent="Ҷойгиршавӣ муайян мешавад…";
+ navigator.geolocation.getCurrentPosition(position=>{
+  const {latitude,longitude}=position.coords;setShopMapPoint(latitude,longitude);
+  if(shopMapInstance){shopMapInstance.setView([latitude,longitude],17);shopMapMarker.setLatLng([latitude,longitude]);}
+  $("shopMapMessage").textContent="Ҷойгиршавӣ интихоб шуд. Барои нигоҳ доштан маълумоти марказро сабт кун.";
+  $("myLocationBtn").disabled=false;
+ },error=>{
+  $("shopMapMessage").textContent=error.code===1?"Иҷозати ҷойгиршавӣ дода нашуд. Метавонӣ ҷойро дастӣ дар харита интихоб кунӣ.":"Ҷойгиршавӣ муайян нашуд. Метавонӣ ҷойро дастӣ интихоб кунӣ.";
+  $("myLocationBtn").disabled=false;
+ },{enableHighAccuracy:true,timeout:12000,maximumAge:60000});
+});
 $("hoursForm").addEventListener("submit",async e=>{
  e.preventDefault();if(!shop)return;
  const rows=[...$("hoursList").querySelectorAll(".hours-row")];
