@@ -59,6 +59,7 @@ a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14
 <div id="bookingStatsCard" class="card hidden"><h2>Омори навбатҳо</h2><p class="muted">Омори навбатҳо барои имрӯз.</p><div id="bookingStats" class="stats-grid"><div class="service">Ҳисоб шуда истодааст…</div></div></div>
 <div id="staffBookingStatsCard" class="card hidden"><h2>Навбатҳо аз рӯи корманд</h2><p class="muted">Шумора аз рӯи 100 навбати охирин ҳисоб мешавад.</p><div id="staffBookingStats" class="stats-grid"></div></div>
 <div id="revenueStatsCard" class="card hidden"><h2>Ҳисоботи даромад</h2><p class="muted">Танҳо навбатҳои «Анҷомёфта» ҳисоб мешаванд. Маблағ аз рӯйи нархи сабтшудаи ҳар навбат ҷамъ карда мешавад.</p><div id="revenueStats" class="stats-grid"><div class="service">Ҳисоб шуда истодааст…</div></div></div>
+<div id="monthlyStaffReportCard" class="card hidden"><h2>Ҳисоботи моҳона аз рӯи корманд</h2><p class="muted">Ҳамаи навбатҳои моҳи интихобшуда ҳисоб мешаванд. Даромад танҳо аз навбатҳои «Анҷомёфта» ҷамъ карда мешавад.</p><div class="row"><div><label for="reportMonth">Моҳ</label><input id="reportMonth" type="month"></div><div style="align-self:end"><button id="loadMonthlyReportBtn" type="button" class="primary">Нишон додани ҳисобот</button></div></div><div id="monthlyStaffReport" class="stats-grid" style="margin-top:12px"></div></div>
 <div id="bookingCard" class="card hidden"><h2>Дархостҳои навбат</h2><p class="muted">Дархостҳои «Интизор» ва «Тасдиқшуда» вақтро банд мекунанд. Агар марказ дархостро рад кунад, вақт боз озод мешавад.</p><div class="row"><div><label for="bookingSearch">Ҷустуҷӯ</label><input id="bookingSearch" type="search" placeholder="Ном, телефон ё хизмат"></div><div><label for="bookingPeriod">Давра</label><select id="bookingPeriod"><option value="today">Имрӯз</option><option value="week">7 рӯзи охир</option><option value="all">Ҳама</option></select></div></div><div class="row"><div><label for="bookingStatusFilter">Ҳолат</label><select id="bookingStatusFilter"><option value="all">Ҳамаи ҳолатҳо</option><option value="pending">Интизор</option><option value="confirmed">Тасдиқшуда</option><option value="completed">Анҷомёфта</option><option value="cancelled">Радшуда</option></select></div><div><label for="bookingStaffFilter">Корманд</label><select id="bookingStaffFilter"><option value="all">Ҳамаи кормандон</option></select></div></div><div class="row" style="margin:14px 0"><button id="exportBookingsBtn" type="button" class="primary">Зеркашии ҳисобот (CSV)</button></div><div id="bookingList" class="muted">Дархостҳо бор шуда истодаанд…</div></div>
 </section>
 </main>
@@ -74,7 +75,7 @@ async function loadShop(){
  if(userError||!userData.user){showDashboard(false);status("Лутфан ворид шав.",true);return;}
  const {data,error}=await supabase.from("barbershops").select("id,name,description,address,city,phone").eq("owner_id",userData.user.id).limit(1).maybeSingle();
  if(error){status("Марказ бор карда нашуд: "+error.message,true);return;}
- if(!data){shop=null;$("shopForm").reset();$("serviceCard").classList.add("hidden");$("staffCard").classList.add("hidden");$("bookingCard").classList.add("hidden");$("bookingStatsCard").classList.add("hidden");$("revenueStatsCard").classList.add("hidden");$("hoursCard").classList.add("hidden");showDashboard(true);status("Ҳисоби соҳибкор омода аст. Маълумоти маркази худро пур карда, сабт кун. Марказ то санҷиш дар рӯйхати умумӣ намоён намешавад.");return;}
+ if(!data){shop=null;$("shopForm").reset();$("serviceCard").classList.add("hidden");$("staffCard").classList.add("hidden");$("bookingCard").classList.add("hidden");$("bookingStatsCard").classList.add("hidden");$("revenueStatsCard").classList.add("hidden");$("monthlyStaffReportCard").classList.add("hidden");$("hoursCard").classList.add("hidden");showDashboard(true);status("Ҳисоби соҳибкор омода аст. Маълумоти маркази худро пур карда, сабт кун. Марказ то санҷиш дар рӯйхати умумӣ намоён намешавад.");return;}
  shop=data;$("shopName").value=data.name||"";$("shopDescription").value=data.description||"";$("shopCity").value=data.city||"";$("shopAddress").value=data.address||"";$("shopPhone").value=data.phone||"";
  showDashboard(true);$("serviceCard").classList.remove("hidden");$("bookingCard").classList.remove("hidden");$("hoursCard").classList.remove("hidden");status("Марказ бор шуд. Тағйиротро танҳо соҳиби ин марказ сабт карда метавонад.");await loadServices();$("staffCard").classList.remove("hidden");await loadStaff();await loadBusinessHours();await loadBookings();
 }
@@ -188,6 +189,60 @@ async function loadRevenueStats(){
   item.append(name,number,detail);box.append(item);
  });
 }
+
+async function loadMonthlyStaffReport(){
+ if(!shop)return;
+ const card=$("monthlyStaffReportCard"),box=$("monthlyStaffReport"),monthInput=$("reportMonth");
+ card.classList.remove("hidden");box.replaceChildren();
+ if(!monthInput.value){
+  const parts=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Dushanbe",year:"numeric",month:"2-digit"}).formatToParts(new Date());
+  const part=type=>parts.find(x=>x.type===type)?.value;
+  monthInput.value=part("year")+"-"+part("month");
+ }
+ const match=monthInput.value.match(/^(\d{4})-(\d{2})$/);
+ if(!match){box.textContent="Моҳро дуруст интихоб кун.";return;}
+ const year=Number(match[1]),month=Number(match[2]);
+ if(month<1||month>12){box.textContent="Моҳ нодуруст аст.";return;}
+ const start=new Date(Date.UTC(year,month-1,1)-5*60*60*1000);
+ const end=new Date(Date.UTC(year,month,1)-5*60*60*1000);
+ const staffResult=await supabase.from("staff").select("id,full_name").eq("barbershop_id",shop.id);
+ if(staffResult.error){box.textContent="Рӯйхати кормандон бор нашуд: "+staffResult.error.message;return;}
+ const counts=new Map((staffResult.data||[]).map(person=>[person.id,{name:person.full_name,total:0,pending:0,confirmed:0,completed:0,cancelled:0,revenue:0}]));
+ const unassigned={name:"Бе корманди интихобшуда",total:0,pending:0,confirmed:0,completed:0,cancelled:0,revenue:0};
+ let offset=0,total=0,completedRevenue=0;
+ while(true){
+  const {data,error}=await supabase.from("bookings").select("staff_id,status,price_snapshot").eq("barbershop_id",shop.id).gte("starts_at",start.toISOString()).lt("starts_at",end.toISOString()).order("starts_at",{ascending:true}).range(offset,offset+999);
+  if(error){box.textContent="Ҳисоботи моҳона бор нашуд: "+error.message;return;}
+  const rows=data||[];
+  rows.forEach(booking=>{
+   total++;
+   let item=booking.staff_id?counts.get(booking.staff_id):unassigned;
+   if(booking.staff_id&&!item){item={name:"Корманди ғайрифаъол",total:0,pending:0,confirmed:0,completed:0,cancelled:0,revenue:0};counts.set(booking.staff_id,item);}
+   item.total++;
+   if(Object.prototype.hasOwnProperty.call(item,booking.status))item[booking.status]++;
+   if(booking.status==="completed"){const amount=Number(booking.price_snapshot)||0;item.revenue+=amount;completedRevenue+=amount;}
+  });
+  if(rows.length<1000)break;
+  offset+=rows.length;
+ }
+ const format=value=>value.toLocaleString("tg-TJ",{minimumFractionDigits:0,maximumFractionDigits:2})+" сомонӣ";
+ const summary=document.createElement("div");summary.className="service";
+ const summaryTitle=document.createElement("strong");summaryTitle.textContent=monthInput.value+" — Ҳамагӣ";
+ const summaryCount=document.createElement("span");summaryCount.className="stats-number";summaryCount.textContent=String(total)+" навбат";
+ const summaryRevenue=document.createElement("p");summaryRevenue.className="muted";summaryRevenue.textContent="Даромади умумӣ: "+format(completedRevenue);
+ summary.append(summaryTitle,summaryCount,summaryRevenue);box.append(summary);
+ const rows=[...counts.values()].sort((a,b)=>a.name.localeCompare(b.name,"tg"));
+ if(unassigned.total)rows.push(unassigned);
+ if(!rows.length){const empty=document.createElement("p");empty.className="muted";empty.textContent="Дар ин моҳ корманд ё навбат нест.";box.append(empty);return;}
+ rows.forEach(item=>{
+  const panel=document.createElement("div");panel.className="service";
+  const name=document.createElement("strong");name.textContent=item.name;
+  const number=document.createElement("span");number.className="stats-number";number.textContent=String(item.total)+" навбат";
+  const details=document.createElement("p");details.className="muted";details.textContent="Интизор: "+item.pending+" · Тасдиқшуда: "+item.confirmed+" · Анҷомёфта: "+item.completed+" · Радшуда: "+item.cancelled;
+  const revenue=document.createElement("p");revenue.className="muted";revenue.textContent="Даромад аз навбатҳои анҷомёфта: "+format(item.revenue);
+  panel.append(name,number,details,revenue);box.append(panel);
+ });
+}
 function csvCell(value){return '"'+String(value??"").replace(/"/g,'""')+'"';}
 $("exportBookingsBtn").addEventListener("click",()=>{
  const visible=[...$("bookingList").children].filter(card=>!card.classList.contains("hidden"));
@@ -260,6 +315,7 @@ async function loadBookings(){
  if(!shop)return;
  await loadBookingStats();
  await loadRevenueStats();
+ await loadMonthlyStaffReport();
  const box=$("bookingList");box.textContent="Дархостҳо бор шуда истодаанд…";
  const {data,error}=await supabase.from("bookings").select("id,service_name_snapshot,price_snapshot,duration_minutes_snapshot,starts_at,ends_at,status,customer_name,customer_phone,customer_note,staff_id").eq("barbershop_id",shop.id).order("starts_at",{ascending:false}).limit(100);
  if(error){box.textContent="Дархостҳо бор нашуданд: "+error.message;return;}
@@ -327,6 +383,7 @@ $("signupForm").addEventListener("submit",async e=>{
 $("togglePassword").addEventListener("click",()=>{const field=$("password");const visible=field.type==="password";field.type=visible?"text":"password";$("togglePassword").textContent=visible?"Пинҳон кардан":"Нишон додан";});
 $("loginForm").addEventListener("submit",async e=>{e.preventDefault();status("Ворид шуда истодаӣ…");const {error}=await supabase.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});if(error){const code=error.code||"";let message="Воридшавӣ нашуд.";if(code==="invalid_credentials"||/invalid login credentials/i.test(error.message||"")){message="Email ё парол нодуруст аст. Ҳарфҳои калон/хурд ва фосилаҳоро санҷ.";}else if(code==="email_not_confirmed"||/email not confirmed/i.test(error.message||"")){message="Email ҳанӯз тасдиқ нашудааст. Қуттии почтаатро барои паёми тасдиқи Supabase санҷ.";}else if(code==="user_not_found"){message="Ин email дар ин лоиҳаи Supabase ёфт нашуд.";}else{message+=" Сабаб: "+(error.message||code||"хатои номаълум");}status(message,true);return;}await loadShop();});
 $("logoutBtn").addEventListener("click",async()=>{await supabase.auth.signOut();shop=null;showDashboard(false);status("Аз ҳисоб баромадӣ.");});
+$("loadMonthlyReportBtn").addEventListener("click",loadMonthlyStaffReport);
 $("shopForm").addEventListener("submit",async e=>{e.preventDefault();const updates={name:$("shopName").value.trim(),description:$("shopDescription").value.trim()||null,city:$("shopCity").value.trim()||null,address:$("shopAddress").value.trim()||null,phone:$("shopPhone").value.trim()||null};if(!updates.name){status("Номи марказро навис.",true);return;}let result;if(shop){result=await supabase.from("barbershops").update(updates).eq("id",shop.id).select("id,name,description,address,city,phone").maybeSingle();}else{const {data:userData,error:userError}=await supabase.auth.getUser();if(userError||!userData.user){status("Аввал ба ҳисоб ворид шав.",true);return;}result=await supabase.from("barbershops").insert({...updates,owner_id:userData.user.id,is_active:false}).select("id,name,description,address,city,phone").single();}if(result.error){status("Маълумот сабт нашуд: "+result.error.message,true);return;}if(!result.data){status("Марказ сабт нашуд. Иҷозати соҳибро санҷ.",true);return;}shop=result.data;$("serviceCard").classList.remove("hidden");$("bookingCard").classList.remove("hidden");status("Марказ сабт шуд. Он то санҷиш аз ҷониби маъмури платформа дар рӯйхати умумӣ намоён намешавад.");await loadServices();$("staffCard").classList.remove("hidden");await loadStaff();await loadBookings();});
 $("hoursForm").addEventListener("submit",async e=>{
  e.preventDefault();if(!shop)return;
