@@ -61,6 +61,7 @@ a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14
 <div id="revenueStatsCard" class="card hidden"><h2>Ҳисоботи даромад</h2><p class="muted">Танҳо навбатҳои «Анҷомёфта» ҳисоб мешаванд. Маблағ аз рӯйи нархи сабтшудаи ҳар навбат ҷамъ карда мешавад.</p><div id="revenueStats" class="stats-grid"><div class="service">Ҳисоб шуда истодааст…</div></div></div>
 <div id="monthlyStaffReportCard" class="card hidden"><h2>Ҳисоботи моҳона аз рӯи корманд</h2><p class="muted">Ҳамаи навбатҳои моҳи интихобшуда ҳисоб мешаванд. Даромад танҳо аз навбатҳои «Анҷомёфта» ҷамъ карда мешавад.</p><div class="row"><div><label for="reportMonth">Моҳ</label><input id="reportMonth" type="month"></div><div style="align-self:end"><button id="loadMonthlyReportBtn" type="button" class="primary">Нишон додани ҳисобот</button><button id="exportMonthlyStaffReportBtn" type="button">Зеркашии ҳисоботи моҳона (CSV)</button></div></div><div id="monthlyStaffReport" class="stats-grid" style="margin-top:12px"></div></div>
 <div id="bookingCalendarCard" class="card hidden"><h2>Тақвими навбатҳо</h2><p class="muted">Ҳамаи навбатҳои моҳи интихобшуда аз рӯи рӯз нишон дода мешаванд.</p><div class="row"><div><label for="calendarMonth">Моҳ</label><input id="calendarMonth" type="month"></div><div style="align-self:end"><button id="loadCalendarBtn" type="button" class="primary">Нишон додани тақвим</button></div></div><div class="row"><div><label for="calendarStaffFilter">Корманд</label><select id="calendarStaffFilter"><option value="all">Ҳамаи кормандон</option></select></div><div><label for="calendarStatusFilter">Ҳолат</label><select id="calendarStatusFilter"><option value="all">Ҳамаи ҳолатҳо</option><option value="pending">Интизор</option><option value="confirmed">Тасдиқшуда</option><option value="completed">Анҷомёфта</option><option value="cancelled">Радшуда</option></select></div></div><div id="bookingCalendar" style="margin-top:14px"></div></div>
+<div id="reviewsCard" class="card hidden"><h2>Баҳо ва фикру мулоҳизаҳои муштариён</h2><p class="muted">Баҳоҳои нав аввал санҷида мешаванд. Метавонӣ онҳоро нашр ё пинҳон кунӣ.</p><div id="reviewsList">Бор шуда истодааст…</div></div>
 <div id="bookingCard" class="card hidden"><h2>Дархостҳои навбат</h2><p class="muted">Дархостҳои «Интизор» ва «Тасдиқшуда» вақтро банд мекунанд. Агар марказ дархостро рад кунад, вақт боз озод мешавад.</p><div class="row"><div><label for="bookingSearch">Ҷустуҷӯ</label><input id="bookingSearch" type="search" placeholder="Ном, телефон ё хизмат"></div><div><label for="bookingPeriod">Давра</label><select id="bookingPeriod"><option value="today">Имрӯз</option><option value="week">7 рӯзи охир</option><option value="all">Ҳама</option></select></div></div><div class="row"><div><label for="bookingStatusFilter">Ҳолат</label><select id="bookingStatusFilter"><option value="all">Ҳамаи ҳолатҳо</option><option value="pending">Интизор</option><option value="confirmed">Тасдиқшуда</option><option value="completed">Анҷомёфта</option><option value="cancelled">Радшуда</option></select></div><div><label for="bookingStaffFilter">Корманд</label><select id="bookingStaffFilter"><option value="all">Ҳамаи кормандон</option></select></div></div><div class="row" style="margin:14px 0"><button id="exportBookingsBtn" type="button" class="primary">Зеркашии ҳисобот (CSV)</button></div><div id="bookingList" class="muted">Дархостҳо бор шуда истодаанд…</div></div>
 </section>
 </main>
@@ -78,7 +79,7 @@ async function loadShop(){
  if(error){status("Марказ бор карда нашуд: "+error.message,true);return;}
  if(!data){shop=null;$("shopForm").reset();$("serviceCard").classList.add("hidden");$("staffCard").classList.add("hidden");$("bookingCard").classList.add("hidden");$("bookingStatsCard").classList.add("hidden");$("revenueStatsCard").classList.add("hidden");$("monthlyStaffReportCard").classList.add("hidden");$("hoursCard").classList.add("hidden");showDashboard(true);status("Ҳисоби соҳибкор омода аст. Маълумоти маркази худро пур карда, сабт кун. Марказ то санҷиш дар рӯйхати умумӣ намоён намешавад.");return;}
  shop=data;$("shopName").value=data.name||"";$("shopDescription").value=data.description||"";$("shopCity").value=data.city||"";$("shopAddress").value=data.address||"";$("shopPhone").value=data.phone||"";
- showDashboard(true);$("serviceCard").classList.remove("hidden");$("bookingCard").classList.remove("hidden");$("hoursCard").classList.remove("hidden");status("Марказ бор шуд. Тағйиротро танҳо соҳиби ин марказ сабт карда метавонад.");await loadServices();$("staffCard").classList.remove("hidden");await loadStaff();await loadBusinessHours();await loadBookings();
+ showDashboard(true);$("serviceCard").classList.remove("hidden");$("bookingCard").classList.remove("hidden");$("hoursCard").classList.remove("hidden");status("Марказ бор шуд. Тағйиротро танҳо соҳиби ин марказ сабт карда метавонад.");await loadServices();$("staffCard").classList.remove("hidden");await loadStaff();await loadBusinessHours();await loadBookings();await loadReviews();
 }
 async function loadServices(){
  if(!shop)return;
@@ -448,6 +449,31 @@ function renderStaffBookingStats(bookings,staffRows){
   item.append(name,total);box.append(item);
  }
  if(!rows.length&&!unassigned)box.textContent="Ҳоло корманд ё навбат нест.";
+}
+async function loadReviews(){
+ if(!shop)return;
+ const box=$("reviewsList");box.textContent="Баҳоҳо бор шуда истодаанд…";
+ const {data:reviews,error}=await supabase.from("reviews").select("id,booking_id,rating,comment,status,created_at").eq("barbershop_id",shop.id).order("created_at",{ascending:false}).limit(200);
+ if(error){box.textContent="Баҳоҳо бор нашуданд: "+error.message;return;}
+ box.replaceChildren();
+ if(!reviews||!reviews.length){box.textContent="Ҳоло баҳо ё фикру мулоҳиза нест.";return;}
+ const bookingIds=reviews.map(item=>item.booking_id);
+ const {data:bookings,error:bookingError}=await supabase.from("bookings").select("id,customer_name,service_name_snapshot,starts_at").in("id",bookingIds);
+ if(bookingError){box.textContent="Маълумоти навбатҳо бор нашуд: "+bookingError.message;return;}
+ const bookingMap=new Map((bookings||[]).map(item=>[item.id,item]));
+ reviews.forEach(review=>{
+  const booking=bookingMap.get(review.booking_id)||{};
+  const card=document.createElement("article");card.className="service";
+  const title=document.createElement("strong");title.textContent="★".repeat(review.rating)+"☆".repeat(5-review.rating)+" — "+(booking.customer_name||"Муштарӣ");card.append(title);
+  const meta=document.createElement("p");meta.className="muted";meta.textContent=(booking.service_name_snapshot||"Хизмат")+(booking.starts_at?" · "+new Date(booking.starts_at).toLocaleString("tg-TJ",{dateStyle:"medium",timeStyle:"short"}):"");card.append(meta);
+  if(review.comment){const comment=document.createElement("p");comment.textContent=review.comment;card.append(comment);}
+  const state=document.createElement("p");state.className="muted";state.textContent="Ҳолат: "+({pending:"Интизор",approved:"Нашр шудааст",hidden:"Пинҳон"}[review.status]||review.status);card.append(state);
+  const actions=document.createElement("div");actions.className="row";
+  if(review.status!=="approved"){const approve=document.createElement("button");approve.type="button";approve.className="primary";approve.textContent="Нашр кардан";approve.addEventListener("click",async()=>{approve.disabled=true;const {error}=await supabase.from("reviews").update({status:"approved"}).eq("id",review.id);if(error){status("Баҳо нашр нашуд: "+error.message,true);approve.disabled=false;}else{status("Баҳо нашр шуд.");await loadReviews();}});actions.append(approve);}
+  if(review.status!=="hidden"){const hide=document.createElement("button");hide.type="button";hide.className="danger";hide.textContent="Пинҳон кардан";hide.addEventListener("click",async()=>{hide.disabled=true;const {error}=await supabase.from("reviews").update({status:"hidden"}).eq("id",review.id);if(error){status("Баҳо пинҳон нашуд: "+error.message,true);hide.disabled=false;}else{status("Баҳо пинҳон карда шуд.");await loadReviews();}});actions.append(hide);}
+  if(actions.children.length)card.append(actions);
+  box.append(card);
+ });
 }
 async function loadBookings(){
  if(!shop)return;
