@@ -576,14 +576,14 @@ function render() {
       card.append(description);
     }
     const location = document.createElement("p");
-    const locationText=[shop.city,shop.address].filter(Boolean).join(" · ");
+    const locationText=[shop.city,shop.district,shop.address].filter(Boolean).join(" · ");
     location.textContent = locationText || words.noAddress;
     card.append(location);
     const hasCoordinates=shop.latitude!=null&&shop.longitude!=null;
     if(locationText||hasCoordinates){
       const mapLink=document.createElement("a");
       if(hasCoordinates){const lat=Number(shop.latitude),lng=Number(shop.longitude);mapLink.href="https://www.openstreetmap.org/?mlat="+encodeURIComponent(lat)+"&mlon="+encodeURIComponent(lng)+"#map=18/"+lat+"/"+lng;}
-      else{mapLink.href="https://www.openstreetmap.org/search?query="+encodeURIComponent([shop.address,shop.city,"Tajikistan"].filter(Boolean).join(", "));}
+      else{mapLink.href="https://www.openstreetmap.org/search?query="+encodeURIComponent([shop.address,shop.district,shop.city,"Tajikistan"].filter(Boolean).join(", "));}
       mapLink.target="_blank";mapLink.rel="noopener noreferrer";mapLink.textContent="📍 "+words.mapLabel;
       mapLink.style.display="inline-block";mapLink.style.marginTop="4px";
       card.append(mapLink);
@@ -648,7 +648,7 @@ async function loadShops() {
   render();
   const { data, error } = await supabase
     .from("barbershops")
-    .select("id,name,description,address,city,phone,latitude,longitude")
+    .select("id,name,description,address,city,district,phone,latitude,longitude")
     .eq("is_active", true)
     .order("name", { ascending: true });
   if (error) {
