@@ -717,8 +717,28 @@ $("myLocationBtn").addEventListener("click",async()=>{
   const accuracyText=Number.isFinite(accuracy)?" Дақиқии тахминӣ: ±"+Math.round(accuracy)+" метр.":"";
   $("shopMapMessage").textContent=shop?"Ҷойгиршавӣ ба таври автоматӣ сабт шуд."+accuracyText:"Ҷой муайян шуд. Марказро аввал сабт кун, то координатаҳо низ нигоҳ дошта шаванд."+accuracyText;
   $("myLocationBtn").disabled=false;
- },error=>{
-  $("shopMapMessage").textContent=error.code===1?"Иҷозати ҷойгиршавӣ дода нашуд. Дар танзимоти Chrome иҷозати Location-ро фаъол кун.":"Ҷойгиршавӣ муайян нашуд. GPS ва интернетро санҷ ё ҷойро дастӣ дар харита интихоб кун.";
+ },async error=>{
+  let permissionState="номаълум";
+  try{
+   if(navigator.permissions&&navigator.permissions.query){
+    const permission=await navigator.permissions.query({name:"geolocation"});
+    permissionState=permission.state||"номаълум";
+   }
+  }catch(permissionError){}
+  const errorCode=Number(error&&error.code)||0;
+  const errorMessage=(error&&error.message?String(error.message):"паёми браузер дастрас нест").slice(0,180);
+  const secureState=window.isSecureContext?"HTTPS/муҳити бехатар: ҳа":"HTTPS/муҳити бехатар: не";
+  let reason;
+  if(errorCode===1){
+   reason="Браузер иҷозати GPS-ро рад кард. Иҷозати сайтро дар Chrome аз нав санҷ ё иҷозатҳоро Reset кун.";
+  }else if(errorCode===2){
+   reason="Телефон ҷойро муайян карда натавонист. GPS, Location Accuracy ва дастрасии интернетро санҷ.";
+  }else if(errorCode===3){
+   reason="Муайян кардани ҷой аз вақти интизорӣ зиёд шуд. Ба ҷои кушодтар баромада, боз кӯшиш кун.";
+  }else{
+   reason="Хатои номаълум ҳангоми гирифтани ҷойгиршавӣ.";
+  }
+  $("shopMapMessage").textContent=reason+" Санҷиш: код="+errorCode+"; иҷозати браузер="+permissionState+"; "+secureState+"; паёми браузер: "+errorMessage;
   $("myLocationBtn").disabled=false;
  },{enableHighAccuracy:true,timeout:30000,maximumAge:0});
 });
