@@ -40,7 +40,7 @@ a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14
 <label for="shopName">Номи марказ</label><input id="shopName" required maxlength="120">
 <label for="shopDescription">Тавсиф</label><textarea id="shopDescription" maxlength="500"></textarea>
 <label for="shopCity">Шаҳр</label><input id="shopCity" maxlength="100"><label for="shopDistrict">Ноҳия</label><input id="shopDistrict" maxlength="100" placeholder="Масалан: Мастчоҳ">
-<label for="shopAddress">Суроғаи марказ</label><input id="shopAddress" maxlength="250" placeholder="Кӯча, маҳалла, нишонаи наздик"><div id="shopAddressResults" class="muted" aria-live="polite" style="margin-top:6px"></div><a id="shopMapPreview" class="muted" href="#" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:8px">📍 Пешнамоиши суроға</a><p class="muted">Дар харитаи поён нуқтаи дақиқи марказро бо ангушт интихоб кун. Метавонӣ нишонаи харитаро низ кашида ҷойиваз кунӣ.</p><div id="shopLocationMap" role="application" aria-label="Харитаи интихоби ҷойгиршавии марказ"></div><div class="coordinate-fields"><div><label for="shopLatitude">Арзи ҷуғрофӣ</label><input id="shopLatitude" readonly placeholder="Интихоб нашудааст"></div><div><label for="shopLongitude">Тӯли ҷуғрофӣ</label><input id="shopLongitude" readonly placeholder="Интихоб нашудааст"></div></div><p class="muted">Нуқтаи интихобшуда баъд аз пахши «Сабт кардани маълумот» нигоҳ дошта мешавад.</p>
+<label for="shopAddress">Суроғаи марказ</label><input id="shopAddress" maxlength="250" placeholder="Масалан: назди бозор, кӯчаи марказӣ"><button id="searchShopAddressBtn" type="button" class="primary" style="margin-top:8px;width:100%">📍 Ҷустуҷӯи суроға</button><div id="shopAddressResults" class="muted" aria-live="polite" style="margin-top:6px"></div><a id="shopMapPreview" class="muted" href="#" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:8px">📍 Пешнамоиши суроға</a><p class="muted">Суроғаро навис ва «Ҷустуҷӯи суроға»-ро пахш кун. Ҷойи мувофиқ худкор интихоб мешавад.</p><details id="mapAdvanced" style="margin-top:10px"><summary style="cursor:pointer;color:var(--p);font-weight:650">Танзими дақиқи харита (ихтиёрӣ)</summary><p class="muted">Агар ҷой нодуруст бошад, харитаро кушо ва нуқтаро бо ангушт ислоҳ кун.</p><div id="shopLocationMap" role="application" aria-label="Харитаи интихоби ҷойгиршавии марказ"></div><div class="coordinate-fields"><div><label for="shopLatitude">Арзи ҷуғрофӣ</label><input id="shopLatitude" readonly placeholder="Интихоб нашудааст"></div><div><label for="shopLongitude">Тӯли ҷуғрофӣ</label><input id="shopLongitude" readonly placeholder="Интихоб нашудааст"></div></div></details><p class="muted">Ҷой баъд аз пахши «Сабт кардани маълумот» нигоҳ дошта мешавад.</p>
 <label for="shopPhone">Телефони кории марказ (ихтиёрӣ)</label><input id="shopPhone" type="tel" maxlength="40">
 <button class="primary" type="submit" style="margin-top:14px">Сабт кардани маълумот</button>
 </form></div>
@@ -84,6 +84,10 @@ initializeShopMap();
 function updateShopMapPreview(){const lat=$("shopLatitude").value,lng=$("shopLongitude").value,link=$("shopMapPreview");if(lat&&lng){link.href="https://www.openstreetmap.org/?mlat="+encodeURIComponent(lat)+"&mlon="+encodeURIComponent(lng)+"#map=18/"+lat+"/"+lng;link.textContent="📍 Дидани нуқтаи интихобшуда дар харита";}else{const q=[$("shopAddress").value.trim(),$("shopDistrict").value.trim(),$("shopCity").value.trim(),"Tajikistan"].filter(Boolean).join(", ");link.href="https://www.openstreetmap.org/search?query="+encodeURIComponent(q);link.textContent="📍 Пешнамоиши суроға";}link.style.opacity=(lat&&lng)||$("shopAddress").value.trim()||$("shopCity").value.trim()?"1":".5";}
 $("shopAddress").addEventListener("input",updateShopMapPreview);
 $("shopAddress").addEventListener("change",searchShopAddress);
+$("searchShopAddressBtn").addEventListener("click",searchShopAddress);
+$("shopCity").addEventListener("change",()=>{if($("shopAddress").value.trim())searchShopAddress();});
+$("shopDistrict").addEventListener("change",()=>{if($("shopAddress").value.trim())searchShopAddress();});
+$("mapAdvanced").addEventListener("toggle",()=>{if($("mapAdvanced").open)requestAnimationFrame(()=>shopMap.invalidateSize());});
 $("shopCity").addEventListener("input",updateShopMapPreview);
 $("shopDistrict").addEventListener("input",updateShopMapPreview);
 async function searchShopAddress(){
@@ -98,16 +102,20 @@ async function searchShopAddress(){
   const places=await response.json();
   results.replaceChildren();
   if(!places.length){results.textContent="Суроға ёфт нашуд. Номи маҳалла ё нишонаи наздикро дақиқтар навис.";return;}
-  const heading=document.createElement("div");heading.textContent="Ҷойро интихоб кун:";results.append(heading);
-  places.forEach(place=>{
-   const button=document.createElement("button");button.type="button";button.textContent=place.display_name;
-   button.addEventListener("click",()=>{
-    setShopCoordinates(Number(place.lat),Number(place.lon),true);
-    results.textContent="Ҷой интихоб шуд. Агар лозим бошад, нишонаи харитаро ба ҷои дақиқ каш.";
-    updateShopMapPreview();
+  const best=places[0];
+  setShopCoordinates(Number(best.lat),Number(best.lon),true);
+  const message=document.createElement("div");
+  message.textContent="Ҷой ба таври худкор ёфт шуд: "+best.display_name;
+  results.append(message);
+  if(places.length>1){
+   const heading=document.createElement("div");heading.textContent="Агар ин ҷой дуруст набошад, натиҷаи дигарро интихоб кун:";heading.style.marginTop="8px";results.append(heading);
+   places.slice(1).forEach(place=>{
+    const button=document.createElement("button");button.type="button";button.textContent=place.display_name;
+    button.addEventListener("click",()=>{setShopCoordinates(Number(place.lat),Number(place.lon),true);message.textContent="Ҷой интихоб шуд: "+place.display_name;updateShopMapPreview();});
+    results.append(button);
    });
-   results.append(button);
-  });
+  }
+  updateShopMapPreview();
  }catch(error){results.textContent="Ҷустуҷӯ нашуд. Интернетро санҷ ва боз кӯшиш кун.";}
 }
 function status(message,isError=false){$("status").textContent=message;$("status").style.background=isError?"#fff0f1":"#f1edfa";$("status").style.color=isError?"#9b1c31":"#716b7e";}
