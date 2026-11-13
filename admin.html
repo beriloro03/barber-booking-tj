@@ -57,6 +57,7 @@ a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14
 <button class="primary" type="submit" style="margin-top:14px">Илова кардани корманд</button></form><div id="staffList"></div></div>
 <div id="hoursCard" class="card hidden"><h2>Рӯзҳо ва соатҳои корӣ</h2><p class="muted">Марказ ҳамаи 7 рӯзи ҳафта кор мекунад. Соҳибкор метавонад барои ҳар рӯз соати оғоз ва анҷоми корро мустақилона интихоб кунад. Рӯзи истироҳат пешбинӣ нашудааст.</p><form id="hoursForm"><div id="hoursList"></div><button class="primary" type="submit" style="margin-top:14px">Сабт кардани соатҳои корӣ</button></form></div>
 <div id="bookingStatsCard" class="card hidden"><h2>Омори навбатҳо</h2><p class="muted">Омори навбатҳо барои имрӯз.</p><div id="bookingStats" class="stats-grid"><div class="service">Ҳисоб шуда истодааст…</div></div></div>
+<div id="staffBookingStatsCard" class="card hidden"><h2>Навбатҳо аз рӯи корманд</h2><p class="muted">Шумора аз рӯи 100 навбати охирин ҳисоб мешавад.</p><div id="staffBookingStats" class="stats-grid"></div></div>
 <div id="revenueStatsCard" class="card hidden"><h2>Ҳисоботи даромад</h2><p class="muted">Танҳо навбатҳои «Анҷомёфта» ҳисоб мешаванд. Маблағ аз рӯйи нархи сабтшудаи ҳар навбат ҷамъ карда мешавад.</p><div id="revenueStats" class="stats-grid"><div class="service">Ҳисоб шуда истодааст…</div></div></div>
 <div id="bookingCard" class="card hidden"><h2>Дархостҳои навбат</h2><p class="muted">Дархостҳои «Интизор» ва «Тасдиқшуда» вақтро банд мекунанд. Агар марказ дархостро рад кунад, вақт боз озод мешавад.</p><div class="row"><div><label for="bookingSearch">Ҷустуҷӯ</label><input id="bookingSearch" type="search" placeholder="Ном, телефон ё хизмат"></div><div><label for="bookingPeriod">Давра</label><select id="bookingPeriod"><option value="today">Имрӯз</option><option value="week">7 рӯзи охир</option><option value="all">Ҳама</option></select></div></div><div class="row"><div><label for="bookingStatusFilter">Ҳолат</label><select id="bookingStatusFilter"><option value="all">Ҳамаи ҳолатҳо</option><option value="pending">Интизор</option><option value="confirmed">Тасдиқшуда</option><option value="completed">Анҷомёфта</option><option value="cancelled">Радшуда</option></select></div><div><label for="bookingStaffFilter">Корманд</label><select id="bookingStaffFilter"><option value="all">Ҳамаи кормандон</option></select></div></div><div class="row" style="margin:14px 0"><button id="exportBookingsBtn" type="button" class="primary">Зеркашии ҳисобот (CSV)</button></div><div id="bookingList" class="muted">Дархостҳо бор шуда истодаанд…</div></div>
 </section>
@@ -227,6 +228,34 @@ function applyBookingFilters(){
  });
 }
 ["bookingSearch","bookingPeriod","bookingStatusFilter","bookingStaffFilter"].forEach(id=>$(id).addEventListener(id==="bookingSearch"?"input":"change",applyBookingFilters));
+function renderStaffBookingStats(bookings,staffRows){
+ const card=$("staffBookingStatsCard"),box=$("staffBookingStats");
+ card.classList.remove("hidden");box.replaceChildren();
+ const counts=new Map();
+ (staffRows||[]).forEach(person=>counts.set(person.id,{name:person.full_name,total:0,pending:0,confirmed:0,completed:0,cancelled:0}));
+ let unassigned=0;
+ (bookings||[]).forEach(booking=>{
+  if(!booking.staff_id){unassigned++;return;}
+  if(!counts.has(booking.staff_id))counts.set(booking.staff_id,{name:"Корманди ғайрифаъол",total:0,pending:0,confirmed:0,completed:0,cancelled:0});
+  const item=counts.get(booking.staff_id);item.total++;
+  if(Object.prototype.hasOwnProperty.call(item,booking.status))item[booking.status]++;
+ });
+ const rows=[...counts.values()].sort((a,b)=>a.name.localeCompare(b.name,"tg"));
+ rows.forEach(item=>{
+  const boxItem=document.createElement("div");boxItem.className="service";
+  const name=document.createElement("strong");name.textContent=item.name;
+  const total=document.createElement("span");total.className="stats-number";total.textContent=String(item.total);
+  const detail=document.createElement("p");detail.className="muted";detail.textContent="Интизор: "+item.pending+" · Тасдиқшуда: "+item.confirmed+" · Анҷомёфта: "+item.completed+" · Радшуда: "+item.cancelled;
+  boxItem.append(name,total,detail);box.append(boxItem);
+ });
+ if(unassigned){
+  const item=document.createElement("div");item.className="service";
+  const name=document.createElement("strong");name.textContent="Бе корманди интихобшуда";
+  const total=document.createElement("span");total.className="stats-number";total.textContent=String(unassigned);
+  item.append(name,total);box.append(item);
+ }
+ if(!rows.length&&!unassigned)box.textContent="Ҳоло корманд ё навбат нест.";
+}
 async function loadBookings(){
  if(!shop)return;
  await loadBookingStats();
@@ -236,9 +265,10 @@ async function loadBookings(){
  if(error){box.textContent="Дархостҳо бор нашуданд: "+error.message;return;}
  box.replaceChildren();
  if(!data||!data.length){box.textContent="Ҳоло дархости навбат нест.";return;}
- const assignedIds=[...new Set(data.map(b=>b.staff_id).filter(Boolean))];
- let staffNames=new Map();
- if(assignedIds.length){const {data:staffRows,error:staffError}=await supabase.from("staff").select("id,full_name").in("id",assignedIds);if(!staffError)staffNames=new Map((staffRows||[]).map(person=>[person.id,person.full_name]));}
+ const {data:staffRows,error:staffError}=await supabase.from("staff").select("id,full_name,is_active").eq("barbershop_id",shop.id);
+ if(staffError){box.textContent="Рӯйхати кормандон бор нашуд: "+staffError.message;return;}
+ const staffNames=new Map((staffRows||[]).map(person=>[person.id,person.full_name]));
+ renderStaffBookingStats(data,staffRows||[]);
  const staffFilter=$("bookingStaffFilter"),selectedStaff=staffFilter.value;
  staffFilter.replaceChildren();const allStaffOption=document.createElement("option");allStaffOption.value="all";allStaffOption.textContent="Ҳамаи кормандон";staffFilter.append(allStaffOption);
  [...staffNames.entries()].sort((a,b)=>a[1].localeCompare(b[1],"tg")).forEach(([id,name])=>{const option=document.createElement("option");option.value=id;option.textContent=name;staffFilter.append(option);});
