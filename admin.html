@@ -60,7 +60,7 @@ a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14
 <div id="staffBookingStatsCard" class="card hidden"><h2>Навбатҳо аз рӯи корманд</h2><p class="muted">Шумора аз рӯи 100 навбати охирин ҳисоб мешавад.</p><div id="staffBookingStats" class="stats-grid"></div></div>
 <div id="revenueStatsCard" class="card hidden"><h2>Ҳисоботи даромад</h2><p class="muted">Танҳо навбатҳои «Анҷомёфта» ҳисоб мешаванд. Маблағ аз рӯйи нархи сабтшудаи ҳар навбат ҷамъ карда мешавад.</p><div id="revenueStats" class="stats-grid"><div class="service">Ҳисоб шуда истодааст…</div></div></div>
 <div id="monthlyStaffReportCard" class="card hidden"><h2>Ҳисоботи моҳона аз рӯи корманд</h2><p class="muted">Ҳамаи навбатҳои моҳи интихобшуда ҳисоб мешаванд. Даромад танҳо аз навбатҳои «Анҷомёфта» ҷамъ карда мешавад.</p><div class="row"><div><label for="reportMonth">Моҳ</label><input id="reportMonth" type="month"></div><div style="align-self:end"><button id="loadMonthlyReportBtn" type="button" class="primary">Нишон додани ҳисобот</button><button id="exportMonthlyStaffReportBtn" type="button">Зеркашии ҳисоботи моҳона (CSV)</button></div></div><div id="monthlyStaffReport" class="stats-grid" style="margin-top:12px"></div></div>
-<div id="bookingCalendarCard" class="card hidden"><h2>Тақвими навбатҳо</h2><p class="muted">Ҳамаи навбатҳои моҳи интихобшуда аз рӯи рӯз нишон дода мешаванд.</p><div class="row"><div><label for="calendarMonth">Моҳ</label><input id="calendarMonth" type="month"></div><div style="align-self:end"><button id="loadCalendarBtn" type="button" class="primary">Нишон додани тақвим</button></div></div><div id="bookingCalendar" style="margin-top:14px"></div></div>
+<div id="bookingCalendarCard" class="card hidden"><h2>Тақвими навбатҳо</h2><p class="muted">Ҳамаи навбатҳои моҳи интихобшуда аз рӯи рӯз нишон дода мешаванд.</p><div class="row"><div><label for="calendarMonth">Моҳ</label><input id="calendarMonth" type="month"></div><div style="align-self:end"><button id="loadCalendarBtn" type="button" class="primary">Нишон додани тақвим</button></div></div><div class="row"><div><label for="calendarStaffFilter">Корманд</label><select id="calendarStaffFilter"><option value="all">Ҳамаи кормандон</option></select></div><div><label for="calendarStatusFilter">Ҳолат</label><select id="calendarStatusFilter"><option value="all">Ҳамаи ҳолатҳо</option><option value="pending">Интизор</option><option value="confirmed">Тасдиқшуда</option><option value="completed">Анҷомёфта</option><option value="cancelled">Радшуда</option></select></div></div><div id="bookingCalendar" style="margin-top:14px"></div></div>
 <div id="bookingCard" class="card hidden"><h2>Дархостҳои навбат</h2><p class="muted">Дархостҳои «Интизор» ва «Тасдиқшуда» вақтро банд мекунанд. Агар марказ дархостро рад кунад, вақт боз озод мешавад.</p><div class="row"><div><label for="bookingSearch">Ҷустуҷӯ</label><input id="bookingSearch" type="search" placeholder="Ном, телефон ё хизмат"></div><div><label for="bookingPeriod">Давра</label><select id="bookingPeriod"><option value="today">Имрӯз</option><option value="week">7 рӯзи охир</option><option value="all">Ҳама</option></select></div></div><div class="row"><div><label for="bookingStatusFilter">Ҳолат</label><select id="bookingStatusFilter"><option value="all">Ҳамаи ҳолатҳо</option><option value="pending">Интизор</option><option value="confirmed">Тасдиқшуда</option><option value="completed">Анҷомёфта</option><option value="cancelled">Радшуда</option></select></div><div><label for="bookingStaffFilter">Корманд</label><select id="bookingStaffFilter"><option value="all">Ҳамаи кормандон</option></select></div></div><div class="row" style="margin:14px 0"><button id="exportBookingsBtn" type="button" class="primary">Зеркашии ҳисобот (CSV)</button></div><div id="bookingList" class="muted">Дархостҳо бор шуда истодаанд…</div></div>
 </section>
 </main>
@@ -182,17 +182,7 @@ async function loadRevenueStats(){
  const sum=items=>items.reduce((total,item)=>total+(Number(item.price_snapshot)||0),0);
  const format=value=>value.toLocaleString("tg-TJ",{minimumFractionDigits:0,maximumFractionDigits:2})+" сомонӣ";
  const items=[["Даромади имрӯз",sum(todayRows),todayRows.length],["Даромади 7 рӯзи охир",sum(rows),rows.length]];
- items.forEach(([label,amount,count])=>{
-  const item=document.createElement("div");item.className="service";
-  const name=document.createElement("span");name.className="muted";name.textContent=label;
-  const number=document.createElement("strong");number.className="stats-number";number.textContent=format(amount);
-  const detail=document.createElement("p");detail.className="muted";detail.textContent=count+" навбати анҷомёфта";
-  item.append(name,number,detail);box.append(item);
- });
-}
-
-
-async function loadBookingCalendar(){
+ items.forasync function loadBookingCalendar(){
  if(!shop)return;
  const card=$("bookingCalendarCard"),box=$("bookingCalendar"),input=$("calendarMonth");
  card.classList.remove("hidden");box.replaceChildren();
@@ -201,7 +191,7 @@ async function loadBookingCalendar(){
   const part=type=>parts.find(x=>x.type===type)?.value;
   input.value=part("year")+"-"+part("month");
  }
- const match=input.value.match(/^(\\d{4})-(\\d{2})$/);
+ const match=input.value.match(/^(\d{4})-(\d{2})$/);
  if(!match){box.textContent="Моҳро дуруст интихоб кун.";return;}
  const year=Number(match[1]),month=Number(match[2]);
  if(month<1||month>12){box.textContent="Моҳ нодуруст аст.";return;}
@@ -210,6 +200,11 @@ async function loadBookingCalendar(){
  const staffResult=await supabase.from("staff").select("id,full_name").eq("barbershop_id",shop.id);
  if(staffResult.error){box.textContent="Рӯйхати кормандон бор нашуд: "+staffResult.error.message;return;}
  const staffNames=new Map((staffResult.data||[]).map(person=>[person.id,person.full_name]));
+ const staffFilter=$("calendarStaffFilter"),previousStaff=staffFilter.value;
+ staffFilter.replaceChildren();
+ const allStaff=document.createElement("option");allStaff.value="all";allStaff.textContent="Ҳамаи кормандон";staffFilter.append(allStaff);
+ [...staffNames.entries()].sort((a,b)=>a[1].localeCompare(b[1],"tg")).forEach(([id,name])=>{const option=document.createElement("option");option.value=id;option.textContent=name;staffFilter.append(option);});
+ staffFilter.value=[...staffFilter.options].some(option=>option.value===previousStaff)?previousStaff:"all";
  const bookings=[];let offset=0;
  while(true){
   const {data,error}=await supabase.from("bookings").select("id,starts_at,service_name_snapshot,customer_name,status,staff_id").eq("barbershop_id",shop.id).gte("starts_at",start.toISOString()).lt("starts_at",end.toISOString()).order("starts_at",{ascending:true}).range(offset,offset+999);
@@ -218,10 +213,12 @@ async function loadBookingCalendar(){
   if(rows.length<1000)break;
   offset+=rows.length;
  }
+ const selectedStaff=staffFilter.value,selectedStatus=$("calendarStatusFilter").value;
+ const visibleBookings=bookings.filter(item=>(selectedStaff==="all"||(item.staff_id||"")===selectedStaff)&&(selectedStatus==="all"||item.status===selectedStatus));
  const daysInMonth=new Date(Date.UTC(year,month,0)).getUTCDate();
  const firstWeekday=(new Date(Date.UTC(year,month-1,1)).getUTCDay()+6)%7;
  const groups=new Map();
- bookings.forEach(item=>{
+ visibleBookings.forEach(item=>{
   const parts=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Dushanbe",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date(item.starts_at));
   const part=type=>parts.find(x=>x.type===type)?.value;
   const day=Number(part("day"));
@@ -248,10 +245,9 @@ async function loadBookingCalendar(){
   grid.append(cell);
  }
  box.append(grid);
- const summary=document.createElement("p");summary.className="muted";summary.textContent="Ҳамагӣ: "+bookings.length+" навбат. Барои моҳи интихобшуда ҳамаи саҳифаҳои натиҷаҳо хонда шуданд.";
+ const summary=document.createElement("p");summary.className="muted";summary.textContent="Намоиш дода шуд: "+visibleBookings.length+" аз "+bookings.length+" навбат. Барои моҳи интихобшуда ҳамаи саҳифаҳои натиҷаҳо хонда шуданд.";
  box.append(summary);
 }
-
 async function loadMonthlyStaffReport(){
  if(!shop)return;
  const card=$("monthlyStaffReportCard"),box=$("monthlyStaffReport"),monthInput=$("reportMonth");
