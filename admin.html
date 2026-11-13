@@ -87,7 +87,7 @@ $("shopAddress").addEventListener("change",searchShopAddress);
 $("searchShopAddressBtn").addEventListener("click",searchShopAddress);
 $("shopCity").addEventListener("change",()=>{if($("shopAddress").value.trim())searchShopAddress();});
 $("shopDistrict").addEventListener("change",()=>{if($("shopAddress").value.trim())searchShopAddress();});
-$("mapAdvanced").addEventListener("toggle",()=>{if($("mapAdvanced").open&&shopMap)requestAnimationFrame(()=>shopMap.invalidateSize());});
+$("mapAdvanced").addEventListener("toggle",()=>{if($("mapAdvanced").open&&shopMap)requestAnimationFrame(()=>{if(shopMap)shopMap.invalidateSize();});});
 $("shopCity").addEventListener("input",updateShopMapPreview);
 $("shopDistrict").addEventListener("input",updateShopMapPreview);
 async function searchShopAddress(){
@@ -125,9 +125,9 @@ async function loadShop(){
  if(userError||!userData.user){showDashboard(false);status("Лутфан ворид шав.",true);return;}
  const {data,error}=await supabase.from("barbershops").select("id,name,description,address,city,district,phone,latitude,longitude").eq("owner_id",userData.user.id).limit(1).maybeSingle();
  if(error){status("Марказ бор карда нашуд: "+error.message,true);return;}
- if(!data){shop=null;$("shopForm").reset();$("serviceCard").classList.add("hidden");$("staffCard").classList.add("hidden");$("bookingCard").classList.add("hidden");$("bookingStatsCard").classList.add("hidden");$("revenueStatsCard").classList.add("hidden");$("monthlyStaffReportCard").classList.add("hidden");$("hoursCard").classList.add("hidden");showDashboard(true);requestAnimationFrame(()=>shopMap.invalidateSize());status("Ҳисоби соҳибкор омода аст. Маълумоти маркази худро пур карда, сабт кун. Марказ то санҷиш дар рӯйхати умумӣ намоён намешавад.");return;}
+ if(!data){shop=null;$("shopForm").reset();$("serviceCard").classList.add("hidden");$("staffCard").classList.add("hidden");$("bookingCard").classList.add("hidden");$("bookingStatsCard").classList.add("hidden");$("revenueStatsCard").classList.add("hidden");$("monthlyStaffReportCard").classList.add("hidden");$("hoursCard").classList.add("hidden");showDashboard(true);requestAnimationFrame(()=>{if(shopMap)shopMap.invalidateSize();});status("Ҳисоби соҳибкор омода аст. Маълумоти маркази худро пур карда, сабт кун. Марказ то санҷиш дар рӯйхати умумӣ намоён намешавад.");return;}
  shop=data;$("shopName").value=data.name||"";$("shopDescription").value=data.description||"";$("shopCity").value=data.city||"";$("shopDistrict").value=data.district||"";$("shopAddress").value=data.address||"";$("shopPhone").value=data.phone||"";if(data.latitude!=null&&data.longitude!=null)setShopCoordinates(data.latitude,data.longitude,true);else clearShopCoordinates();updateShopMapPreview();
- showDashboard(true);requestAnimationFrame(()=>shopMap.invalidateSize());$("serviceCard").classList.remove("hidden");$("bookingCard").classList.remove("hidden");$("hoursCard").classList.remove("hidden");$("reviewsCard").classList.remove("hidden");status("Марказ бор шуд. Тағйиротро танҳо соҳиби ин марказ сабт карда метавонад.");await loadServices();$("staffCard").classList.remove("hidden");await loadStaff();await loadBusinessHours();await loadBookings();await loadReviews();
+ showDashboard(true);requestAnimationFrame(()=>{if(shopMap)shopMap.invalidateSize();});$("serviceCard").classList.remove("hidden");$("bookingCard").classList.remove("hidden");$("hoursCard").classList.remove("hidden");$("reviewsCard").classList.remove("hidden");status("Марказ бор шуд. Тағйиротро танҳо соҳиби ин марказ сабт карда метавонад.");await loadServices();$("staffCard").classList.remove("hidden");await loadStaff();await loadBusinessHours();await loadBookings();await loadReviews();
 }
 async function loadServices(){
  if(!shop)return;
