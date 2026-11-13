@@ -182,7 +182,17 @@ async function loadRevenueStats(){
  const sum=items=>items.reduce((total,item)=>total+(Number(item.price_snapshot)||0),0);
  const format=value=>value.toLocaleString("tg-TJ",{minimumFractionDigits:0,maximumFractionDigits:2})+" сомонӣ";
  const items=[["Даромади имрӯз",sum(todayRows),todayRows.length],["Даромади 7 рӯзи охир",sum(rows),rows.length]];
- items.forasync function loadBookingCalendar(){
+ items.forEach(([label,amount,count])=>{
+  const item=document.createElement("div");item.className="service";
+  const name=document.createElement("span");name.className="muted";name.textContent=label;
+  const number=document.createElement("strong");number.className="stats-number";number.textContent=format(amount);
+  const detail=document.createElement("p");detail.className="muted";detail.textContent=count+" навбати анҷомёфта";
+  item.append(name,number,detail);box.append(item);
+ });
+}
+
+
+async function loadBookingCalendar(){
  if(!shop)return;
  const card=$("bookingCalendarCard"),box=$("bookingCalendar"),input=$("calendarMonth");
  card.classList.remove("hidden");box.replaceChildren();
@@ -248,6 +258,7 @@ async function loadRevenueStats(){
  const summary=document.createElement("p");summary.className="muted";summary.textContent="Намоиш дода шуд: "+visibleBookings.length+" аз "+bookings.length+" навбат. Барои моҳи интихобшуда ҳамаи саҳифаҳои натиҷаҳо хонда шуданд.";
  box.append(summary);
 }
+
 async function loadMonthlyStaffReport(){
  if(!shop)return;
  const card=$("monthlyStaffReportCard"),box=$("monthlyStaffReport"),monthInput=$("reportMonth");
