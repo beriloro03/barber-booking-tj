@@ -14,7 +14,7 @@ textarea{min-height:76px;resize:vertical}button{font:inherit;border:1px solid va
 .primary{background:var(--p);border-color:var(--p);color:white}.danger{color:#a21d35;border-color:#efc7d0}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.row>*{flex:1}.muted{color:var(--muted);font-size:14px;line-height:1.5}
 #status{padding:12px;border-radius:10px;background:#f1edfa;color:var(--muted);margin:12px 0}.service{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}.hours-row{display:grid;grid-template-columns:1fr 100px 100px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}.hours-row label{margin:0}.hours-row input{min-width:0;padding:8px}@media(max-width:520px){.hours-row{grid-template-columns:1fr 1fr 1fr}.hours-row label{grid-column:1/-1}}.service-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.service-top strong{overflow-wrap:anywhere}.stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.stats-grid .service{margin:0}.stats-number{display:block;font-size:28px;font-weight:750;color:var(--p);margin-top:4px}@media(min-width:600px){.stats-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.calendar-day{border:1px solid var(--line);border-radius:9px;padding:6px;min-height:76px;min-width:0}.calendar-day strong{display:block;font-size:13px}.calendar-day .muted{font-size:11px;overflow-wrap:anywhere}.calendar-day-events{margin-top:5px}.calendar-event{border-top:1px solid var(--line);padding:5px 0;font-size:12px;overflow-wrap:anywhere}.calendar-weekday{text-align:center;font-size:11px;font-weight:700;color:var(--muted);padding:4px 0}@media(max-width:520px){.calendar-grid{gap:3px}.calendar-day{padding:4px;min-height:65px}.calendar-day .muted{font-size:10px}.calendar-event{font-size:10px}}.hidden{display:none!important}
 a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14px}.row>*{min-width:100%}}
-</style></head>
+.staff-hours-row{display:grid;grid-template-columns:minmax(82px,1fr) minmax(90px,1fr) minmax(90px,1fr) auto;gap:7px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}.staff-hours-row input{min-width:0;padding:7px}.staff-closed-label{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;margin:0;white-space:nowrap}.staff-closed-label input{margin:0}@media(max-width:520px){.staff-hours-row{grid-template-columns:1fr 1fr 1fr}.staff-hours-row strong{grid-column:1/-1}.staff-closed-label{grid-column:1/-1}}</style></head>
 <body>
 <header><div><a href="./">← Сомонаи асосӣ</a><h1>Панели соҳибкор</h1><div class="muted">Идоракунии марказ ва хизматрасониҳо</div></div></header>
 <main>
@@ -99,6 +99,60 @@ async function loadServices(){
   actions.append(edit,del);card.append(actions);box.append(card);
  });
 }
+async function addStaffScheduleEditor(person, card){
+ const toggle=document.createElement("button");toggle.type="button";toggle.textContent="Ҷадвали корӣ";
+ const editor=document.createElement("div");editor.className="hidden";editor.style.marginTop="12px";
+ const note=document.createElement("p");note.className="muted";note.textContent="Соатҳои корӣ ва рӯзҳои истироҳати ин кормандро интихоб кун.";
+ const rowsBox=document.createElement("div");
+ const save=document.createElement("button");save.type="button";save.className="primary";save.textContent="Сабт кардани ҷадвал";save.style.marginTop="12px";
+ editor.append(note,rowsBox,save);card.append(toggle,editor);
+ let loaded=false;
+ toggle.addEventListener("click",async()=>{
+  const opening=editor.classList.contains("hidden");
+  editor.classList.toggle("hidden",!opening);
+  if(!opening||loaded)return;
+  toggle.disabled=true;
+  const {data,error}=await supabase.rpc("get_staff_business_hours",{p_staff_id:person.id});
+  toggle.disabled=false;
+  if(error){status("Ҷадвали корманд бор нашуд: "+error.message,true);editor.classList.add("hidden");return;}
+  const days=[{id:1,name:"Душанбе"},{id:2,name:"Сешанбе"},{id:3,name:"Чоршанбе"},{id:4,name:"Панҷшанбе"},{id:5,name:"Ҷумъа"},{id:6,name:"Шанбе"},{id:0,name:"Якшанбе"}];
+  const map=Object.fromEntries((data||[]).map(row=>[Number(row.weekday),row]));
+  rowsBox.replaceChildren();
+  days.forEach(day=>{
+   const saved=map[day.id]||{opens_at:"08:00:00",closes_at:"21:00:00",is_closed:false};
+   const row=document.createElement("div");row.className="staff-hours-row";row.dataset.weekday=String(day.id);
+   const name=document.createElement("strong");name.textContent=day.name;
+   const opens=document.createElement("input");opens.type="time";opens.className="staff-hours-open";opens.value=saved.opens_at?String(saved.opens_at).slice(0,5):"08:00";opens.setAttribute("aria-label","Оғози кор "+day.name);
+   const closes=document.createElement("input");closes.type="time";closes.className="staff-hours-close";closes.value=saved.closes_at?String(saved.closes_at).slice(0,5):"21:00";closes.setAttribute("aria-label","Анҷоми кор "+day.name);
+   const label=document.createElement("label");label.className="staff-closed-label";
+   const closed=document.createElement("input");closed.type="checkbox";closed.className="staff-hours-closed";closed.checked=!!saved.is_closed;closed.style.width="auto";
+   label.append(closed,document.createTextNode("Истироҳат"));
+   const sync=()=>{opens.disabled=closed.checked;closes.disabled=closed.checked;};
+   closed.addEventListener("change",sync);sync();
+   row.append(name,opens,closes,label);rowsBox.append(row);
+  });
+  loaded=true;
+ });
+ save.addEventListener("click",async()=>{
+  const rows=[...rowsBox.querySelectorAll(".staff-hours-row")];
+  const schedule=rows.map(row=>({
+   weekday:Number(row.dataset.weekday),
+   opens_at:row.querySelector(".staff-hours-closed").checked?null:row.querySelector(".staff-hours-open").value,
+   closes_at:row.querySelector(".staff-hours-closed").checked?null:row.querySelector(".staff-hours-close").value,
+   is_closed:row.querySelector(".staff-hours-closed").checked
+  }));
+  if(schedule.some(day=>!day.is_closed&&(!day.opens_at||!day.closes_at||day.closes_at<=day.opens_at))){
+   status("Барои рӯзи корӣ вақти анҷом бояд аз вақти оғоз дертар бошад.",true);return;
+  }
+  save.disabled=true;
+  const {error}=await supabase.rpc("save_staff_business_hours",{p_staff_id:person.id,p_schedule:schedule});
+  save.disabled=false;
+  if(error){status("Ҷадвали корманд сабт нашуд: "+error.message,true);return;}
+  status("Ҷадвали кори "+person.full_name+" сабт шуд.");
+  loaded=false;toggle.click();
+ });
+}
+
 async function loadStaff(){
  if(!shop)return;
  const box=$("staffList"),options=$("staffServiceOptions");box.replaceChildren();options.replaceChildren();
@@ -118,6 +172,7 @@ async function loadStaff(){
   if(linkError){status("Хизматҳои корманд бор нашуданд: "+linkError.message,true);return;}
   const names=(links||[]).map(link=>services.find(service=>service.id===link.service_id)?.name).filter(Boolean);
   const serviceText=document.createElement("p");serviceText.className="muted";serviceText.textContent="Хизматҳо: "+(names.join(", ")||"Муайян нашудааст");card.append(serviceText);
+  await addStaffScheduleEditor(person,card);
   const remove=document.createElement("button");remove.type="button";remove.className="danger";remove.textContent="Ғайрифаъол кардан";remove.addEventListener("click",async()=>{if(!confirm("Ин корманд аз рӯйхати фаъол пинҳон карда шавад?"))return;remove.disabled=true;const {error:updateError}=await supabase.from("staff").update({is_active:false}).eq("id",person.id).eq("barbershop_id",shop.id);if(updateError){status("Корманд ғайрифаъол нашуд: "+updateError.message,true);remove.disabled=false;}else{status("Корманд ғайрифаъол карда шуд.");await loadStaff();}});
   card.append(remove);box.append(card);
  }
