@@ -294,6 +294,22 @@
       .booking-panel input,.booking-panel select,.booking-panel textarea{font-size:19px}
     }
 
+
+    /* Customer map: responsive modal, lazy-loaded so the directory stays fast. */
+    .customer-map-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(10,22,32,.68);display:grid;place-items:center;padding:14px}
+    .customer-map-dialog{width:min(920px,100%);height:min(760px,94dvh);background:#fff;border-radius:22px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.28)}
+    .customer-map-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 18px;border-bottom:1px solid #dce5e8}
+    .customer-map-head h3{margin:0;font-size:20px;color:#172b35}.customer-map-head p{margin:5px 0 0;color:#526b62;font-size:14px}
+    .customer-map-close{font-size:24px;line-height:1;min-width:44px;min-height:44px}
+    .customer-map-canvas{flex:1;min-height:260px;background:#eaf1ef}
+    .customer-map-actions{padding:13px 16px;display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid #dce5e8}
+    .customer-map-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:10px 16px;border-radius:12px;background:#176b52;color:white;text-decoration:none;font-weight:700}
+    .customer-map-actions button{min-height:46px}
+    .customer-map-note{padding:0 16px 12px;margin:0;color:#526b62;font-size:13px}
+    .customer-map-trigger{display:inline-flex;align-items:center;gap:7px;margin-top:7px;padding:10px 14px;border-radius:12px;background:#176b52;color:#fff!important;font-weight:750}
+    @media(max-width:560px){.customer-map-backdrop{padding:0}.customer-map-dialog{width:100%;height:100dvh;height:100%;max-height:100dvh;border-radius:0}.customer-map-head{padding:13px 14px}.customer-map-head h3{font-size:18px}.customer-map-canvas{min-height:0}.customer-map-actions{padding:12px}.customer-map-actions>*{flex:1}}
+    @media(prefers-reduced-motion:no-preference){.customer-map-dialog{animation:customerMapIn .18s ease-out}@keyframes customerMapIn{from{transform:translateY(12px);opacity:.7}to{transform:none;opacity:1}}}
+
   </style>
 </head>
 <body>
@@ -552,6 +568,60 @@ async function loadMyBookings() {
 }
 document.getElementById("refreshMyBookings")?.addEventListener("click",loadMyBookings);
 
+
+let customerLeafletPromise=null;
+function loadCustomerLeaflet(){
+  if(window.L)return Promise.resolve(window.L);
+  if(customerLeafletPromise)return customerLeafletPromise;
+  customerLeafletPromise=new Promise((resolve,reject)=>{
+    if(!document.getElementById("customer-leaflet-css")){
+      const css=document.createElement("link");css.id="customer-leaflet-css";css.rel="stylesheet";css.href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css";document.head.append(css);
+    }
+    const script=document.createElement("script");script.src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js";
+    script.onload=()=>window.L?resolve(window.L):reject(new Error("Leaflet unavailable"));
+    script.onerror=()=>{const fallback=document.createElement("script");fallback.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";fallback.onload=()=>window.L?resolve(window.L):reject(new Error("Leaflet unavailable"));fallback.onerror=()=>reject(new Error("Map library failed"));document.head.append(fallback);};
+    document.head.append(script);
+  });
+  return customerLeafletPromise;
+}
+function openCustomerMap(shop){
+  const lang=document.documentElement.lang||"tg";
+  const labels={
+    tg:{title:"Ҷойгиршавии марказ",loading:"Харита бор шуда истодааст…",failed:"Харита бор нашуд. Интернетро санҷед ё харитаи берунаро кушоед.",saved:"Нишони марказ дар харита",external:"Кушодан дар OpenStreetMap",close:"Пӯшидан",note:"Барои дидани роҳ, харитаро калон ё хурд кунед ва нишони марказро интихоб намоед."},
+    ru:{title:"Расположение заведения",loading:"Загрузка карты…",failed:"Не удалось загрузить карту. Проверьте интернет или откройте внешнюю карту.",saved:"Метка заведения на карте",external:"Открыть в OpenStreetMap",close:"Закрыть",note:"Масштабируйте карту и выберите метку заведения, чтобы посмотреть расположение."},
+    en:{title:"Location of the shop",loading:"Loading map…",failed:"The map could not load. Check your connection or open the external map.",saved:"Shop marker on the map",external:"Open in OpenStreetMap",close:"Close",note:"Zoom the map and select the shop marker to view its location."}
+  }[lang]||{
+    title:"Shop location",loading:"Loading map…",failed:"Map unavailable. Check your internet or open the external map.",saved:"Shop marker",external:"Open in OpenStreetMap",close:"Close",note:"Zoom the map and select the shop marker."
+  };
+  const lat=Number(shop.latitude),lng=Number(shop.longitude);
+  const valid=shop.latitude!==null&&shop.longitude!==null&&Number.isFinite(lat)&&Number.isFinite(lng)&&Math.abs(lat)<=90&&Math.abs(lng)<=180;
+  const query=[shop.address,shop.district,shop.city,"Tajikistan"].filter(Boolean).join(", ");
+  const external=valid?"https://www.openstreetmap.org/?mlat="+encodeURIComponent(lat)+"&mlon="+encodeURIComponent(lng)+"#map=18/"+lat+"/"+lng:"https://www.openstreetmap.org/search?query="+encodeURIComponent(query);
+  const backdrop=document.createElement("div");backdrop.className="customer-map-backdrop";backdrop.setAttribute("role","presentation");
+  const dialog=document.createElement("section");dialog.className="customer-map-dialog";dialog.setAttribute("role","dialog");dialog.setAttribute("aria-modal","true");dialog.setAttribute("aria-label",labels.title);
+  const head=document.createElement("div");head.className="customer-map-head";
+  const titleBox=document.createElement("div");const title=document.createElement("h3");title.textContent=shop.name||labels.title;
+  const subtitle=document.createElement("p");subtitle.textContent=[shop.address,shop.district,shop.city].filter(Boolean).join(" · ")||labels.title;titleBox.append(title,subtitle);
+  const close=document.createElement("button");close.type="button";close.className="customer-map-close";close.textContent="×";close.setAttribute("aria-label",labels.close);head.append(titleBox,close);
+  const canvas=document.createElement("div");canvas.className="customer-map-canvas";canvas.setAttribute("aria-label",labels.title);
+  const note=document.createElement("p");note.className="customer-map-note";note.textContent=valid?labels.note:labels.failed;
+  const actions=document.createElement("div");actions.className="customer-map-actions";
+  const externalLink=document.createElement("a");externalLink.href=external;externalLink.target="_blank";externalLink.rel="noopener noreferrer";externalLink.textContent=labels.external;actions.append(externalLink);
+  const closeBottom=document.createElement("button");closeBottom.type="button";closeBottom.textContent=labels.close;actions.append(closeBottom);
+  dialog.append(head,canvas,note,actions);backdrop.append(dialog);document.body.append(backdrop);
+  const closeMap=()=>{backdrop.remove();document.body.style.overflow="";document.removeEventListener("keydown",onKey);};
+  const onKey=e=>{if(e.key==="Escape")closeMap();};close.addEventListener("click",closeMap);closeBottom.addEventListener("click",closeMap);
+  backdrop.addEventListener("click",e=>{if(e.target===backdrop)closeMap();});document.addEventListener("keydown",onKey);document.body.style.overflow="hidden";close.focus();
+  if(!valid){canvas.hidden=true;return;}
+  loadCustomerLeaflet().then(L=>{
+    if(!backdrop.isConnected)return;
+    const map=L.map(canvas,{scrollWheelZoom:false}).setView([lat,lng],16);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(map);
+    L.marker([lat,lng]).addTo(map).bindPopup(shop.name||labels.saved).openPopup();
+    setTimeout(()=>map.invalidateSize(),100);
+  }).catch(()=>{note.textContent=labels.failed;canvas.hidden=true;});
+}
+
 function render() {
   const words = languageCopy();
   list.replaceChildren();
@@ -581,11 +651,9 @@ function render() {
     card.append(location);
     const hasCoordinates=shop.latitude!=null&&shop.longitude!=null;
     if(locationText||hasCoordinates){
-      const mapLink=document.createElement("a");
-      if(hasCoordinates){const lat=Number(shop.latitude),lng=Number(shop.longitude);mapLink.href="https://www.openstreetmap.org/?mlat="+encodeURIComponent(lat)+"&mlon="+encodeURIComponent(lng)+"#map=18/"+lat+"/"+lng;}
-      else{mapLink.href="https://www.openstreetmap.org/search?query="+encodeURIComponent([shop.address,shop.district,shop.city,"Tajikistan"].filter(Boolean).join(", "));}
-      mapLink.target="_blank";mapLink.rel="noopener noreferrer";mapLink.textContent="📍 "+words.mapLabel;
-      mapLink.style.display="inline-block";mapLink.style.marginTop="4px";
+      const mapLink=document.createElement("button");mapLink.type="button";mapLink.className="customer-map-trigger";
+      mapLink.textContent="📍 "+words.mapLabel;
+      mapLink.addEventListener("click",()=>openCustomerMap(shop));
       card.append(mapLink);
     }
     const hoursSection=document.createElement("div");hoursSection.className="hours-list";
