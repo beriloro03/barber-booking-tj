@@ -672,12 +672,35 @@ function setShopMapPoint(lat,lng){
 async function ensureShopMapLibrary(){
  if(window.L)return window.L;
  if(shopMapLoading)return shopMapLoading;
- shopMapLoading=new Promise((resolve,reject)=>{
-  if(!document.getElementById("leaflet-css")){
-   const css=document.createElement("link");css.id="leaflet-css";css.rel="stylesheet";css.href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";document.head.append(css);
+ shopMapLoading=(async()=>{
+  const css=document.getElementById("leaflet-css")||document.createElement("link");
+  css.id="leaflet-css";css.rel="stylesheet";
+  if(!css.isConnected)document.head.append(css);
+  if(!css.href||!css.href.includes("leaflet.css")){
+   css.href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css";
   }
-  const script=document.createElement("script");script.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";script.onload=()=>window.L?resolve(window.L):reject(new Error("Харита дастрас нашуд."));script.onerror=()=>reject(new Error("Харита бор нашуд. Интернетро санҷ ва аз нав кӯшиш кун."));document.head.append(script);
- });
+  await new Promise(resolve=>{
+   if(css.sheet){resolve();return;}
+   css.onload=()=>resolve();
+   css.onerror=()=>{css.href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";resolve();};
+  });
+  const sources=[
+   "https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js",
+   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  ];
+  for(const src of sources){
+   try{
+    await new Promise((resolve,reject)=>{
+     const script=document.createElement("script");
+     script.src=src;script.onload=()=>window.L?resolve():reject(new Error("Leaflet дастрас нашуд."));
+     script.onerror=()=>reject(new Error("CDN дастрас нест."));
+     document.head.append(script);
+    });
+    if(window.L)return window.L;
+   }catch(error){}
+  }
+  throw new Error("Китобхонаи харита бор нашуд. Интернет ё дастрасии CDN-ро санҷ.");
+ })();
  try{return await shopMapLoading;}catch(error){shopMapLoading=null;throw error;}
 }
 async function openShopMap(){
@@ -687,7 +710,17 @@ async function openShopMap(){
   if(!shopMapInstance){
    const lat=Number($("shopLatitude").value)||39.0,lng=Number($("shopLongitude").value)||69.5;
    shopMapInstance=L.map("shopMap").setView([lat,lng],$("shopLatitude").value?16:7);
-   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(shopMapInstance);
+   const primaryTiles=L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"});
+   const fallbackTiles=L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{maxZoom:19,attribution:"© OpenStreetMap © CARTO"});
+   let tileFallbackUsed=false;
+   primaryTiles.on("tileerror",()=>{
+    if(tileFallbackUsed)return;
+    tileFallbackUsed=true;
+    if(shopMapInstance.hasLayer(primaryTiles))shopMapInstance.removeLayer(primaryTiles);
+    fallbackTiles.addTo(shopMapInstance);
+    $("shopMapMessage").textContent="Манбаи аввалини харита дастрас нест; манбаи эҳтиётӣ фаъол шуд.";
+   });
+   primaryTiles.addTo(shopMapInstance);
    shopMapMarker=L.marker([lat,lng],{draggable:true}).addTo(shopMapInstance);
    shopMapMarker.on("dragend",()=>{const p=shopMapMarker.getLatLng();setShopMapPoint(p.lat,p.lng);});
    shopMapInstance.on("click",event=>{setShopMapPoint(event.latlng.lat,event.latlng.lng);});
