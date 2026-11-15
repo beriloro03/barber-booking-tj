@@ -14,7 +14,18 @@ textarea{min-height:76px;resize:vertical}button{font:inherit;border:1px solid va
 .primary{background:var(--p);border-color:var(--p);color:white}.danger{color:#a21d35;border-color:#efc7d0}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.row>*{flex:1}.muted{color:var(--muted);font-size:14px;line-height:1.5}
 #status{padding:12px;border-radius:10px;background:#f1edfa;color:var(--muted);margin:12px 0}.service{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}.hours-row{display:grid;grid-template-columns:1fr 100px 100px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}.hours-row label{margin:0}.hours-row input{min-width:0;padding:8px}@media(max-width:520px){.hours-row{grid-template-columns:1fr 1fr 1fr}.hours-row label{grid-column:1/-1}}.service-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.service-top strong{overflow-wrap:anywhere}.stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.stats-grid .service{margin:0}.stats-number{display:block;font-size:28px;font-weight:750;color:var(--p);margin-top:4px}@media(min-width:600px){.stats-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.calendar-day{border:1px solid var(--line);border-radius:9px;padding:6px;min-height:76px;min-width:0}.calendar-day strong{display:block;font-size:13px}.calendar-day .muted{font-size:11px;overflow-wrap:anywhere}.calendar-day-events{margin-top:5px}.calendar-event{border-top:1px solid var(--line);padding:5px 0;font-size:12px;overflow-wrap:anywhere}.calendar-weekday{text-align:center;font-size:11px;font-weight:700;color:var(--muted);padding:4px 0}@media(max-width:520px){.calendar-grid{gap:3px}.calendar-day{padding:4px;min-height:65px}.calendar-day .muted{font-size:10px}.calendar-event{font-size:10px}}.hidden{display:none!important}
 a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14px}.row>*{min-width:100%}}
-.staff-hours-row{display:grid;grid-template-columns:minmax(82px,1fr) minmax(90px,1fr) minmax(90px,1fr) auto;gap:7px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}.staff-hours-row input{min-width:0;padding:7px}.staff-closed-label{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;margin:0;white-space:nowrap}.staff-closed-label input{margin:0}@media(max-width:520px){.staff-hours-row{grid-template-columns:1fr 1fr 1fr}.staff-hours-row strong{grid-column:1/-1}.staff-closed-label{grid-column:1/-1}}</style></head>
+.staff-hours-row{display:grid;grid-template-columns:minmax(82px,1fr) minmax(90px,1fr) minmax(90px,1fr) auto;gap:7px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}.staff-hours-row input{min-width:0;padding:7px}.staff-closed-label{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;margin:0;white-space:nowrap}.staff-closed-label input{margin:0}@media(max-width:520px){.staff-hours-row{grid-template-columns:1fr 1fr 1fr}.staff-hours-row strong{grid-column:1/-1}.staff-closed-label{grid-column:1/-1}}
+.map-open-button{width:100%;min-height:48px;border:1px solid #d8ccef;background:#f5f1ff;color:#4d2a9c;font-weight:700;border-radius:13px}
+.map-panel{margin-top:12px;padding:14px;border:1px solid #e4def0;border-radius:18px;background:linear-gradient(180deg,#fff 0%,#faf8ff 100%);box-shadow:0 10px 28px rgba(44,25,84,.08)}
+.map-topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}.map-topbar>div{min-width:0}.map-title{font-size:18px;display:block;margin-bottom:3px}.map-topbar button{flex:0 0 auto;min-height:42px}
+.map-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.map-actions button{min-height:46px;padding:9px 10px;font-size:14px}
+.map-message{padding:10px 12px;border-radius:11px;background:#f1edfa;color:#51466a;font-size:13px;line-height:1.45;margin-bottom:10px}
+.shop-map-canvas{height:clamp(340px,55vh,540px);width:100%;border-radius:14px;overflow:hidden;background:#e9e6ef;border:1px solid #e2ddec;z-index:1}
+.map-coordinate-card{display:grid;gap:4px;padding:11px 13px;margin-top:10px;border-radius:12px;background:#f4f0fc;color:#5d5270;font-size:12px}.map-coordinate-card strong{font-size:14px;color:#34264f;overflow-wrap:anywhere}
+.map-footnote{margin:9px 2px 0;font-size:12px}
+#shopMap .leaflet-control-zoom a{width:40px;height:40px;line-height:40px;font-size:20px}#shopMap .leaflet-control-attribution{font-size:9px}
+@media(max-width:600px){.map-panel:not(.hidden){position:fixed;inset:0;z-index:9999;margin:0!important;padding:14px 12px calc(14px + env(safe-area-inset-bottom));border:0;border-radius:0;display:flex;flex-direction:column;overflow:auto;background:#fff}.map-topbar{padding-top:env(safe-area-inset-top)}.shop-map-canvas{height:auto;min-height:300px;flex:1 0 42vh}.map-footnote{flex:0 0 auto}.map-coordinate-card{flex:0 0 auto}.map-actions{grid-template-columns:1fr 1fr}.map-topbar button{padding:8px 10px}}
+</style></head>
 <body>
 <header><div><a href="./">← Сомонаи асосӣ</a><h1>Панели соҳибкор</h1><div class="muted">Идоракунии марказ ва хизматрасониҳо</div></div></header>
 <main>
@@ -41,16 +52,20 @@ a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14
 <label for="shopCity">Шаҳр</label><input id="shopCity" maxlength="100"><label for="shopDistrict">Ноҳия</label><input id="shopDistrict" maxlength="100" placeholder="Масалан: Мастчоҳ">
 <label for="shopAddress">Суроғаи марказ</label><input id="shopAddress" maxlength="250" placeholder="Масалан: назди бозор, кӯчаи марказӣ">
 <div style="margin-top:10px">
- <button id="openShopMapBtn" type="button">📍 Интихоби ҷой дар харита</button>
- <div id="shopMapPanel" class="hidden" style="margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:12px">
-  <p class="muted">Ба харита ламс кун, то ҷойи марказ интихоб шавад. Нишонаро низ ҳаракат дода метавонӣ.</p>
-  <div class="row" style="margin:10px 0">
-   <button id="myLocationBtn" type="button">◎ Ҷойгиршавии ман</button>
-   <button id="closeShopMapBtn" type="button">Пӯшидан</button>
+ <button id="openShopMapBtn" class="map-open-button" type="button">📍 Интихоби ҷой дар харита</button>
+ <div id="shopMapPanel" class="hidden map-panel" aria-label="Интихоби ҷойи марказ">
+  <div class="map-topbar">
+   <div><strong class="map-title">Ҷойи марказ</strong><div class="muted">Нуқтаро интихоб кун ё нишонаро ба ҷойи дуруст каш.</div></div>
+   <button id="closeShopMapBtn" type="button" aria-label="Пӯшидани харита">✕ Пӯшидан</button>
   </div>
-  <div id="shopMapMessage" class="muted" role="status">Харита ҳангоми кушодан бор мешавад.</div>
-  <div id="shopMap" style="height:280px;width:100%;border-radius:10px;overflow:hidden;background:#eee;margin-top:8px"></div>
-  <div id="shopMapCoordinates" class="muted" style="margin-top:8px">Ҷой интихоб нашудааст.</div>
+  <div class="map-actions">
+   <button id="myLocationBtn" class="primary" type="button">◎ Ҷойгиршавии ман</button>
+   <button id="centerShopMapBtn" type="button">⌖ Ҷойи сабтшуда</button>
+  </div>
+  <div id="shopMapMessage" class="map-message" role="status">Харита ҳангоми кушодан бор мешавад.</div>
+  <div id="shopMap" class="shop-map-canvas"></div>
+  <div class="map-coordinate-card"><span>Координатаҳои интихобшуда</span><strong id="shopMapCoordinates">Ҷой интихоб нашудааст.</strong></div>
+  <p class="muted map-footnote">Пас аз интихоб, тугмаи «Сабт кардани маълумот»-ро дар поёни форма пахш кун. Интихоби нуқта бе GPS ҳам кор мекунад.</p>
  </div>
  <input id="shopLatitude" type="hidden">
  <input id="shopLongitude" type="hidden">
@@ -726,12 +741,19 @@ async function openShopMap(){
    shopMapInstance.on("click",event=>{setShopMapPoint(event.latlng.lat,event.latlng.lng);});
    if($("shopLatitude").value)setShopMapPoint(lat,lng);
   }
-  $("shopMapMessage").textContent="Ба харита ламс кун ё нишонаро ҳаракат деҳ.";
+  $("shopMapMessage").textContent="Ба харита як бор ламс кун, то нуқта гузошта шавад. Барои дақиқтар кардан нишонаро нигоҳ дошта, ҳаракат деҳ.";
   setTimeout(()=>shopMapInstance&&shopMapInstance.invalidateSize(),120);
  }catch(error){$("shopMapMessage").textContent=error.message||"Харита бор нашуд."; }
 }
 $("openShopMapBtn").addEventListener("click",openShopMap);
 $("closeShopMapBtn").addEventListener("click",()=>$("shopMapPanel").classList.add("hidden"));
+$("centerShopMapBtn").addEventListener("click",()=>{
+ const hasSavedPoint=$("shopLatitude").value&&$("shopLongitude").value;
+ const lat=hasSavedPoint?Number($("shopLatitude").value):39.0;
+ const lng=hasSavedPoint?Number($("shopLongitude").value):69.5;
+ if(shopMapInstance){shopMapInstance.setView([lat,lng],hasSavedPoint?17:9);if(shopMapMarker)shopMapMarker.setLatLng([lat,lng]);}
+ $("shopMapMessage").textContent=hasSavedPoint?"Харита ба ҷойи охирини интихобшуда гузашт.":"Минтақаи Тоҷикистон нишон дода шуд. Барои интихоби ҷой ба харита ламс кун.";
+});
 $("myLocationBtn").addEventListener("click",async()=>{
  if(!navigator.geolocation){$("shopMapMessage").textContent="Ин браузер ҷойгиршавиро дастгирӣ намекунад.";return;}
  $("myLocationBtn").disabled=true;$("shopMapMessage").textContent="Ҷойгиршавии дақиқ муайян мешавад… GPS-и телефонро фаъол кун.";
