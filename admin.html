@@ -768,48 +768,40 @@ $("centerShopMapBtn").addEventListener("click",()=>{
  if(shopMapInstance){shopMapInstance.setView([lat,lng],hasPoint?17:7);if(shopMapMarker)shopMapMarker.setLatLng([lat,lng]);}
  $("shopMapMessage").textContent=hasPoint?"Ба нуқтаи интихобшуда гузашт.":"Тоҷикистон нишон дода шуд. Ҷойро интихоб кун.";
 });
-$("myLocationBtn").addEventListener("click",async()=>{
+$("myLocationBtn").addEventListener("click",()=>{
  if(!navigator.geolocation){$("shopMapMessage").textContent="Ин браузер ҷойгиршавиро дастгирӣ намекунад.";return;}
- $("myLocationBtn").disabled=true;$("shopMapMessage").textContent="Ҷойгиршавии дақиқ муайян мешавад… GPS-и телефонро фаъол кун.";
- navigator.geolocation.getCurrentPosition(async position=>{
+ $("myLocationBtn").disabled=true;$("shopMapMessage").textContent="Ҷойгиршавӣ муайян мешавад… GPS ва иҷозати браузерро санҷ.";
+ const onPosition=position=>{
   const {latitude,longitude,accuracy}=position.coords;
-  if(shop){
-   const {data,error}=await supabase.from("barbershops").update({latitude,longitude}).eq("id",shop.id).select("id,latitude,longitude").maybeSingle();
-   if(error||!data){
-    $("shopMapMessage").textContent="Ҷой муайян шуд, аммо сабт нашуд. Лутфан дубора кӯшиш кун ё маълумоти марказро сабт намо.";
-    $("myLocationBtn").disabled=false;return;
-   }
-   shop.latitude=data.latitude;shop.longitude=data.longitude;
-  }
   setShopMapPoint(latitude,longitude);
-  if(shopMapInstance){shopMapInstance.setView([latitude,longitude],18);if(shopMapMarker)shopMapMarker.setLatLng([latitude,longitude]);}
-  const accuracyText=Number.isFinite(accuracy)?" Дақиқии тахминӣ: ±"+Math.round(accuracy)+" метр.":"";
-  $("shopMapMessage").textContent=shop?"Ҷойгиршавӣ ба таври автоматӣ сабт шуд."+accuracyText:"Ҷой муайян шуд. Марказро аввал сабт кун, то координатаҳо низ нигоҳ дошта шаванд."+accuracyText;
-  $("myLocationBtn").disabled=false;
- },async error=>{
-  let permissionState="номаълум";
-  try{
-   if(navigator.permissions&&navigator.permissions.query){
-    const permission=await navigator.permissions.query({name:"geolocation"});
-    permissionState=permission.state||"номаълум";
-   }
-  }catch(permissionError){}
-  const errorCode=Number(error&&error.code)||0;
-  const errorMessage=(error&&error.message?String(error.message):"паёми браузер дастрас нест").slice(0,180);
-  const secureState=window.isSecureContext?"HTTPS/муҳити бехатар: ҳа":"HTTPS/муҳити бехатар: не";
-  let reason;
-  if(errorCode===1){
-   reason="Браузер иҷозати GPS-ро рад кард. Иҷозати сайтро дар Chrome аз нав санҷ ё иҷозатҳоро Reset кун.";
-  }else if(errorCode===2){
-   reason="Телефон ҷойро муайян карда натавонист. GPS, Location Accuracy ва дастрасии интернетро санҷ.";
-  }else if(errorCode===3){
-   reason="Муайян кардани ҷой аз вақти интизорӣ зиёд шуд. Ба ҷои кушодтар баромада, боз кӯшиш кун.";
-  }else{
-   reason="Хатои номаълум ҳангоми гирифтани ҷойгиршавӣ.";
+  if(shopMapInstance){
+   shopMapInstance.setView([latitude,longitude],18);
+   if(shopMapMarker)shopMapMarker.setLatLng([latitude,longitude]);
+   if(shopMapAccuracyCircle)shopMapAccuracyCircle.remove();
+   const radius=Math.min(Math.max(Number(accuracy)||0,10),2000);
+   shopMapAccuracyCircle=window.L.circle([latitude,longitude],{radius,color:"#2878d0",weight:2,fillColor:"#2878d0",fillOpacity:.10}).addTo(shopMapInstance);
   }
-  $("shopMapMessage").textContent=reason+" Санҷиш: код="+errorCode+"; иҷозати браузер="+permissionState+"; "+secureState+"; паёми браузер: "+errorMessage;
+  const accuracyText=Number.isFinite(accuracy)?" Дақиқии GPS: ±"+Math.round(accuracy)+" метр.":"";
+  $("shopMapMessage").textContent="Ҷой муайян шуд. Ин ҳоло танҳо нуқтаи интихобист; барои нигоҳ доштан «Сабт кардани маълумот»-ро пахш кун."+accuracyText;
   $("myLocationBtn").disabled=false;
- },{enableHighAccuracy:true,timeout:30000,maximumAge:0});
+ };
+ const onLocationError=async error=>{
+  let permissionState="номаълум";
+  try{if(navigator.permissions&&navigator.permissions.query){const permission=await navigator.permissions.query({name:"geolocation"});permissionState=permission.state||"номаълум";}}catch(permissionError){}
+  const errorCode=Number(error&&error.code)||0;
+  if(errorCode===1){
+   $("shopMapMessage").textContent="Браузер иҷозати GPS-ро рад кард. Дар Chrome → Танзимоти сайт → Ҷойгиршавӣ → Иҷозат додан.";
+  }else{
+   const reason=errorCode===3?"Вақти муайян кардани GPS гузашт.":"GPS ҷойро муайян карда натавонист.";
+   $("shopMapMessage").textContent=reason+" Иҷозати браузер: "+permissionState+". GPS ва Location Accuracy-ро санҷ.";
+  }
+  $("myLocationBtn").disabled=false;
+ };
+ navigator.geolocation.getCurrentPosition(onPosition,error=>{
+  if(error.code===1){onLocationError(error);return;}
+  $("shopMapMessage").textContent="GPS-и дақиқ дастрас нест. Усули эҳтиётиро месанҷем…";
+  navigator.geolocation.getCurrentPosition(onPosition,onLocationError,{enableHighAccuracy:false,timeout:20000,maximumAge:120000});
+ },{enableHighAccuracy:true,timeout:15000,maximumAge:30000});
 });
 $("shopMapSearchBtn").addEventListener("click",async()=>{
  const query=$("shopMapSearch").value.trim();
