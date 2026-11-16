@@ -700,7 +700,7 @@ function openCustomerMap(shop){
     const layerNames={};layerNames[lang==="ru"?"Кӯчаҳо ва маҳаллаҳо":lang==="en"?"Detailed streets":"Подробная карта"]=detailed;layerNames[lang==="ru"?"Улицы":lang==="en"?"Streets":"Кӯчаҳо"]=streets;layerNames[lang==="ru"?"Светлая карта":lang==="en"?"Light map":"Харитаи равшан"]=light;
     L.control.layers(layerNames,null,{collapsed:true,position:"topright"}).addTo(mapRef);
     L.control.scale({metric:true,imperial:false,position:"bottomleft"}).addTo(mapRef);
-    L.marker([lat,lng],{icon:L.divIcon({className:"",html:"<div class=\\"customer-shop-pin\\"></div>",iconSize:[22,22],iconAnchor:[11,22]})}).addTo(mapRef).bindPopup(shop.name||labels.saved).openPopup();
+    L.marker([lat,lng],{icon:L.divIcon({className:"",html:"<div class='customer-shop-pin'></div>",iconSize:[22,22],iconAnchor:[11,22]})}).addTo(mapRef).bindPopup(shop.name||labels.saved).openPopup();
     mapRef.on("click",async event=>{
       const point=event.latlng;
       if(searchMarker)mapRef.removeLayer(searchMarker);
