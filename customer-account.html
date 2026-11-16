@@ -32,7 +32,7 @@ save.addEventListener("click",async()=>{
  const {data,error}=await supabase.auth.getUser();
  if(error||!data.user){say("Ҳисоби меҳмонӣ ёфт нашуд. Аввал дар сомона як бор навбат фармоиш деҳ ё ба ҳисоби худ ворид шав.");save.disabled=false;return;}
  if(!data.user.is_anonymous){say("Ин браузер аллакай бо ҳисоби доимӣ ворид шудааст. Барои иваз кардани почта аз танзимоти ҳисоб истифода бар.");save.disabled=false;return;}
- const {error:linkError}=await supabase.auth.updateUser({email:e,password:p},{emailRedirectTo:location.origin+location.pathname.replace(/customer-account\.html$/,"")});
+ const {error:linkError}=await supabase.auth.updateUser({email:e,password:p},{emailRedirectTo:location.origin+location.pathname});
  if(linkError){say("Пайваст нашуд: "+linkError.message);save.disabled=false;return;}
  say("Дархост фиристода шуд. Ба почтаи электронии худ даро ва пайванди тасдиқро кушо. То тасдиқ шудан аз ин браузер хориҷ нашав.");
  save.disabled=false;
