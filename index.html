@@ -637,6 +637,23 @@ function loadCustomerLeaflet(){
   });
   return customerLeafletPromise;
 }
+
+async function loadOpenFreeMapPlugin(){
+ if(window.L&&window.L.maplibreGL)return true;
+ if(window.__openFreeMapPluginPromise)return window.__openFreeMapPluginPromise;
+ window.__openFreeMapPluginPromise=(async()=>{
+  const css=document.createElement("link");
+  css.rel="stylesheet";css.href="https://cdn.jsdelivr.net/npm/maplibre-gl@6.3.0/dist/maplibre-gl.css";
+  document.head.append(css);
+  const maplibregl=await import("https://cdn.jsdelivr.net/npm/maplibre-gl@6.3.0/dist/maplibre-gl.mjs");
+  window.maplibregl=maplibregl;
+  await import("https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js");
+  if(!window.L||typeof window.L.maplibreGL!=="function")throw new Error("OpenFreeMap plugin unavailable");
+  return true;
+ })();
+ try{return await window.__openFreeMapPluginPromise;}catch(error){window.__openFreeMapPluginPromise=null;return false;}
+}
+
 function openCustomerMap(shop){
   const lang=document.documentElement.lang||"tg";
   const labels={
@@ -690,11 +707,12 @@ function openCustomerMap(shop){
     userMarker=window.L.circleMarker(pendingUserPoint,{radius:10,color:"#fff",weight:3,fillColor:"#2878d0",fillOpacity:1}).addTo(mapRef).bindPopup(lang==="ru"?"Вы здесь":lang==="en"?"You are here":"Шумо дар ин ҷо ҳастед");
     mapRef.fitBounds(routeLayer.getBounds().pad(.18));
   };
-  loadCustomerLeaflet().then(L=>{
+  loadCustomerLeaflet().then(async L=>{
     if(!backdrop.isConnected)return;
+    await loadOpenFreeMapPlugin();
     mapRef=L.map(canvas,{scrollWheelZoom:false}).setView([lat,lng],16);
     const streets=L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'});
-    const detailed=L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{maxZoom:20,attribution:"© OpenStreetMap © CARTO"});
+    const detailed=typeof L.maplibreGL==="function"?L.maplibreGL({style:"https://tiles.openfreemap.org/styles/liberty"}):L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{maxZoom:20,attribution:"© OpenStreetMap © CARTO"});
     const light=L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{maxZoom:20,attribution:"© OpenStreetMap © CARTO"});
     detailed.addTo(mapRef);
     const layerNames={};layerNames[lang==="ru"?"Кӯчаҳо ва маҳаллаҳо":lang==="en"?"Detailed streets":"Подробная карта"]=detailed;layerNames[lang==="ru"?"Улицы":lang==="en"?"Streets":"Кӯчаҳо"]=streets;layerNames[lang==="ru"?"Светлая карта":lang==="en"?"Light map":"Харитаи равшан"]=light;
