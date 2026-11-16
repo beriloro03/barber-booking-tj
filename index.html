@@ -675,6 +675,7 @@ function openCustomerMap(shop){
    const searchInput=document.createElement("input");searchInput.type="search";searchInput.maxLength=160;searchInput.placeholder=lang==="ru"?"Найти улицу, район или место":lang==="en"?"Search street, district or place":"Ҷустуҷӯи кӯча, маҳалла ё ҷой";
    const searchButton=document.createElement("button");searchButton.type="button";searchButton.textContent=lang==="ru"?"Найти":lang==="en"?"Search":"Ҷустуҷӯ";searchBar.append(searchInput,searchButton);
    const canvas=document.createElement("div");canvas.className="customer-map-canvas";
+   const canvas3d=document.createElement("div");canvas3d.className="customer-map-canvas";canvas3d.hidden=true;
   const note=document.createElement("p");note.className="customer-map-note";note.textContent=valid?labels.note:labels.noCoords;
   const routeStatus=document.createElement("p");routeStatus.className="customer-route-status";routeStatus.setAttribute("aria-live","polite");routeStatus.hidden=true;
   const coordinateBox=document.createElement("div");coordinateBox.className="customer-coordinate-box";coordinateBox.hidden=!valid;
@@ -693,8 +694,10 @@ function openCustomerMap(shop){
   const routeButton=document.createElement("button");routeButton.type="button";routeButton.className="customer-route-btn";routeButton.textContent="🧭 "+labels.route;routeButton.disabled=!valid;
   const externalLink=document.createElement("a");externalLink.href=external;externalLink.target="_blank";externalLink.rel="noopener noreferrer";externalLink.textContent=labels.external;actions.append(modeLabel,routeButton,externalLink);
   const closeBottom=document.createElement("button");closeBottom.type="button";closeBottom.textContent=labels.close;actions.append(closeBottom);
-  dialog.append(head,searchBar,canvas,note,routeStatus,coordinateBox,actions);backdrop.append(dialog);document.body.append(backdrop);
-  const closeMap=()=>{backdrop.remove();document.body.style.overflow="";document.removeEventListener("keydown",onKey);};
+  const view3dButton=document.createElement("button");view3dButton.type="button";view3dButton.textContent="🏙️ 3D";view3dButton.disabled=true;view3dButton.title=lang==="ru"?"Открыть 3D-карту":lang==="en"?"Open 3D map":"Кушодани харитаи 3D";actions.append(view3dButton);
+  dialog.append(head,searchBar,canvas,canvas3d,note,routeStatus,coordinateBox,actions);backdrop.append(dialog);document.body.append(backdrop);
+  let map3d=null,is3d=false;
+  const closeMap=()=>{if(map3d){map3d.remove();map3d=null;}backdrop.remove();document.body.style.overflow="";document.removeEventListener("keydown",onKey);};
   const onKey=e=>{if(e.key==="Escape")closeMap();};close.addEventListener("click",closeMap);closeBottom.addEventListener("click",closeMap);
   backdrop.addEventListener("click",e=>{if(e.target===backdrop)closeMap();});document.addEventListener("keydown",onKey);document.body.style.overflow="hidden";close.focus();
   if(!valid){canvas.hidden=true;return;}
@@ -710,6 +713,35 @@ function openCustomerMap(shop){
   loadCustomerLeaflet().then(async L=>{
     if(!backdrop.isConnected)return;
     await loadOpenFreeMapPlugin();
+    if(window.maplibregl&&window.maplibregl.Map){
+      view3dButton.disabled=false;
+      view3dButton.addEventListener("click",()=>{
+        if(is3d){if(map3d){map3d.remove();map3d=null;}canvas3d.hidden=true;canvas.hidden=false;is3d=false;view3dButton.textContent="🏙️ 3D";setTimeout(()=>mapRef&&mapRef.invalidateSize(),80);return;}
+        canvas.hidden=true;canvas3d.hidden=false;is3d=true;view3dButton.textContent="🗺️ 2D";
+        map3d=new window.maplibregl.Map({container:canvas3d,style:"https://tiles.openfreemap.org/styles/liberty",center:[lng,lat],zoom:16,pitch:55,bearing:-15,attributionControl:true});
+        map3d.addControl(new window.maplibregl.NavigationControl({visualizePitch:true}),"top-right");
+        map3d.on("load",()=>{
+          try{
+            const style=map3d.getStyle();
+            const sourceId=Object.keys(style.sources||{}).find(id=>style.sources[id].type==="vector"&&String(style.sources[id].url||"").includes("openfreemap"));
+            if(sourceId&&!map3d.getLayer("customer-3d-buildings")){
+              const label=style.layers.find(layer=>layer.type==="symbol"&&layer.layout&&layer.layout["text-field"]);
+              const layer={id:"customer-3d-buildings",type:"fill-extrusion",source:sourceId,"source-layer":"building",minzoom:15,filter:["!=",["get","hide_3d"],true],paint:{"fill-extrusion-color":"#b8c2d1","fill-extrusion-height":["interpolate",["linear"],["zoom"],15,0,16,["coalesce",["get","render_height"],8]],"fill-extrusion-base":["coalesce",["get","render_min_height"],0],"fill-extrusion-opacity":0.82}};
+              map3d.addLayer(layer,label?label.id:undefined);
+            }
+            const places=[...(Array.isArray(shops)?shops:[])];
+            if(!places.some(place=>place.id===shop.id))places.push(shop);
+            places.filter(place=>place.latitude!=null&&place.longitude!=null&&Number.isFinite(Number(place.latitude))&&Number.isFinite(Number(place.longitude))).forEach(place=>{
+              const popup=document.createElement("div");
+              const name=document.createElement("strong");name.textContent=place.name||labels.saved;popup.append(name);
+              const address=document.createElement("div");address.textContent=[place.address,place.district,place.city].filter(Boolean).join(" · ");if(address.textContent)popup.append(address);
+              if(place.phone){const phone=document.createElement("div");phone.textContent="☎ "+place.phone;popup.append(phone);}
+              new window.maplibregl.Marker({color:"#3478f6"}).setLngLat([Number(place.longitude),Number(place.latitude)]).setPopup(new window.maplibregl.Popup({offset:24}).setDOMContent(popup)).addTo(map3d);
+            });
+          }catch(error){console.warn("3D map details:",error);}
+        });
+      });
+    }
     mapRef=L.map(canvas,{scrollWheelZoom:false}).setView([lat,lng],16);
     const streets=L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'});
     const detailed=typeof L.maplibreGL==="function"?L.maplibreGL({style:"https://tiles.openfreemap.org/styles/liberty"}):L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{maxZoom:20,attribution:"© OpenStreetMap © CARTO"});
@@ -718,7 +750,17 @@ function openCustomerMap(shop){
     const layerNames={};layerNames[lang==="ru"?"Кӯчаҳо ва маҳаллаҳо":lang==="en"?"Detailed streets":"Подробная карта"]=detailed;layerNames[lang==="ru"?"Улицы":lang==="en"?"Streets":"Кӯчаҳо"]=streets;layerNames[lang==="ru"?"Светлая карта":lang==="en"?"Light map":"Харитаи равшан"]=light;
     L.control.layers(layerNames,null,{collapsed:true,position:"topright"}).addTo(mapRef);
     L.control.scale({metric:true,imperial:false,position:"bottomleft"}).addTo(mapRef);
-    L.marker([lat,lng],{icon:L.divIcon({className:"",html:"<div class='customer-shop-pin'></div>",iconSize:[22,22],iconAnchor:[11,22]})}).addTo(mapRef).bindPopup(shop.name||labels.saved).openPopup();
+    const shopIcon=L.divIcon({className:"",html:"<div class='customer-shop-pin'></div>",iconSize:[22,22],iconAnchor:[11,22]});
+    const places=[...(Array.isArray(shops)?shops:[])];
+    if(!places.some(place=>place.id===shop.id))places.push(shop);
+    places.filter(place=>place.latitude!=null&&place.longitude!=null&&Number.isFinite(Number(place.latitude))&&Number.isFinite(Number(place.longitude))).forEach(place=>{
+      const popup=document.createElement("div");
+      const name=document.createElement("strong");name.textContent=place.name||labels.saved;popup.append(name);
+      const address=document.createElement("div");address.textContent=[place.address,place.district,place.city].filter(Boolean).join(" · ");if(address.textContent)popup.append(address);
+      if(place.phone){const phone=document.createElement("div");phone.textContent="☎ "+place.phone;popup.append(phone);}
+      const marker=L.marker([Number(place.latitude),Number(place.longitude)],{icon:shopIcon}).addTo(mapRef).bindPopup(popup);
+      if(place.id===shop.id)marker.openPopup();
+    });
     mapRef.on("click",async event=>{
       const point=event.latlng;
       if(searchMarker)mapRef.removeLayer(searchMarker);
