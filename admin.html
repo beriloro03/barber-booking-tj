@@ -749,16 +749,34 @@ async function ensureShopMapLibrary(){
  })();
  try{return await shopMapLoading;}catch(error){shopMapLoading=null;throw error;}
 }
+
+async function loadOpenFreeMapPlugin(){
+ if(window.L&&window.L.maplibreGL)return true;
+ if(window.__openFreeMapPluginPromise)return window.__openFreeMapPluginPromise;
+ window.__openFreeMapPluginPromise=(async()=>{
+  const css=document.createElement("link");
+  css.rel="stylesheet";css.href="https://cdn.jsdelivr.net/npm/maplibre-gl@6.3.0/dist/maplibre-gl.css";
+  document.head.append(css);
+  const maplibregl=await import("https://cdn.jsdelivr.net/npm/maplibre-gl@6.3.0/dist/maplibre-gl.mjs");
+  window.maplibregl=maplibregl;
+  await import("https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js");
+  if(!window.L||typeof window.L.maplibreGL!=="function")throw new Error("OpenFreeMap plugin unavailable");
+  return true;
+ })();
+ try{return await window.__openFreeMapPluginPromise;}catch(error){window.__openFreeMapPluginPromise=null;return false;}
+}
+
 async function openShopMap(){
  $("shopMapPanel").classList.remove("hidden");$("shopMapMessage").textContent="Харита бор шуда истодааст…";
  try{
   const L=await ensureShopMapLibrary();
+  await loadOpenFreeMapPlugin();
   if(!shopMapInstance){
    const lat=Number($("shopLatitude").value)||39.0,lng=Number($("shopLongitude").value)||69.5;
    shopMapInstance=L.map("shopMap").setView([lat,lng],$("shopLatitude").value?16:7);
    const primaryTiles=L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"});
    const fallbackTiles=L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{maxZoom:20,attribution:"© OpenStreetMap © CARTO"});
-   const detailedTiles=L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{maxZoom:20,attribution:"© OpenStreetMap © CARTO"});
+   const detailedTiles=typeof L.maplibreGL==="function"?L.maplibreGL({style:"https://tiles.openfreemap.org/styles/liberty"}):L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{maxZoom:20,attribution:"© OpenStreetMap © CARTO"});
    let tileFallbackUsed=false;
    primaryTiles.on("tileerror",()=>{
     if(tileFallbackUsed)return;
