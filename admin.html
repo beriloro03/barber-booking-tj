@@ -753,6 +753,8 @@ async function openShopMap(){
    shopMapInstance.on("click",event=>{setShopMapPoint(event.latlng.lat,event.latlng.lng);$("shopMapMessage").textContent="Нуқта интихоб шуд. Барои нигоҳ доштан «Сабт кардани маълумот»-ро пахш кун.";});
    const baseLayers={"OpenStreetMap":primaryTiles,"Харитаи равшан":fallbackTiles};
    L.control.layers(baseLayers,null,{collapsed:true,position:"topright"}).addTo(shopMapInstance);
+   L.control.scale({metric:true,imperial:false,position:"bottomleft"}).addTo(shopMapInstance);
+   shopMapInstance.zoomControl.setPosition("topleft");
    if($("shopLatitude").value)setShopMapPoint(lat,lng);
   }
   $("shopMapMessage").textContent="Нуқтаро бо ламс интихоб кун ё нишонаро каш. Ҷой танҳо баъди пахши «Сабт кардани маълумот» нигоҳ дошта мешавад.";
