@@ -28,6 +28,26 @@ a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14
 .map-footnote{margin:9px 2px 0;font-size:12px}
 #shopMap .leaflet-control-zoom a{width:40px;height:40px;line-height:40px;font-size:20px}#shopMap .leaflet-control-attribution{font-size:9px}
 @media(max-width:600px){.map-panel:not(.hidden){position:fixed;inset:0;z-index:9999;margin:0!important;padding:14px 12px calc(14px + env(safe-area-inset-bottom));border:0;border-radius:0;display:flex;flex-direction:column;overflow:auto;background:#fff}.map-topbar{padding-top:env(safe-area-inset-top)}.shop-map-canvas{height:auto;min-height:300px;flex:1 0 42vh}.map-footnote{flex:0 0 auto}.map-coordinate-card{flex:0 0 auto}.map-actions{grid-template-columns:1fr 1fr}.map-topbar button{padding:8px 10px}}
+/* Navigation-inspired owner map UI */
+.map-panel{background:#101c31;border:1px solid #30415d;border-radius:22px;box-shadow:0 18px 48px rgba(15,27,48,.22);color:#f3f7ff}
+.map-topbar .map-title{color:#fff;font-size:19px}.map-topbar .muted{color:#b7c7df}
+.map-topbar button{background:#243651;color:#fff;border:1px solid #435a7c;border-radius:13px}
+.map-search{background:#172740;padding:9px;border-radius:16px}
+.map-search input{background:#f9fbff;border:1px solid #d8e1ef;border-radius:12px}
+.map-search button{background:#3478f6;color:#fff;border:0;border-radius:12px}
+.map-search-note{color:#b8c7dd}
+.map-actions button{background:#233752;color:#fff;border:1px solid #496184;border-radius:13px}
+.map-actions button.primary{background:#3478f6;border-color:#3478f6}
+.map-message{background:#1c304d;color:#e6efff;border:1px solid #344c70;border-radius:13px}
+.shop-map-canvas{border:1px solid #425878;border-radius:17px;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.map-coordinate-card{background:#1c304d;color:#b9cbe5;border:1px solid #344c70;border-radius:14px}
+.map-coordinate-card strong{color:#fff;font-size:15px;font-variant-numeric:tabular-nums}
+.map-coordinate-card button{min-height:40px;background:#3478f6;border:0;color:#fff;border-radius:11px;font-weight:750}
+#shopMap .leaflet-control-zoom,#shopMap .leaflet-control-layers{border:0!important;border-radius:13px;overflow:hidden;box-shadow:0 5px 18px rgba(20,35,60,.24)!important}
+#shopMap .leaflet-control-zoom a{background:#fff;color:#17243b;border:0;border-bottom:1px solid #e7edf5}
+#shopMap .leaflet-popup-content-wrapper{border-radius:13px}
+@media(max-width:600px){.map-panel:not(.hidden){background:#101c31;padding:calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom))}.map-topbar{margin-bottom:10px}.shop-map-canvas{min-height:36vh}.map-footnote{color:#b8c7dd}}
+
 </style></head>
 <body>
 <header><div><a href="./">← Сомонаи асосӣ</a><h1>Панели соҳибкор</h1><div class="muted">Идоракунии марказ ва хизматрасониҳо</div></div></header>
@@ -72,7 +92,7 @@ a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14
   </div>
   <div id="shopMapMessage" class="map-message" role="status">Харита ҳангоми кушодан бор мешавад.</div>
   <div id="shopMap" class="shop-map-canvas"></div>
-  <div class="map-coordinate-card"><span>Координатаҳои интихобшуда</span><strong id="shopMapCoordinates">Ҷой интихоб нашудааст.</strong></div>
+  <div class="map-coordinate-card"><span>Координатаҳои пурра (арзи ҷуғрофӣ, тӯли ҷуғрофӣ)</span><strong id="shopMapCoordinates">Ҷой интихоб нашудааст.</strong><button id="copyShopMapCoordinates" type="button">Нусхаи координатаҳо</button></div>
   <p class="muted map-footnote">Пас аз интихоб, тугмаи «Сабт кардани маълумот»-ро дар поёни форма пахш кун. Интихоби нуқта бе GPS ҳам кор мекунад.</p>
  </div>
  <input id="shopLatitude" type="hidden">
@@ -691,7 +711,7 @@ function setShopMapPoint(lat,lng,options={}){
  const latitude=Number(lat),longitude=Number(lng);
  if(!Number.isFinite(latitude)||!Number.isFinite(longitude)||Math.abs(latitude)>90||Math.abs(longitude)>180)return;
  $("shopLatitude").value=latitude.toFixed(7);$("shopLongitude").value=longitude.toFixed(7);
- $("shopMapCoordinates").textContent="Ҷой интихоб шуд: "+latitude.toFixed(6)+", "+longitude.toFixed(6);
+ $("shopMapCoordinates").textContent="Арз: "+latitude.toFixed(7)+" · Тӯл: "+longitude.toFixed(7)+" (широта, долгота)";
  if(shopMapMarker)shopMapMarker.setLatLng([latitude,longitude]);
  if(shopMapAccuracyCircle&&!options.keepAccuracy){shopMapAccuracyCircle.remove();shopMapAccuracyCircle=null;}
 }
@@ -774,6 +794,12 @@ async function openShopMap(){
   setTimeout(()=>shopMapInstance&&shopMapInstance.invalidateSize(),120);
  }catch(error){$("shopMapMessage").textContent=error.message||"Харита бор нашуд."; }
 }
+$("copyShopMapCoordinates").addEventListener("click",async()=>{
+ const latitude=$("shopLatitude").value,longitude=$("shopLongitude").value,button=$("copyShopMapCoordinates");
+ if(!latitude||!longitude){$("shopMapMessage").textContent="Аввал нуқтаи харитаро интихоб кун.";return;}
+ try{await navigator.clipboard.writeText(latitude+", "+longitude);button.textContent="Нусха гирифта шуд ✓";}
+ catch(error){$("shopMapMessage").textContent="Нусха гирифтан имкон нашуд. Координатаҳоро дастӣ интихоб кун.";}
+});
 $("openShopMapBtn").addEventListener("click",openShopMap);
 $("closeShopMapBtn").addEventListener("click",()=>$("shopMapPanel").classList.add("hidden"));
 $("centerShopMapBtn").addEventListener("click",()=>{
