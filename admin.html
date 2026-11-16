@@ -58,9 +58,14 @@ a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14
    <div><strong class="map-title">Ҷойи марказ</strong><div class="muted">Нуқтаро интихоб кун ё нишонаро ба ҷойи дуруст каш.</div></div>
    <button id="closeShopMapBtn" type="button" aria-label="Пӯшидани харита">✕ Пӯшидан</button>
   </div>
+  <div class="map-search">
+   <input id="shopMapSearch" type="search" maxlength="160" placeholder="Ҷустуҷӯи кӯча, маҳалла ё ҷой…" aria-label="Ҷустуҷӯи ҷой дар харита">
+   <button id="shopMapSearchBtn" type="button">⌕ Ҷустуҷӯ</button>
+  </div>
+  <p class="map-search-note">Номи кӯча, бозор ё маҳалларо навис. Ҷустуҷӯ танҳо баъди пахши тугма иҷро мешавад.</p>
   <div class="map-actions">
    <button id="myLocationBtn" class="primary" type="button">◎ Ҷойгиршавии ман</button>
-   <button id="centerShopMapBtn" type="button">⌖ Ҷойи сабтшуда</button>
+   <button id="centerShopMapBtn" type="button">⌖ Ҷойи интихобшуда</button>
   </div>
   <div id="shopMapMessage" class="map-message" role="status">Харита ҳангоми кушодан бор мешавад.</div>
   <div id="shopMap" class="shop-map-canvas"></div>
