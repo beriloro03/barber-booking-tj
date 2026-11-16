@@ -729,11 +729,18 @@ function openCustomerMap(shop){
       if(!backdrop.isConnected)return;
       routeStatus.hidden=false;routeStatus.textContent=error.code===1?labels.permission:labels.accuracy;routeButton.disabled=false;
     };
-    navigator.geolocation.getCurrentPosition(onPosition,error=>{
-      if(error.code===1){onLocationError(error);return;}
-      routeStatus.textContent=labels.accuracy+" · "+labels.locating;
-      navigator.geolocation.getCurrentPosition(onPosition,onLocationError,{enableHighAccuracy:false,timeout:20000,maximumAge:120000});
-    },{enableHighAccuracy:true,timeout:12000,maximumAge:30000});
+    // Collect several GPS readings and use the most accurate fix, rather than the first possibly rough reading.
+    let bestPosition=null,watchId=null,finished=false;
+    const finishWith=position=>{if(finished)return;finished=true;if(watchId!==null)navigator.geolocation.clearWatch(watchId);onPosition(position);};
+    const useFallback=()=>{if(finished)return;navigator.geolocation.getCurrentPosition(finishWith,onLocationError,{enableHighAccuracy:false,timeout:20000,maximumAge:0});};
+    watchId=navigator.geolocation.watchPosition(position=>{
+      if(!bestPosition||position.coords.accuracy<bestPosition.coords.accuracy)bestPosition=position;
+      if(position.coords.accuracy<=15)finishWith(bestPosition);
+    },error=>{
+      if(error.code===1){if(!finished){finished=true;if(watchId!==null)navigator.geolocation.clearWatch(watchId);onLocationError(error);}}
+      else if(bestPosition)finishWith(bestPosition);else useFallback();
+    },{enableHighAccuracy:true,timeout:20000,maximumAge:0});
+    setTimeout(()=>{if(bestPosition)finishWith(bestPosition);else useFallback();},12000);
   }
   routeButton.addEventListener("click",buildCustomerRoute);
   modeSelect.addEventListener("change",()=>{
