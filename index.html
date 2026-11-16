@@ -603,9 +603,9 @@ function loadCustomerLeaflet(){
 function openCustomerMap(shop){
   const lang=document.documentElement.lang||"tg";
   const labels={
-    tg:{title:"Ҷойгиршавии марказ",loading:"Харита бор шуда истодааст…",failed:"Харита бор нашуд. Интернетро санҷед ё харитаи берунаро кушоед.",saved:"Сартарошхона",external:"Кушодан дар харитаи беруна",close:"Пӯшидан",note:"Ҳангоми кушодани харита масир ба сартарошхона ба таври худкор сохта мешавад. Ҷойгиршавии шумо танҳо бо иҷозати браузер истифода мешавад.",route:"Аз нав сохтани масир",locating:"Ҷойгиршавии шуморо муайян карда истодаем…",routing:"Масир ҳисоб карда мешавад…",routeReady:"Масир омода аст. Масофа: ",routeError:"Масир пайдо нашуд. Харитаи берунаро кушоед.",permission:"Барои сохтани масир ба браузер иҷозати ҷойгиршавӣ диҳед.",accuracy:"Ҷойгиршавӣ муайян нашуд. GPS ва иҷозати сайтро санҷед.",noCoords:"Ин марказ ҳоло координатаи харита надорад.",shopCoords:"Координатаи сартарошхона",youCoords:"Координатаи шумо",walk:"Пиёда",drive:"Бо мошин",mode:"Навъи роҳ",minutes:"дақ."},
-    ru:{title:"Расположение заведения",loading:"Загрузка карты…",failed:"Не удалось загрузить карту. Проверьте интернет или откройте внешнюю карту.",saved:"Парикмахерская",external:"Открыть внешнюю карту",close:"Закрыть",note:"При открытии карты маршрут до барбершопа строится автоматически. Ваше местоположение используется только с разрешения браузера.",route:"Построить маршрут ещё раз",locating:"Определяем ваше местоположение…",routing:"Строим маршрут…",routeReady:"Маршрут готов. Расстояние: ",routeError:"Маршрут не найден. Откройте внешнюю карту.",permission:"Разрешите браузеру доступ к местоположению для построения маршрута.",accuracy:"Не удалось определить местоположение. Проверьте GPS и разрешение сайта.",noCoords:"У заведения пока нет координат на карте.",shopCoords:"Координаты барбершопа",youCoords:"Ваши координаты",walk:"Пешком",drive:"На машине",mode:"Тип маршрута",minutes:"мин."},
-    en:{title:"Shop location",loading:"Loading map…",failed:"Map unavailable. Check your connection or open the external map.",saved:"Barbershop",external:"Open external map",close:"Close",note:"When the map opens, the route to the barbershop is built automatically. Your location is used only with browser permission.",route:"Rebuild route",locating:"Finding your location…",routing:"Calculating route…",routeReady:"Route ready. Distance: ",routeError:"Route not found. Open the external map.",permission:"Allow browser location access to build a route.",accuracy:"Could not get your location. Check GPS and site permission.",noCoords:"This shop has no map coordinates yet.",shopCoords:"Barbershop coordinates",youCoords:"Your coordinates",walk:"Walking",drive:"Driving",mode:"Travel mode",minutes:"min"}
+    tg:{title:"Ҷойгиршавии марказ",loading:"Харита бор шуда истодааст…",failed:"Харита бор нашуд. Интернетро санҷед ё харитаи берунаро кушоед.",saved:"Сартарошхона",external:"Кушодан дар харитаи беруна",close:"Пӯшидан",note:"Ҳангоми кушодани харита масир ба сартарошхона ба таври худкор сохта мешавад. Ҷойгиршавии шумо танҳо бо иҷозати браузер истифода мешавад.",route:"Аз нав сохтани масир",locating:"Ҷойгиршавии шуморо муайян карда истодаем…",routing:"Масир ҳисоб карда мешавад…",routeReady:"Масир омода аст. Масофа: ",routeError:"Масир пайдо нашуд. Харитаи берунаро кушоед.",permission:"Барои сохтани масир ба браузер иҷозати ҷойгиршавӣ диҳед.",accuracy:"Ҷойгиршавӣ муайян нашуд. GPS ва иҷозати сайтро санҷед.",noCoords:"Ин марказ ҳоло координатаи харита надорад.",shopCoords:"Координатаи сартарошхона",youCoords:"Координатаи шумо",walk:"Пиёда",drive:"Бо мошин",mode:"Навъи роҳ",minutes:"дақ.",approx:"тақрибан",accuracyLabel:"дақиқии GPS"},
+    ru:{title:"Расположение заведения",loading:"Загрузка карты…",failed:"Не удалось загрузить карту. Проверьте интернет или откройте внешнюю карту.",saved:"Парикмахерская",external:"Открыть внешнюю карту",close:"Закрыть",note:"При открытии карты маршрут до барбершопа строится автоматически. Ваше местоположение используется только с разрешения браузера.",route:"Построить маршрут ещё раз",locating:"Определяем ваше местоположение…",routing:"Строим маршрут…",routeReady:"Маршрут готов. Расстояние: ",routeError:"Маршрут не найден. Откройте внешнюю карту.",permission:"Разрешите браузеру доступ к местоположению для построения маршрута.",accuracy:"Не удалось определить местоположение. Проверьте GPS и разрешение сайта.",noCoords:"У заведения пока нет координат на карте.",shopCoords:"Координаты барбершопа",youCoords:"Ваши координаты",walk:"Пешком",drive:"На машине",mode:"Тип маршрута",minutes:"мин.",approx:"примерно",accuracyLabel:"точность GPS"},
+    en:{title:"Shop location",loading:"Loading map…",failed:"Map unavailable. Check your connection or open the external map.",saved:"Barbershop",external:"Open external map",close:"Close",note:"When the map opens, the route to the barbershop is built automatically. Your location is used only with browser permission.",route:"Rebuild route",locating:"Finding your location…",routing:"Calculating route…",routeReady:"Route ready. Distance: ",routeError:"Route not found. Open the external map.",permission:"Allow browser location access to build a route.",accuracy:"Could not get your location. Check GPS and site permission.",noCoords:"This shop has no map coordinates yet.",shopCoords:"Barbershop coordinates",youCoords:"Your coordinates",walk:"Walking",drive:"Driving",mode:"Travel mode",minutes:"min",approx:"about",accuracyLabel:"GPS accuracy"}
   }[lang]||{title:"Shop location",loading:"Loading map…",failed:"Map unavailable.",saved:"Barbershop",external:"Open external map",close:"Close",note:"Tap Get directions to build a route.",route:"Get directions",locating:"Finding your location…",routing:"Calculating route…",routeReady:"Route ready. Distance: ",routeError:"Route not found.",permission:"Allow location access.",accuracy:"Could not get location.",noCoords:"No coordinates available."};
   const lat=Number(shop.latitude),lng=Number(shop.longitude);
   const valid=shop.latitude!==null&&shop.longitude!==null&&Number.isFinite(lat)&&Number.isFinite(lng)&&Math.abs(lat)<=90&&Math.abs(lng)<=180;
@@ -657,9 +657,10 @@ function openCustomerMap(shop){
   function buildCustomerRoute(){
     if(!navigator.geolocation){routeStatus.hidden=false;routeStatus.textContent=labels.permission;return;}
     routeButton.disabled=true;routeStatus.hidden=false;routeStatus.textContent=labels.locating;
-    navigator.geolocation.getCurrentPosition(async pos=>{
+    const onPosition=async pos=>{
       const userLat=pos.coords.latitude,userLng=pos.coords.longitude;
-      userCoordinateLine.textContent=labels.youCoords+": "+userLat.toFixed(6)+", "+userLng.toFixed(6);
+      const accuracyMeters=Math.max(0,Math.round(Number(pos.coords.accuracy)||0));
+      userCoordinateLine.textContent=labels.youCoords+": "+userLat.toFixed(6)+", "+userLng.toFixed(6)+" · "+labels.accuracyLabel+": ±"+accuracyMeters+" м";
       routeStatus.textContent=labels.routing;
       try{
         const walking=modeSelect.value==="walking";
@@ -669,18 +670,28 @@ function openCustomerMap(shop){
         const data=await response.json();if(!data.routes||!data.routes.length)throw new Error("route missing");
         const route=data.routes[0],distance=route.distance>=1000?(route.distance/1000).toFixed(1)+" км":Math.round(route.distance)+" м";
         const duration=Math.round(route.duration/60);
-        routeStatus.textContent=labels.routeReady+distance+" · тақрибан "+duration+" "+labels.minutes+" · "+(walking?labels.walk:labels.drive);
+        routeStatus.textContent=labels.routeReady+distance+" · "+labels.approx+" "+duration+" "+labels.minutes+" · "+(walking?labels.walk:labels.drive);
         pendingRoute=route.geometry;pendingUserPoint=[userLat,userLng];drawCustomerRoute();
         externalLink.href="https://www.google.com/maps/dir/?api=1&origin="+encodeURIComponent(userLat+","+userLng)+"&destination="+encodeURIComponent(lat+","+lng)+"&travelmode="+(walking?"walking":"driving");
         externalLink.textContent=lang==="ru"?"Открыть навигацию":lang==="en"?"Open navigation":"Кушодани роҳнамо";
       }catch(error){routeStatus.textContent=labels.routeError;externalLink.href="https://www.google.com/maps/dir/?api=1&origin="+encodeURIComponent(userLat+","+userLng)+"&destination="+encodeURIComponent(lat+","+lng)+"&travelmode="+(modeSelect.value==="walking"?"walking":"driving");}
       routeButton.disabled=false;
-    },error=>{
+    };
+    const onLocationError=error=>{
+      if(!backdrop.isConnected)return;
       routeStatus.hidden=false;routeStatus.textContent=error.code===1?labels.permission:labels.accuracy;routeButton.disabled=false;
-    },{enableHighAccuracy:true,timeout:20000,maximumAge:60000});
+    };
+    navigator.geolocation.getCurrentPosition(onPosition,error=>{
+      if(error.code===1){onLocationError(error);return;}
+      routeStatus.textContent=labels.accuracy+" · "+labels.locating;
+      navigator.geolocation.getCurrentPosition(onPosition,onLocationError,{enableHighAccuracy:false,timeout:20000,maximumAge:120000});
+    },{enableHighAccuracy:true,timeout:12000,maximumAge:30000});
   }
   routeButton.addEventListener("click",buildCustomerRoute);
-  modeSelect.addEventListener("change",buildCustomerRoute);
+  modeSelect.addEventListener("change",()=>{
+    externalLink.href="https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(lat+","+lng)+"&travelmode="+modeSelect.value;
+    buildCustomerRoute();
+  });
   // The map button is a deliberate customer action, so request location and build the route immediately.
   buildCustomerRoute();
 }
