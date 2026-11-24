@@ -106,7 +106,7 @@ function renderShopTrend(){
   track.append(bar);
   const label=document.createElement("span");label.className="trend-label";label.textContent=m.label;
   col.append(value,track,label);box.append(col);
-}
+ });
 }
 function renderShops(){
  const box=$("shopList"),term=$("searchShops").value.trim().toLocaleLowerCase();
