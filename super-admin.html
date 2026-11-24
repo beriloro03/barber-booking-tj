@@ -19,6 +19,10 @@ button{font:inherit;font-weight:650;border:1px solid var(--line);border-radius:1
 .section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.section-head h2{margin:0}.tools{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:10px;margin:16px 0}
 .shop{border:1px solid var(--line);border-radius:15px;padding:16px;margin-top:11px;background:#fff}.shop-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.shop-title{font-size:16px;font-weight:750;overflow-wrap:anywhere}.shop p{margin:7px 0}.pill{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:750;white-space:nowrap}.pill.active{background:#e7f6ee;color:var(--green)}.pill.inactive{background:#fff3df;color:var(--amber)}.shop-actions{margin-top:13px;display:flex;gap:9px;flex-wrap:wrap}.shop-actions button{flex:1;min-width:170px}
 .empty{padding:22px;text-align:center;color:var(--muted);background:#faf9fc;border:1px dashed #dcd5e8;border-radius:13px;margin-top:12px}
+.activity-item{border:1px solid var(--line);border-radius:13px;padding:13px;margin-top:10px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:start}
+.activity-item strong{display:block;overflow-wrap:anywhere}.activity-item p{margin:5px 0 0}.activity-time{font-size:12px;color:var(--muted);white-space:nowrap}
+@media(max-width:650px){.activity-item{grid-template-columns:1fr}.activity-time{white-space:normal}}
+
 .trend{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;align-items:end;min-height:180px;padding:12px 4px 0}
 .trend-col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:7px;min-width:0;height:160px}
 .trend-value{font-size:12px;font-weight:750;color:var(--purple-dark)}
@@ -71,6 +75,11 @@ button{font:inherit;font-weight:650;border:1px solid var(--line);border-radius:1
 <div class="section-head"><h2>Марказҳои сартарошӣ</h2><span id="shopCount" class="muted"></span></div>
 <div class="tools"><input id="searchShops" type="search" placeholder="Ҷустуҷӯи ном, шаҳр ё телефон…"><select id="statusFilter" aria-label="Филтр аз рӯи ҳолат"><option value="all">Ҳамаи ҳолатҳо</option><option value="active">Фаъол</option><option value="inactive">Ғайрифаъол</option></select></div>
 <div id="shopList" class="muted">Маълумот бор шуда истодааст…</div>
+</div>
+<div class="card">
+<div class="section-head"><h2>Таърихи амалиёт</h2><span class="muted">50 амали охирин</span></div>
+<p class="muted">Сабти фаъол ё ғайрифаъол кардани марказҳо аз ҷониби Super Admin.</p>
+<div id="activityList"><div class="empty">Таърих бор шуда истодааст…</div></div>
 </div>
 <div class="card"><h2>Маъмурони марказҳо</h2><p class="muted">Маълумоти маъмурон аз профилҳои марказҳои сабтшуда гирифта мешавад.</p><div id="adminList" class="admin-grid"></div></div>
 </section>
@@ -207,6 +216,41 @@ function renderShops(){
   const actions=document.createElement("div");actions.className="shop-actions";actions.append(action);item.append(actions);box.append(item);
  });
 }
+async function loadActivityLog(){
+ const box=$("activityList");box.replaceChildren();
+ const {data:logs,error}=await supabase.from("platform_activity_log")
+  .select("id,actor_id,action,shop_name,old_is_active,new_is_active,created_at")
+  .order("created_at",{ascending:false}).limit(50);
+ if(error){
+  const empty=document.createElement("div");empty.className="empty";
+  empty.textContent="Таърихи амалиёт бор нашуд: "+error.message;box.append(empty);return;
+ }
+ if(!logs?.length){
+  const empty=document.createElement("div");empty.className="empty";
+  empty.textContent="Ҳоло амалиёт сабт нашудааст.";box.append(empty);return;
+ }
+ const actorIds=[...new Set(logs.map(x=>x.actor_id).filter(Boolean))];
+ let actors={};
+ if(actorIds.length){
+  const result=await supabase.from("profiles").select("id,full_name").in("id",actorIds);
+  if(!result.error)(result.data||[]).forEach(p=>actors[p.id]=p.full_name);
+ }
+ logs.forEach(log=>{
+  const item=document.createElement("article");item.className="activity-item";
+  const detail=document.createElement("div");
+  const title=document.createElement("strong");title.textContent=log.shop_name||"Марказ";
+  const desc=document.createElement("p");desc.className="muted";
+  const action=log.action==="shop_activated"?"Марказ фаъол карда шуд":"Марказ ғайрифаъол карда шуд";
+  const from=log.old_is_active?"Фаъол":"Ғайрифаъол";
+  const to=log.new_is_active?"Фаъол":"Ғайрифаъол";
+  desc.textContent=action+" · "+from+" → "+to+" · Super Admin: "+(actors[log.actor_id]||"ID "+String(log.actor_id||"номаълум").slice(0,8));
+  detail.append(title,desc);
+  const time=document.createElement("time");time.className="activity-time";
+  time.dateTime=log.created_at;
+  time.textContent=new Intl.DateTimeFormat("tg-TJ",{dateStyle:"medium",timeStyle:"short"}).format(new Date(log.created_at));
+  item.append(detail,time);box.append(item);
+ });
+}
 async function loadDashboard(){
  try{await loadBookingStats();}
  catch(error){
@@ -233,6 +277,7 @@ async function loadDashboard(){
  });
  renderShops();
  renderShopTrend();
+ await loadActivityLog();
  const adminBox=$("adminList");adminBox.replaceChildren();
  if(!ownerIds.length){const empty=document.createElement("div");empty.className="empty";empty.textContent="Ҳоло маъмуре нест.";adminBox.append(empty);}
  else ownerIds.forEach(id=>{
