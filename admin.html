@@ -48,6 +48,64 @@ a{color:var(--p)}@media(max-width:520px){main{padding:16px 12px}.card{padding:14
 #shopMap .leaflet-popup-content-wrapper{border-radius:13px}
 @media(max-width:600px){.map-panel:not(.hidden){background:#101c31;padding:calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom))}.map-topbar{margin-bottom:10px}.shop-map-canvas{min-height:36vh}.map-footnote{color:#b8c7dd}}
 
+
+/* Owner dashboard visual refresh 2026: visual-only; all forms and actions preserved. */
+:root{--p:#5740b8;--ink:#20243a;--muted:#687187;--bg:#f5f6fb;--line:#e5e8f1}
+*{box-sizing:border-box}
+body{background:radial-gradient(ellipse at 8% 0%,#ebe8ff 0,transparent 34%),#f5f6fb;color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:-.01em}
+header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);box-shadow:0 4px 18px rgba(32,36,58,.05);padding:13px 16px}
+header div,main{max-width:960px}
+header a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-weight:700;color:#5740b8}
+h1{font-size:clamp(23px,4vw,30px);font-weight:850;letter-spacing:-.045em;color:#252541;margin:10px 0 4px}
+h2{font-size:20px;font-weight:820;letter-spacing:-.025em;color:#292744}
+h3{font-weight:780;color:#34304e}
+main{padding:26px 16px 42px}
+.card{background:#fff;border:1px solid #e5e8f1;border-radius:20px;padding:clamp(16px,3vw,23px);margin-bottom:17px;box-shadow:0 8px 26px rgba(32,36,58,.045)}
+label{font-size:14px;font-weight:750;color:#41445b;margin:13px 0 6px}
+input,textarea,select{width:100%;font:inherit;color:#25283d;background:#fff;border:1px solid #dce0eb;border-radius:12px;padding:12px;min-height:45px;outline:none;transition:border-color .16s,box-shadow .16s}
+textarea{min-height:88px}
+input:focus,textarea:focus,select:focus{border-color:#806ce0;box-shadow:0 0 0 3px rgba(87,64,184,.12)}
+button{font:inherit;font-weight:700;border:1px solid #e0e3ed;border-radius:12px;padding:10px 14px;min-height:42px;background:#fff;color:#34364d;transition:transform .16s,box-shadow .16s,border-color .16s}
+button.primary{background:linear-gradient(135deg,#6651c9,#4d36a9);border-color:#5740b8;color:#fff;box-shadow:0 5px 14px rgba(87,64,184,.18)}
+button.danger{background:#fff7f8;color:#a21d35;border-color:#f0cbd2}
+.row{gap:10px}
+.muted{color:#687187;line-height:1.6}
+#status{border:1px solid #e4e0f5;background:#f4f1ff;color:#51458a;border-radius:13px;padding:13px 15px;line-height:1.5}
+.service{background:#fbfbfe;border:1px solid #e7e9f1;border-radius:14px;padding:14px;margin-top:11px}
+.service-top{gap:12px}
+.service-top strong{color:#292744}
+.stats-grid{gap:11px}
+.stats-grid .service{background:linear-gradient(180deg,#fff,#faf9ff);border-color:#e7e4f4}
+.stats-number{font-size:clamp(25px,4vw,31px);font-weight:850;color:#5740b8;font-variant-numeric:tabular-nums}
+.calendar-day{background:#fff;border-color:#e5e8f1;border-radius:11px}
+.calendar-day strong{color:#37334f}
+.calendar-event{border-color:#ececf3}
+a{color:#5740b8}
+.map-open-button{background:#f2efff;border-color:#dcd4fa;color:#4d36a9;border-radius:13px;font-weight:800}
+@media(hover:hover){
+ .card{transition:box-shadow .18s,border-color .18s}
+ .card:hover{box-shadow:0 12px 30px rgba(32,36,58,.07);border-color:#dddff0}
+ button:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(32,36,58,.08)}
+ button.primary:hover{box-shadow:0 8px 20px rgba(87,64,184,.24)}
+}
+@media(max-width:520px){
+ header{padding:11px 13px}
+ main{padding:17px 12px 32px}
+ .card{border-radius:17px;padding:15px;margin-bottom:13px}
+ h1{font-size:23px}
+ h2{font-size:19px}
+ .row{gap:8px}
+ .row>*{min-width:0}
+ .row button{width:100%}
+ input,textarea,select{font-size:16px}
+ .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .stats-number{font-size:25px}
+ .calendar-grid{gap:3px}
+ .calendar-day{min-height:62px;padding:4px}
+ .calendar-weekday{font-size:10px}
+ .service-top{align-items:flex-start;flex-wrap:wrap}
+}
+
 </style></head>
 <body>
 <header><div><a href="./">← Сомонаи асосӣ</a><h1>Панели соҳибкор</h1><div class="muted">Идоракунии марказ ва хизматрасониҳо</div></div></header>
