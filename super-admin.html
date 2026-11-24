@@ -55,6 +55,14 @@ button{font:inherit;font-weight:650;border:1px solid var(--line);border-radius:1
 <div id="summary" class="summary"></div>
 </div>
 <div class="card">
+<h2>Омори бронҳо</h2>
+<p class="muted">Маълумот аз рӯйи вақти оғози брон ҳисоб мешавад. Санаҳо мувофиқи вақти телефони ту мебошанд.</p>
+<div id="bookingSummary" class="summary"></div>
+<h2 style="margin-top:18px">Фаъолияти бронҳо</h2>
+<p class="muted">Шумораи бронҳо дар шаш моҳи охир.</p>
+<div id="bookingTrend" class="trend" aria-label="Диаграммаи бронҳо дар шаш моҳи охир"></div>
+</div>
+<div class="card">
 <h2>Рушди платформа</h2>
 <p class="muted">Шумораи марказҳои нав дар шаш моҳи охир.</p>
 <div id="shopTrend" class="trend" aria-label="Диаграммаи бақайдгирии марказҳои нав"></div>
@@ -83,6 +91,63 @@ async function checkSuperAdmin(){
   status("Ин ҳисоб иҷозати Super Admin надорад. Ба панели соҳибкор ворид шав.",true);return false;
  }
  showDashboard(true);await loadDashboard();return true;
+}
+function localDateStart(year,month,day=1){
+ return new Date(year,month,day);
+}
+function monthRange(date){
+ return {start:localDateStart(date.getFullYear(),date.getMonth(),1),end:localDateStart(date.getFullYear(),date.getMonth()+1,1)};
+}
+async function countBookings(start=null,end=null){
+ let query=supabase.from("bookings").select("id",{count:"exact",head:true});
+ if(start)query=query.gte("starts_at",start.toISOString());
+ if(end)query=query.lt("starts_at",end.toISOString());
+ const {count,error}=await query;
+ if(error)throw error;
+ return count||0;
+}
+function renderBookingTrend(months){
+ const box=$("bookingTrend");box.replaceChildren();
+ const max=Math.max(1,...months.map(m=>m.count));
+ months.forEach(m=>{
+  const col=document.createElement("div");col.className="trend-col";
+  const value=document.createElement("span");value.className="trend-value";value.textContent=String(m.count);
+  const track=document.createElement("div");track.className="trend-track";
+  const bar=document.createElement("div");bar.className="trend-bar";bar.style.height=(m.count?Math.max(5,m.count/max*100):3)+"%";bar.title=m.count+" брон";
+  track.append(bar);
+  const label=document.createElement("span");label.className="trend-label";label.textContent=m.label;
+  col.append(value,track,label);box.append(col);
+ });
+}
+async function loadBookingStats(){
+ const now=new Date();
+ const todayStart=localDateStart(now.getFullYear(),now.getMonth(),now.getDate());
+ const tomorrow=new Date(todayStart);tomorrow.setDate(tomorrow.getDate()+1);
+ const weekStart=new Date(todayStart);weekStart.setDate(weekStart.getDate()-((weekStart.getDay()+6)%7));
+ const nextWeek=new Date(weekStart);nextWeek.setDate(nextWeek.getDate()+7);
+ const month=monthRange(now);
+ const months=[];
+ for(let i=5;i>=0;i--){
+  const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+  months.push({date:d,label:new Intl.DateTimeFormat("tg-TJ",{month:"short"}).format(d),count:0});
+ }
+ const counts=await Promise.all([
+  countBookings(),
+  countBookings(todayStart,tomorrow),
+  countBookings(weekStart,nextWeek),
+  countBookings(month.start,month.end),
+  ...months.map(m=>{const range=monthRange(m.date);return countBookings(range.start,range.end);})
+ ]);
+ const labels=["Ҳамаи бронҳо","Имрӯз","Ин ҳафта","Ин моҳ"];
+ $("bookingSummary").replaceChildren();
+ counts.slice(0,4).forEach((value,i)=>{
+  const item=document.createElement("div");item.className="stat";
+  const strong=document.createElement("strong");strong.textContent=String(value);
+  const small=document.createElement("span");small.textContent=labels[i];
+  item.append(strong,small);$("bookingSummary").append(item);
+ });
+ months.forEach((m,i)=>m.count=counts[i+4]);
+ renderBookingTrend(months);
 }
 function renderShopTrend(){
  const box=$("shopTrend");box.replaceChildren();
@@ -143,6 +208,13 @@ function renderShops(){
  });
 }
 async function loadDashboard(){
+ try{await loadBookingStats();}
+ catch(error){
+  $("bookingSummary").textContent="Омори бронҳо бор нашуд: "+(error.message||"хатои номаълум");
+  $("bookingTrend").replaceChildren();
+  status("Омори бронҳо дастрас нашуд. Иҷозати хондани маълумоти бронҳоро санҷ.",true);
+ }
+
  $("shopList").textContent="Марказҳо бор шуда истодаанд…";$("adminList").textContent="Маъмурон бор шуда истодаанд…";
  const {data:shops,error}=await supabase.from("barbershops").select("id,owner_id,name,city,address,phone,is_active,created_at").order("created_at",{ascending:false});
  if(error){$("shopList").textContent="Марказҳо бор нашуданд: "+error.message;$("adminList").textContent="";status("Хатои гирифтани маълумот: "+error.message,true);return;}
