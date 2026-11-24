@@ -458,6 +458,45 @@
       .lang button{padding:7px 9px;min-width:36px}
     }
 
+
+    /* Booking flow refresh: visual-only, keeps all existing booking behavior. */
+    .booking-panel{
+      margin-top:18px;padding:clamp(17px,3vw,24px);
+      border:1px solid #c9d9d2;border-radius:20px;
+      background:linear-gradient(145deg,#f3faf5 0%,#ffffff 72%);
+      box-shadow:0 12px 30px rgba(24,68,51,.08);
+    }
+    .booking-panel h4{font-size:22px;letter-spacing:-.02em;margin:0 0 7px}
+    .booking-panel>.service-meta{font-size:15px;line-height:1.55;margin:0 0 15px;color:#526b62}
+    .booking-panel form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 14px}
+    .booking-panel form>label{min-width:0;margin:8px 0 4px;font-weight:750;color:#203d32}
+    .booking-panel form>label:nth-child(1),
+    .booking-panel form>label:nth-child(2),
+    .booking-panel form>label:nth-child(7){grid-column:1/-1}
+    .booking-panel input,.booking-panel select,.booking-panel textarea{
+      width:100%;min-width:0;min-height:50px;margin-top:7px;
+      padding:12px 13px;border:1.5px solid #cbdcd1;border-radius:12px;
+      background:#fff;color:#18352d;font-size:16px;
+    }
+    .booking-panel textarea{min-height:88px;resize:vertical}
+    .booking-panel input:focus,.booking-panel select:focus,.booking-panel textarea:focus{
+      outline:none;border-color:#287b59;box-shadow:0 0 0 4px rgba(40,123,89,.12)
+    }
+    .booking-panel form>button{grid-column:1/-1;width:100%;min-height:52px;margin-top:12px;border-radius:13px;font-weight:800;font-size:17px}
+    .booking-panel .booking-status{grid-column:1/-1;margin-top:5px;padding:0 2px;font-size:15px}
+    .booking-panel .booking-status:empty{display:none}
+    .service-item{gap:10px}
+    .service-item .book-btn{min-height:44px;padding:10px 16px;border-radius:12px}
+    @media(max-width:560px){
+      .booking-panel{padding:16px;border-radius:17px}
+      .booking-panel h4{font-size:20px}
+      .booking-panel form{grid-template-columns:minmax(0,1fr);gap:3px}
+      .booking-panel form>label:nth-child(n){grid-column:1}
+      .booking-panel form>button,.booking-panel .booking-status{grid-column:1}
+      .booking-panel input,.booking-panel select,.booking-panel textarea{font-size:16px;min-height:50px}
+      .booking-panel form>button{min-height:54px}
+      .service-item .book-btn{width:100%}
+    }
   </style>
 </head>
 <body>
