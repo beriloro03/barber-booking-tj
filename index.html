@@ -360,7 +360,105 @@
     .customer-shop-pin{width:22px;height:22px;border:4px solid #fff;border-radius:50% 50% 50% 0;background:#3478f6;transform:rotate(-45deg);box-shadow:0 3px 12px rgba(0,0,0,.35)}
     @media(max-width:560px){.customer-map-dialog{border-radius:0}.customer-map-head{padding:calc(12px + env(safe-area-inset-top)) 13px 12px}.customer-map-search{padding:0 12px 10px}.customer-map-actions{padding-bottom:calc(12px + env(safe-area-inset-bottom))}.customer-coordinate-box{font-size:12px}.customer-map-canvas{min-height:0}}
 
-</style>
+
+    /* Modern customer design refresh 2026: visual-only, preserves booking behavior. */
+    :root{
+      --primary:#5b3cc4;
+      --ink:#1f2433;
+      --muted:#667085;
+      --bg:#f6f7fb;
+      --line:#e7e9f0;
+    }
+    body{
+      background:#f6f7fb;
+      color:#1f2433;
+      font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+      letter-spacing:-.01em;
+    }
+    header{
+      background:rgba(255,255,255,.94);
+      border-bottom:1px solid #e7e9f0;
+      box-shadow:0 4px 18px rgba(31,36,51,.05);
+    }
+    .nav{min-height:68px}
+    .brand{color:#5135b5;font-size:19px;font-weight:850;letter-spacing:-.04em}
+    .lang button{border-radius:999px;padding:8px 12px;font-weight:700}
+    main{max-width:1120px;padding-top:34px}
+    .hero{
+      background:linear-gradient(120deg,#30206f 0%,#5b3cc4 58%,#8768e8 100%);
+      border:0;border-radius:28px;padding:clamp(28px,5vw,56px);
+      box-shadow:0 20px 48px rgba(70,49,155,.18);
+      color:#fff;
+    }
+    .hero:after{opacity:.8}
+    .eyebrow{color:#e8e1ff;font-size:13px;font-weight:800;letter-spacing:.12em}
+    h1{font-weight:850;letter-spacing:-.055em;line-height:1.08}
+    .lead{color:rgba(255,255,255,.88);font-size:clamp(16px,2vw,19px);line-height:1.7}
+    .actions{gap:12px}
+    .actions a{border-radius:13px;padding:13px 18px;font-weight:750}
+    .actions .primary{background:#fff;color:#4930a8;border:1px solid #fff}
+    .actions .secondary{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.42)}
+    .section{margin-top:44px}
+    .section h2{color:#20243a;font-size:clamp(23px,3vw,29px);font-weight:820;letter-spacing:-.04em}
+    .muted{color:#667085}
+    .grid{gap:16px}
+    .tile,.shop-card,.my-booking-card{
+      background:#fff;border:1px solid #e7e9f0;border-radius:20px;
+      box-shadow:0 8px 24px rgba(31,36,51,.045);
+      transition:transform .18s ease,box-shadow .18s ease;
+    }
+    .tile{padding:22px}
+    .tile .symbol{background:#f0edff;border-radius:15px}
+    .tile h3{font-weight:780;color:#292344}
+    .tile p,.shop-card p{color:#667085}
+    .shop-card{padding:22px}
+    .shop-card h3{font-size:21px;font-weight:820;color:#25233a}
+    .shop-card a,.service-item strong{color:#5b3cc4}
+    .service-list,.staff-list,.hours-list{border-color:#ececf3}
+    .service-list h4,.staff-list h4,.hours-list h4{font-weight:800;color:#34304a}
+    .service-item{padding:12px 0;align-items:center}
+    .service-meta,.staff-meta{color:#667085}
+    .staff-photo{border-radius:18px;border:0}
+    button,.book-btn{
+      border-radius:12px;font-weight:700;transition:transform .16s ease,box-shadow .16s ease;
+    }
+    .book-btn,button.primary{
+      background:#5b3cc4;border-color:#5b3cc4;color:#fff;
+      box-shadow:0 5px 14px rgba(91,60,196,.18);
+    }
+    .booking-panel{
+      background:#faf9ff;border:1px solid #e3def8;border-radius:18px;padding:18px;
+    }
+    .booking-panel input,.booking-panel select,.booking-panel textarea{
+      border:1px solid #d9dbea;border-radius:12px;background:#fff;min-height:46px;
+    }
+    .booking-panel input:focus,.booking-panel select:focus,.booking-panel textarea:focus{
+      border-color:#8065dc;box-shadow:0 0 0 3px rgba(91,60,196,.12);outline:none;
+    }
+    .booking-panel button{min-height:46px}
+    .booking-state{background:#f0edff;color:#5035b1!important;border-radius:999px;padding:6px 11px}
+    .notice,.shop-status{border:1px solid #e7e9f0;border-radius:16px;background:#fff}
+    footer{color:#7a8192;padding-top:18px}
+    @media(hover:hover){
+      .tile:hover,.shop-card:hover,.my-booking-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(31,36,51,.09)}
+      button:hover,.book-btn:hover{transform:translateY(-1px)}
+    }
+    @media(max-width:560px){
+      main{padding:20px 13px 30px}
+      .nav{padding:11px 13px;min-height:60px}
+      .brand{font-size:16px}
+      .hero{padding:27px 20px;border-radius:22px}
+      h1{font-size:clamp(32px,9vw,42px)}
+      .lead{font-size:17px}
+      .section{margin-top:32px}
+      .grid{grid-template-columns:1fr;gap:12px}
+      .tile,.shop-card{border-radius:17px;padding:18px}
+      .book-btn{width:100%}
+      .booking-panel{padding:14px}
+      .lang button{padding:7px 9px;min-width:36px}
+    }
+
+  </style>
 </head>
 <body>
 <header><div class="nav">
