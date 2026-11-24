@@ -636,7 +636,7 @@ function renderStaffBookingStats(bookings,staffRows){
 async function loadReviews(){
  if(!shop)return;
  const box=$("reviewsList");box.textContent="Баҳоҳо бор шуда истодаанд…";
- const {data:reviews,error}=await supabase.from("reviews").select("id,booking_id,rating,comment,status,created_at").eq("barbershop_id",shop.id).order("created_at",{ascending:false}).limit(200);
+ const {data:reviews,error}=await supabase.from("reviews").select("id,booking_id,rating,comment,owner_reply,status,created_at").eq("barbershop_id",shop.id).order("created_at",{ascending:false}).limit(200);
  if(error){box.textContent="Баҳоҳо бор нашуданд: "+error.message;return;}
  box.replaceChildren();
  if(!reviews||!reviews.length){box.textContent="Ҳоло баҳо ё фикру мулоҳиза нест.";return;}
@@ -651,6 +651,13 @@ async function loadReviews(){
   const meta=document.createElement("p");meta.className="muted";meta.textContent=(booking.service_name_snapshot||"Хизмат")+(booking.starts_at?" · "+new Date(booking.starts_at).toLocaleString("tg-TJ",{dateStyle:"medium",timeStyle:"short"}):"");card.append(meta);
   if(review.comment){const comment=document.createElement("p");comment.textContent=review.comment;card.append(comment);}
   const state=document.createElement("p");state.className="muted";state.textContent="Ҳолат: "+({pending:"Интизор",approved:"Нашр шудааст",hidden:"Пинҳон"}[review.status]||review.status);card.append(state);
+  if(review.status==="approved"){
+   const replyLabel=document.createElement("label");replyLabel.textContent="Ҷавоби соҳибкор (то 500 аломат)";
+   const replyInput=document.createElement("textarea");replyInput.maxLength=500;replyInput.rows=3;replyInput.value=review.owner_reply||"";replyInput.placeholder="Ҷавоби худро нависед…";replyLabel.append(replyInput);card.append(replyLabel);
+   const saveReply=document.createElement("button");saveReply.type="button";saveReply.className="primary";saveReply.textContent="Сабти ҷавоб";
+   saveReply.addEventListener("click",async()=>{saveReply.disabled=true;const reply=replyInput.value.trim();const {error}=await supabase.from("reviews").update({owner_reply:reply||null}).eq("id",review.id);if(error){status("Ҷавоб сабт нашуд: "+error.message,true);saveReply.disabled=false;}else{status("Ҷавоби соҳибкор сабт шуд.");await loadReviews();}});
+   card.append(saveReply);
+  }
   const actions=document.createElement("div");actions.className="row";
   if(review.status!=="approved"){const approve=document.createElement("button");approve.type="button";approve.className="primary";approve.textContent="Нашр кардан";approve.addEventListener("click",async()=>{approve.disabled=true;const {error}=await supabase.from("reviews").update({status:"approved"}).eq("id",review.id);if(error){status("Баҳо нашр нашуд: "+error.message,true);approve.disabled=false;}else{status("Баҳо нашр шуд.");await loadReviews();}});actions.append(approve);}
   if(review.status!=="hidden"){const hide=document.createElement("button");hide.type="button";hide.className="danger";hide.textContent="Пинҳон кардан";hide.addEventListener("click",async()=>{hide.disabled=true;const {error}=await supabase.from("reviews").update({status:"hidden"}).eq("id",review.id);if(error){status("Баҳо пинҳон нашуд: "+error.message,true);hide.disabled=false;}else{status("Баҳо пинҳон карда шуд.");await loadReviews();}});actions.append(hide);}
