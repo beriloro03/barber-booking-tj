@@ -982,7 +982,7 @@ function render() {
     const publicReviews=reviewsByShop[shop.id]||[];
     const ratingLine=document.createElement("p");ratingLine.className="muted";
     if(publicReviews.length){const avg=publicReviews.reduce((sum,item)=>sum+Number(item.rating),0)/publicReviews.length;ratingLine.textContent="★ "+avg.toFixed(1)+"/5 · "+publicReviews.length+" "+words.reviewCount;card.append(ratingLine);
-      publicReviews.slice(0,3).filter(item=>item.comment).forEach(item=>{const quote=document.createElement("p");quote.className="muted";quote.textContent="“"+item.comment+"”";card.append(quote);});
+      publicReviews.slice(0,3).forEach(item=>{if(item.comment){const quote=document.createElement("p");quote.className="muted";quote.textContent="“"+item.comment+"”";card.append(quote);}if(item.owner_reply){const reply=document.createElement("p");reply.className="muted";reply.textContent="↳ Ҷавоби соҳибкор: "+item.owner_reply;card.append(reply);}});
     }else{ratingLine.textContent=words.averageRating+": —";card.append(ratingLine);}
     if (shop.description) {
       const description = document.createElement("p");
@@ -1087,7 +1087,7 @@ async function loadShops() {
           servicesByShop[service.barbershop_id].push(service);
         });
       }
-      const {data:reviewData,error:reviewError}=await supabase.from("reviews").select("barbershop_id,rating,comment,created_at").in("barbershop_id",shops.map(shop=>shop.id)).eq("status","approved").order("created_at",{ascending:false}).limit(200);
+      const {data:reviewData,error:reviewError}=await supabase.from("reviews").select("barbershop_id,rating,comment,owner_reply,created_at").in("barbershop_id",shops.map(shop=>shop.id)).eq("status","approved").order("created_at",{ascending:false}).limit(200);
       if(reviewError){console.error("Supabase reviews query failed:",reviewError.message);}
       else{(reviewData||[]).forEach(review=>{if(!reviewsByShop[review.barbershop_id])reviewsByShop[review.barbershop_id]=[];reviewsByShop[review.barbershop_id].push(review);});}
       const {data:hoursData,error:hoursError}=await supabase.from("business_hours").select("barbershop_id,weekday,opens_at,closes_at,is_closed").in("barbershop_id",shops.map(shop=>shop.id)).order("weekday",{ascending:true});
