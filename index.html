@@ -497,7 +497,24 @@
       .booking-panel form>button{min-height:54px}
       .service-item .book-btn{width:100%}
     }
-  </style>
+  
+    /* Guided booking flow: three clear steps for mobile and desktop. */
+    .booking-progress{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:14px 0 18px}
+    .booking-progress-item{padding:10px 7px;border:1px solid #d4e3dc;border-radius:11px;background:#fff;color:#526b62;text-align:center;font-size:14px;font-weight:700}
+    .booking-progress-item.current{background:#176b52;color:#fff;border-color:#176b52}
+    .booking-progress-item.complete{background:#e1f3e8;color:#145c47;border-color:#b9dfc8}
+    .booking-step{display:grid;gap:5px}
+    .booking-step[hidden],.booking-progress-item[hidden]{display:none}
+    .booking-step-controls{display:flex;gap:10px;margin-top:16px}
+    .booking-step-controls button{flex:1;min-height:50px;font-weight:750}
+    .booking-step-controls .booking-back{background:#fff;color:#18352d;border-color:#cbded2}
+    .booking-summary{padding:14px;margin:4px 0 10px;border:1px solid #cfe4d7;border-radius:13px;background:#f7fcf8}
+    .booking-summary>strong{display:block;margin-bottom:8px}
+    .booking-summary-details p{display:flex;justify-content:space-between;gap:12px;margin:6px 0;font-size:15px}
+    .booking-summary-details p strong{text-align:right}
+    @media(max-width:560px){.booking-progress{gap:5px}.booking-progress-item{font-size:12px;padding:9px 3px}.booking-step-controls{gap:8px}.booking-step-controls button{font-size:15px;padding:10px 7px}}
+
+</style>
 </head>
 <body>
 <header><div class="nav">
@@ -587,11 +604,18 @@ function dushanbeDateString(date) {
 }
 function createBookingPanel(shop, shopServices, shopStaff) {
   const words = languageCopy();
+  const flow = document.documentElement.lang==="ru"
+    ? {steps:["Услуга","Дата и время","Ваши данные"],next:"Далее",back:"Назад",summary:"Проверьте запись",staffAny:"Любой доступный сотрудник"}
+    : document.documentElement.lang==="en"
+    ? {steps:["Service","Date & time","Your details"],next:"Continue",back:"Back",summary:"Review your booking",staffAny:"Any available staff member"}
+    : {steps:["Хизмат","Сана ва вақт","Маълумоти шумо"],next:"Қадами навбатӣ",back:"Қафо",summary:"Маълумоти навбатро санҷед",staffAny:"Ҳар корманди дастрас"};
   const panel = document.createElement("section");
   panel.className = "booking-panel";
   panel.hidden = true;
   const heading = document.createElement("h4"); heading.textContent = words.bookingTitle;
   const notice = document.createElement("p"); notice.className = "service-meta"; notice.textContent = words.bookingNotice;
+  const progress = document.createElement("div"); progress.className = "booking-progress"; progress.setAttribute("aria-label",flow.steps.join(" — "));
+  const progressItems = flow.steps.map((label,index)=>{const item=document.createElement("div");item.className="booking-progress-item";item.textContent=(index+1)+". "+label;progress.append(item);return item;});
   const form = document.createElement("form");
   const makeLabel = (txt, control) => { const label=document.createElement("label"); label.textContent=txt; label.append(control); return label; };
   const serviceSelect=document.createElement("select"); serviceSelect.required=true;
@@ -608,7 +632,7 @@ function createBookingPanel(shop, shopServices, shopStaff) {
       staffSelect.append(first);
       availableStaff.forEach(person=>{const option=document.createElement("option");option.value=person.id;option.textContent=person.full_name;staffSelect.append(option);});
     }else{
-      first.textContent=words.anyStaff;
+      first.textContent=flow.staffAny;
       staffSelect.append(first);staffSelect.value="";staffSelect.required=false;staffSelect.disabled=true;staffLabel.hidden=true;
     }
   };
@@ -618,8 +642,44 @@ function createBookingPanel(shop, shopServices, shopStaff) {
   const nameInput=document.createElement("input");nameInput.type="text";nameInput.maxLength=120;nameInput.autocomplete="name";nameInput.required=true;
   const phoneInput=document.createElement("input");phoneInput.type="tel";phoneInput.maxLength=40;phoneInput.autocomplete="tel";phoneInput.required=true;
   const noteInput=document.createElement("textarea");noteInput.maxLength=500;
-  const submit=document.createElement("button");submit.type="submit";submit.className="primary";submit.textContent=words.sendBooking;
-  const status=document.createElement("div");status.className="booking-status";status.setAttribute("role","status");
+  const summary=document.createElement("div");summary.className="booking-summary";
+  const summaryHeading=document.createElement("strong");summaryHeading.textContent=flow.summary;summary.append(summaryHeading);
+  const summaryDetails=document.createElement("div");summaryDetails.className="booking-summary-details";summary.append(summaryDetails);
+  const stepOne=document.createElement("div");stepOne.className="booking-step";
+  stepOne.append(makeLabel(words.serviceLabel,serviceSelect),staffLabel);
+  const stepTwo=document.createElement("div");stepTwo.className="booking-step";stepTwo.hidden=true;
+  stepTwo.append(makeLabel(words.dateLabel,dateInput),makeLabel(words.timeLabel,timeInput));
+  const stepThree=document.createElement("div");stepThree.className="booking-step";stepThree.hidden=true;
+  stepThree.append(summary,makeLabel(words.nameLabel,nameInput),makeLabel(words.phoneLabel,phoneInput),makeLabel(words.noteLabel,noteInput));
+  const back=document.createElement("button");back.type="button";back.className="booking-back";back.textContent=flow.back;back.hidden=true;
+  const next=document.createElement("button");next.type="button";next.className="primary booking-next";next.textContent=flow.next;
+  const submit=document.createElement("button");submit.type="submit";submit.className="primary booking-submit";submit.textContent=words.sendBooking;submit.hidden=true;
+  const controls=document.createElement("div");controls.className="booking-step-controls";controls.append(back,next,submit);
+  const status=document.createElement("div");status.className="booking-status";status.setAttribute("role","status");status.setAttribute("aria-live","polite");
+  let currentStep=0;
+  const showStep=(step)=>{
+    currentStep=Math.max(0,Math.min(2,step));
+    [stepOne,stepTwo,stepThree].forEach((node,index)=>{node.hidden=index!==currentStep;});
+    progressItems.forEach((node,index)=>{node.classList.toggle("current",index===currentStep);node.classList.toggle("complete",index<currentStep);});
+    back.hidden=currentStep===0;
+    next.hidden=currentStep===2;
+    submit.hidden=currentStep!==2;
+    status.textContent="";
+  };
+  const updateSummary=()=>{
+    const selected=shopServices.find(item=>item.id===serviceSelect.value);
+    const staff=staffSelect.selectedOptions?.[0]?.textContent||flow.staffAny;
+    const rows=[
+      [words.serviceLabel,selected?.name||"—"],
+      [words.staffLabel,staffSelect.value?staff:flow.staffAny],
+      [words.dateLabel,dateInput.value||"—"],
+      [words.timeLabel,timeInput.value||"—"],
+      [words.priceLabel,selected?Number(selected.price).toLocaleString()+" "+words.somoni:"—"],
+      [words.timeLabel,selected?selected.duration_minutes+" "+words.minutes:"—"]
+    ];
+    summaryDetails.replaceChildren();
+    rows.forEach(([label,value])=>{const row=document.createElement("p");const key=document.createElement("span");key.textContent=label+": ";const val=document.createElement("strong");val.textContent=value;row.append(key,val);summaryDetails.append(row);});
+  };
   let slotRequestNumber=0;
   const loadAvailableSlots=async()=>{
     const requestNumber=++slotRequestNumber;
@@ -647,18 +707,32 @@ function createBookingPanel(shop, shopServices, shopStaff) {
   dateInput.addEventListener("change",loadAvailableSlots);
   serviceSelect.addEventListener("change",()=>{refreshStaffOptions();loadAvailableSlots();});
   staffSelect.addEventListener("change",loadAvailableSlots);
-  form.append(makeLabel(words.serviceLabel,serviceSelect),staffLabel,makeLabel(words.dateLabel,dateInput),makeLabel(words.timeLabel,timeInput),makeLabel(words.nameLabel,nameInput),makeLabel(words.phoneLabel,phoneInput),makeLabel(words.noteLabel,noteInput),submit,status);
+  timeInput.addEventListener("change",()=>{if(currentStep===2)updateSummary();});
+  form.append(progress,stepOne,stepTwo,stepThree,controls,status);
   panel.append(heading,notice,form);
+  next.addEventListener("click",()=>{
+    const active=[stepOne,stepTwo,stepThree][currentStep];
+    const required=[...active.querySelectorAll("input,select,textarea")].filter(control=>control.required&&!control.disabled);
+    const invalid=required.find(control=>!control.checkValidity());
+    if(invalid){invalid.reportValidity();return;}
+    if(currentStep===1&&!timeInput.value){timeInput.focus();return;}
+    if(currentStep===1){updateSummary();}
+    showStep(currentStep+1);
+    if(currentStep===2){updateSummary();nameInput.focus();}
+    else if(currentStep===1)dateInput.focus();
+  });
+  back.addEventListener("click",()=>showStep(currentStep-1));
   form.addEventListener("submit",async event=>{
     event.preventDefault();
+    if(currentStep!==2)return;
     const selected=shopServices.find(s=>s.id===serviceSelect.value);
     if(!selected)return;
-    if(staffSelect.required&&!staffSelect.value){status.textContent=words.selectStaffFirst;return;}
+    if(staffSelect.required&&!staffSelect.value){showStep(0);status.textContent=words.selectStaffFirst;return;}
     const startsAt=new Date(dateInput.value+"T"+timeInput.value+":00+05:00");
-    if(!dateInput.value||!timeInput.value||Number.isNaN(startsAt.getTime())||startsAt<=new Date()){status.textContent=words.futureError;return;}
+    if(!dateInput.value||!timeInput.value||Number.isNaN(startsAt.getTime())||startsAt<=new Date()){showStep(1);status.textContent=words.futureError;return;}
     const phoneDigits=phoneInput.value.replace(/\D/g,"");
-    if(nameInput.value.trim().length<2||phoneDigits.length<8||phoneDigits.length>15){status.textContent=words.phoneInvalid;return;}
-    submit.disabled=true;status.textContent=words.loading;
+    if(nameInput.value.trim().length<2||phoneDigits.length<8||phoneDigits.length>15){status.textContent=words.phoneInvalid;phoneInput.focus();return;}
+    submit.disabled=true;back.disabled=true;status.textContent=words.loading;
     let user=null;let sessionError=null;
     try {
       const {data:sessionData,error:getSessionError}=await customerSupabase.auth.getSession();
@@ -671,23 +745,27 @@ function createBookingPanel(shop, shopServices, shopStaff) {
       }
       if(!user){const signed=await customerSupabase.auth.signInAnonymously();user=signed.data?.user||signed.data?.session?.user||null;sessionError=signed.error;}
     } catch(authFailure){sessionError=authFailure;}
-    if(sessionError||!user){status.textContent=words.authError+(sessionError?.message?" ("+sessionError.message+")":"");submit.disabled=false;return;}
+    if(sessionError||!user){status.textContent=words.authError+(sessionError?.message?" ("+sessionError.message+")":"");submit.disabled=false;back.disabled=false;return;}
     const endsAt=new Date(startsAt.getTime()+Number(selected.duration_minutes)*60000);
     const dayKey=dateInput.value;const weekday=new Date(dayKey+"T12:00:00Z").getUTCDay();
     const startMinute=Number(timeInput.value.slice(0,2))*60+Number(timeInput.value.slice(3,5));
     const endMinute=startMinute+Number(selected.duration_minutes);
     const {data:hoursRow,error:hoursError}=await supabase.from("business_hours").select("opens_at,closes_at,is_closed").eq("barbershop_id",shop.id).eq("weekday",weekday).maybeSingle();
-    if(hoursError||!hoursRow){status.textContent=words.hoursCheckError;submit.disabled=false;return;}
+    if(hoursError||!hoursRow){status.textContent=words.hoursCheckError;submit.disabled=false;back.disabled=false;return;}
     const openMinute=Number(hoursRow.opens_at.slice(0,2))*60+Number(hoursRow.opens_at.slice(3,5));
     const closeMinute=Number(hoursRow.closes_at.slice(0,2))*60+Number(hoursRow.closes_at.slice(3,5));
-    if(hoursRow.is_closed||startMinute<openMinute||endMinute>closeMinute||endMinute>1440){status.textContent=words.outsideHours;submit.disabled=false;return;}
+    if(hoursRow.is_closed||startMinute<openMinute||endMinute>closeMinute||endMinute>1440){status.textContent=words.outsideHours;submit.disabled=false;back.disabled=false;return;}
     const payload={barbershop_id:shop.id,service_id:selected.id,staff_id:staffSelect.value||null,customer_id:user.id,starts_at:startsAt.toISOString(),ends_at:endsAt.toISOString(),status:"pending",customer_name:nameInput.value.trim(),customer_phone:phoneInput.value.trim(),customer_note:noteInput.value.trim()||null};
     const {data:createdBooking,error}=await customerSupabase.from("bookings").insert(payload).select("id").single();
-    if(error){status.textContent=error.code==="23P01"?(words.timeBusy):error.code==="22023"?(error.message||words.bookingError):words.bookingError+" ("+error.message+")";submit.disabled=false;return;}
-    if(createdBooking?.id){}
-    status.textContent=words.bookingSent;form.reset();dateInput.min=localDateString();refreshStaffOptions();submit.disabled=false;await loadAvailableSlots();await loadMyBookings();
+    if(error){status.textContent=error.code==="23P01"?(words.timeBusy):error.code==="22023"?(error.message||words.bookingError):words.bookingError+" ("+error.message+")";submit.disabled=false;back.disabled=false;return;}
+    status.textContent=words.bookingSent;
+    form.reset();dateInput.min=localDateString();refreshStaffOptions();
+    timeInput.replaceChildren();const resetTime=document.createElement("option");resetTime.value="";resetTime.textContent=words.chooseDateService;timeInput.append(resetTime);timeInput.disabled=true;
+    submit.disabled=false;back.disabled=false;showStep(0);status.textContent=words.bookingSent;
+    await loadMyBookings();
   });
-  return {panel,open(serviceId){serviceSelect.value=serviceId;refreshStaffOptions();panel.hidden=false;panel.scrollIntoView({behavior:"smooth",block:"center"});}};
+  showStep(0);
+  return {panel,open(serviceId){serviceSelect.value=serviceId;refreshStaffOptions();showStep(0);panel.hidden=false;panel.scrollIntoView({behavior:"smooth",block:"center"});}};
 }
 
 let customerNotificationChannel=null;
