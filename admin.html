@@ -689,7 +689,7 @@ $("signupForm").addEventListener("submit",async e=>{
  const password=$("newPassword").value;
  if(password.length<12){status("Парол бояд на кам аз 12 аломат дошта бошад.",true);return;}
  status("Ҳисоб сохта шуда истодааст…");
- const {data,error}=await supabase.auth.signUp({email,password});
+ const {data,error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:"https://beriloro03.github.io/barber-booking-tj/admin.html"}});
  if(error){status("Сабти ном нашуд: "+error.message,true);return;}
  if(data.session){status("Ҳисоб сохта шуд. Акнун маълумоти марказро пур кун.");await loadShop();}
  else{status("Дархости сабти ном қабул шуд. Email-ро кушо, пайванди тасдиқи Supabase-ро пахш кун, баъд бо email ва пароли нав ворид шав.");}
