@@ -21,6 +21,9 @@ button{font:inherit;font-weight:650;border:1px solid var(--line);border-radius:1
 .empty{padding:22px;text-align:center;color:var(--muted);background:#faf9fc;border:1px dashed #dcd5e8;border-radius:13px;margin-top:12px}
 .activity-item{border:1px solid var(--line);border-radius:13px;padding:13px;margin-top:10px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:start}
 .activity-item strong{display:block;overflow-wrap:anywhere}.activity-item p{margin:5px 0 0}.activity-time{font-size:12px;color:var(--muted);white-space:nowrap}
+.activity-tools{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(145px,1fr) repeat(2,minmax(130px,1fr));gap:9px;margin:14px 0}
+.activity-tools button{white-space:nowrap}
+@media(max-width:650px){.activity-tools{grid-template-columns:1fr 1fr}.activity-tools input[type="search"]{grid-column:1/-1}.activity-tools button{grid-column:1/-1}}
 @media(max-width:650px){.activity-item{grid-template-columns:1fr}.activity-time{white-space:normal}}
 
 .trend{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;align-items:end;min-height:180px;padding:12px 4px 0}
@@ -79,6 +82,13 @@ button{font:inherit;font-weight:650;border:1px solid var(--line);border-radius:1
 <div class="card">
 <div class="section-head"><h2>Таърихи амалиёт</h2><span class="muted">50 амали охирин</span></div>
 <p class="muted">Сабти фаъол ё ғайрифаъол кардани марказҳо аз ҷониби Super Admin.</p>
+<div class="activity-tools">
+ <input id="activitySearch" type="search" placeholder="Ҷустуҷӯи номи марказ…" aria-label="Ҷустуҷӯи номи марказ">
+ <select id="activityAction" aria-label="Филтр аз рӯйи амал"><option value="all">Ҳамаи амалҳо</option><option value="shop_activated">Фаъол карда шуд</option><option value="shop_deactivated">Ғайрифаъол карда шуд</option></select>
+ <input id="activityFrom" type="date" aria-label="Аз сана">
+ <input id="activityTo" type="date" aria-label="То сана">
+ <button id="exportActivity" class="soft" type="button">⬇ Боргирии CSV</button>
+</div>
 <div id="activityList"><div class="empty">Таърих бор шуда истодааст…</div></div>
 </div>
 <div class="card"><h2>Маъмурони марказҳо</h2><p class="muted">Маълумоти маъмурон аз профилҳои марказҳои сабтшуда гирифта мешавад.</p><div id="adminList" class="admin-grid"></div></div>
@@ -216,26 +226,28 @@ function renderShops(){
   const actions=document.createElement("div");actions.className="shop-actions";actions.append(action);item.append(actions);box.append(item);
  });
 }
-async function loadActivityLog(){
+let activityRows=[];
+function filteredActivityRows(){
+ const term=$("activitySearch").value.trim().toLocaleLowerCase();
+ const action=$("activityAction").value;
+ const from=$("activityFrom").value;
+ const to=$("activityTo").value;
+ return activityRows.filter(log=>{
+  const day=log.created_at?new Date(log.created_at).toLocaleDateString("en-CA"): "";
+  return (!term||(log.shop_name||"").toLocaleLowerCase().includes(term))
+   &&(action==="all"||log.action===action)
+   &&(!from||day>=from)&&(!to||day<=to);
+ });
+}
+function renderActivityLog(){
  const box=$("activityList");box.replaceChildren();
- const {data:logs,error}=await supabase.from("platform_activity_log")
-  .select("id,actor_id,action,shop_name,old_is_active,new_is_active,created_at")
-  .order("created_at",{ascending:false}).limit(50);
- if(error){
+ const rows=filteredActivityRows();
+ if(!rows.length){
   const empty=document.createElement("div");empty.className="empty";
-  empty.textContent="Таърихи амалиёт бор нашуд: "+error.message;box.append(empty);return;
+  empty.textContent=activityRows.length?"Бо ин филтр амалиёт ёфт нашуд.":"Ҳоло амалиёт сабт нашудааст.";
+  box.append(empty);return;
  }
- if(!logs?.length){
-  const empty=document.createElement("div");empty.className="empty";
-  empty.textContent="Ҳоло амалиёт сабт нашудааст.";box.append(empty);return;
- }
- const actorIds=[...new Set(logs.map(x=>x.actor_id).filter(Boolean))];
- let actors={};
- if(actorIds.length){
-  const result=await supabase.from("profiles").select("id,full_name").in("id",actorIds);
-  if(!result.error)(result.data||[]).forEach(p=>actors[p.id]=p.full_name);
- }
- logs.forEach(log=>{
+ rows.forEach(log=>{
   const item=document.createElement("article");item.className="activity-item";
   const detail=document.createElement("div");
   const title=document.createElement("strong");title.textContent=log.shop_name||"Марказ";
@@ -243,13 +255,52 @@ async function loadActivityLog(){
   const action=log.action==="shop_activated"?"Марказ фаъол карда шуд":"Марказ ғайрифаъол карда шуд";
   const from=log.old_is_active?"Фаъол":"Ғайрифаъол";
   const to=log.new_is_active?"Фаъол":"Ғайрифаъол";
-  desc.textContent=action+" · "+from+" → "+to+" · Super Admin: "+(actors[log.actor_id]||"ID "+String(log.actor_id||"номаълум").slice(0,8));
+  desc.textContent=action+" · "+from+" → "+to+" · Super Admin: "+(log.actor_name||("ID "+String(log.actor_id||"номаълум").slice(0,8)));
   detail.append(title,desc);
   const time=document.createElement("time");time.className="activity-time";
   time.dateTime=log.created_at;
   time.textContent=new Intl.DateTimeFormat("tg-TJ",{dateStyle:"medium",timeStyle:"short"}).format(new Date(log.created_at));
   item.append(detail,time);box.append(item);
  });
+}
+async function loadActivityLog(){
+ const box=$("activityList");box.textContent="Таърих бор шуда истодааст…";
+ const {data:logs,error}=await supabase.from("platform_activity_log")
+  .select("id,actor_id,action,shop_name,old_is_active,new_is_active,created_at")
+  .order("created_at",{ascending:false}).limit(50);
+ if(error){
+  const empty=document.createElement("div");empty.className="empty";
+  empty.textContent="Таърихи амалиёт бор нашуд: "+error.message;box.replaceChildren(empty);return;
+ }
+ activityRows=logs||[];
+ const actorIds=[...new Set(activityRows.map(x=>x.actor_id).filter(Boolean))];
+ let actors={};
+ if(actorIds.length){
+  const result=await supabase.from("profiles").select("id,full_name").in("id",actorIds);
+  if(!result.error)(result.data||[]).forEach(p=>actors[p.id]=p.full_name);
+ }
+ activityRows=activityRows.map(log=>({...log,actor_name:actors[log.actor_id]||""}));
+ renderActivityLog();
+}
+function exportActivityCsv(){
+ const rows=filteredActivityRows();
+ if(!rows.length){status("Барои боргирӣ сабте ёфт нашуд.",true);return;}
+ const columns=["shop_name","action","old_status","new_status","actor","created_at"];
+ const quote=value=>'"'+String(value??"").replace(/"/g,'""')+'"';
+ const lines=[columns.map(quote).join(",")];
+ rows.forEach(log=>lines.push([
+  log.shop_name,
+  log.action==="shop_activated"?"Фаъол карда шуд":"Ғайрифаъол карда шуд",
+  log.old_is_active?"Фаъол":"Ғайрифаъол",
+  log.new_is_active?"Фаъол":"Ғайрифаъол",
+  log.actor_name||log.actor_id||"",
+  log.created_at?new Date(log.created_at).toISOString():""
+ ].map(quote).join(",")));
+ const blob=new Blob(["\uFEFF"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"});
+ const url=URL.createObjectURL(blob),link=document.createElement("a");
+ link.href=url;link.download="platform-activity-log.csv";
+ document.body.append(link);link.click();link.remove();URL.revokeObjectURL(url);
+ status("CSV омода шуд: "+rows.length+" сабт.");
 }
 async function loadDashboard(){
  try{await loadBookingStats();}
@@ -297,6 +348,10 @@ $("logoutBtn").addEventListener("click",async()=>{await supabase.auth.signOut();
 $("refreshBtn").addEventListener("click",loadDashboard);
 $("searchShops").addEventListener("input",renderShops);
 $("statusFilter").addEventListener("change",renderShops);
+["activitySearch","activityAction","activityFrom","activityTo"].forEach(id=>{
+ $(id).addEventListener(id==="activitySearch"?"input":"change",renderActivityLog);
+});
+$("exportActivity").addEventListener("click",exportActivityCsv);
 supabase.auth.getSession().then(({data})=>{if(data.session)checkSuperAdmin();});
 </script>
 </body>
