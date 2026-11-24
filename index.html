@@ -514,6 +514,16 @@
     .booking-summary-details p strong{text-align:right}
     @media(max-width:560px){.booking-progress{gap:5px}.booking-progress-item{font-size:12px;padding:9px 3px}.booking-step-controls{gap:8px}.booking-step-controls button{font-size:15px;padding:10px 7px}}
 
+
+    /* Clearer booking guidance for first-time customers. */
+    .booking-step-hint{margin:2px 0 8px;padding:12px 14px;border-radius:12px;background:#eaf5ee;color:#194d3c;font-size:16px;line-height:1.55;font-weight:600}
+    .booking-progress-item{line-height:1.35}
+    .booking-step-controls button{font-size:16px}
+    .booking-panel label{line-height:1.5}
+    .booking-panel input[type="date"]{min-height:54px}
+    .booking-status{font-weight:600}
+    @media(max-width:560px){.booking-step-hint{font-size:15px;padding:11px 12px}.booking-progress-item{font-size:12px}}
+
 </style>
 </head>
 <body>
@@ -605,10 +615,10 @@ function dushanbeDateString(date) {
 function createBookingPanel(shop, shopServices, shopStaff) {
   const words = languageCopy();
   const flow = document.documentElement.lang==="ru"
-    ? {steps:["Услуга","Дата и время","Ваши данные"],next:"Далее",back:"Назад",summary:"Проверьте запись",staffAny:"Любой доступный сотрудник"}
+    ? {steps:["Услуга","Дата и время","Ваши данные"],next:"Далее",back:"Назад",summary:"Проверьте запись",staffAny:"Любой доступный сотрудник",hints:["Сначала выберите услугу и мастера.","Выберите день, затем свободное время.","Оставьте имя и номер телефона для подтверждения."],duration:"Длительность",step:"Шаг"}
     : document.documentElement.lang==="en"
-    ? {steps:["Service","Date & time","Your details"],next:"Continue",back:"Back",summary:"Review your booking",staffAny:"Any available staff member"}
-    : {steps:["Хизмат","Сана ва вақт","Маълумоти шумо"],next:"Қадами навбатӣ",back:"Қафо",summary:"Маълумоти навбатро санҷед",staffAny:"Ҳар корманди дастрас"};
+    ? {steps:["Service","Date & time","Your details"],next:"Continue",back:"Back",summary:"Review your booking",staffAny:"Any available staff member",hints:["Choose the service and a barber.","Choose a date, then an available time.","Enter your name and phone number so the shop can confirm."],duration:"Duration",step:"Step"}
+    : {steps:["Хизмат","Сана ва вақт","Маълумоти шумо"],next:"Қадами навбатӣ",back:"Қафо",summary:"Маълумоти навбатро санҷед",staffAny:"Ҳар корманди дастрас",hints:["Аввал хизмат ва сартарошро интихоб кунед.","Рӯзро интихоб кунед, баъд вақти холиро гиред.","Ному рақами телефонатонро нависед, то сартарошхона навбатро тасдиқ кунад."],duration:"Давомнокӣ",step:"Қадам"};
   const panel = document.createElement("section");
   panel.className = "booking-panel";
   panel.hidden = true;
@@ -645,12 +655,13 @@ function createBookingPanel(shop, shopServices, shopStaff) {
   const summary=document.createElement("div");summary.className="booking-summary";
   const summaryHeading=document.createElement("strong");summaryHeading.textContent=flow.summary;summary.append(summaryHeading);
   const summaryDetails=document.createElement("div");summaryDetails.className="booking-summary-details";summary.append(summaryDetails);
+  const makeHint=(text)=>{const hint=document.createElement("p");hint.className="booking-step-hint";hint.textContent=text;return hint;};
   const stepOne=document.createElement("div");stepOne.className="booking-step";
-  stepOne.append(makeLabel(words.serviceLabel,serviceSelect),staffLabel);
+  stepOne.append(makeHint(flow.hints[0]),makeLabel(words.serviceLabel,serviceSelect),staffLabel);
   const stepTwo=document.createElement("div");stepTwo.className="booking-step";stepTwo.hidden=true;
-  stepTwo.append(makeLabel(words.dateLabel,dateInput),makeLabel(words.timeLabel,timeInput));
+  stepTwo.append(makeHint(flow.hints[1]),makeLabel(words.dateLabel,dateInput),makeLabel(words.timeLabel,timeInput));
   const stepThree=document.createElement("div");stepThree.className="booking-step";stepThree.hidden=true;
-  stepThree.append(summary,makeLabel(words.nameLabel,nameInput),makeLabel(words.phoneLabel,phoneInput),makeLabel(words.noteLabel,noteInput));
+  stepThree.append(makeHint(flow.hints[2]),summary,makeLabel(words.nameLabel,nameInput),makeLabel(words.phoneLabel,phoneInput),makeLabel(words.noteLabel,noteInput));
   const back=document.createElement("button");back.type="button";back.className="booking-back";back.textContent=flow.back;back.hidden=true;
   const next=document.createElement("button");next.type="button";next.className="primary booking-next";next.textContent=flow.next;
   const submit=document.createElement("button");submit.type="submit";submit.className="primary booking-submit";submit.textContent=words.sendBooking;submit.hidden=true;
@@ -662,6 +673,8 @@ function createBookingPanel(shop, shopServices, shopStaff) {
     [stepOne,stepTwo,stepThree].forEach((node,index)=>{node.hidden=index!==currentStep;});
     progressItems.forEach((node,index)=>{node.classList.toggle("current",index===currentStep);node.classList.toggle("complete",index<currentStep);});
     back.hidden=currentStep===0;
+    progress.setAttribute("aria-label",flow.step+" "+(currentStep+1)+" "+flow.steps.length);
+    next.textContent=flow.step+" "+(currentStep+1)+"/"+flow.steps.length+" · "+flow.next;
     next.hidden=currentStep===2;
     submit.hidden=currentStep!==2;
     status.textContent="";
@@ -675,7 +688,7 @@ function createBookingPanel(shop, shopServices, shopStaff) {
       [words.dateLabel,dateInput.value||"—"],
       [words.timeLabel,timeInput.value||"—"],
       [words.priceLabel,selected?Number(selected.price).toLocaleString()+" "+words.somoni:"—"],
-      [words.timeLabel,selected?selected.duration_minutes+" "+words.minutes:"—"]
+      [flow.duration,selected?selected.duration_minutes+" "+words.minutes:"—"]
     ];
     summaryDetails.replaceChildren();
     rows.forEach(([label,value])=>{const row=document.createElement("p");const key=document.createElement("span");key.textContent=label+": ";const val=document.createElement("strong");val.textContent=value;row.append(key,val);summaryDetails.append(row);});
