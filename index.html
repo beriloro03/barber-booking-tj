@@ -1327,17 +1327,41 @@ document.getElementById("clearShopSearch")?.addEventListener("click",()=>{shopSe
 nearbyButton?.addEventListener("click",()=>{
   const words=languageCopy();
   if(!navigator.geolocation){nearbyStatus.textContent=words.nearbyUnsupported;return;}
+  nearbyButton.disabled=true;
   nearbyStatus.textContent=words.nearbyPermission;
-  navigator.geolocation.getCurrentPosition(position=>{
-    customerPosition={latitude:position.coords.latitude,longitude:position.coords.longitude};
+  let completed=false;
+  const finish=(position)=>{
+    if(completed)return;
+    completed=true;
+    nearbyButton.disabled=false;
+    const latitude=Number(position?.coords?.latitude);
+    const longitude=Number(position?.coords?.longitude);
+    if(!Number.isFinite(latitude)||!Number.isFinite(longitude)||Math.abs(latitude)>90||Math.abs(longitude)>180){
+      nearbyStatus.textContent=lang==="ru"?"Телефон вернул неверные координаты. Включите геолокацию и попробуйте снова.":lang==="en"?"The phone returned invalid coordinates. Turn on location and try again.":"Телефон координатаҳои нодуруст фиристод. Ҷойгиршавиро фаъол карда, аз нав санҷед.";
+      return;
+    }
+    customerPosition={latitude,longitude};
     const available=shops.some(shop=>distanceToShop(shop)!==null);
     if(!available){customerPosition=null;nearbyStatus.textContent=words.nearbyNoCoords;render();return;}
     nearbyStatus.textContent=words.nearbySorted;
     resetNearbyButton.hidden=false;
     render();
-  },error=>{
-    nearbyStatus.textContent=error&&error.code===1?words.nearbyPermission:words.nearbyError;
-  },{enableHighAccuracy:false,timeout:12000,maximumAge:60000});
+  };
+  const fail=(error)=>{
+    if(completed)return;
+    completed=true;
+    nearbyButton.disabled=false;
+    const code=Number(error?.code);
+    if(code===1)nearbyStatus.textContent=lang==="ru"?"Доступ к геолокации запрещён. Разрешите местоположение для этого сайта в Chrome.":lang==="en"?"Location access was denied. Allow location for this site in Chrome.":"Дастрасӣ ба ҷойгиршавӣ манъ аст. Дар Chrome барои ин сайт иҷозат диҳед.";
+    else if(code===2)nearbyStatus.textContent=lang==="ru"?"Телефон не смог определить координаты. Включите GPS и попробуйте у окна или на улице.":lang==="en"?"The phone could not determine coordinates. Turn on GPS and try near a window or outdoors.":"Телефон координатаҳоро муайян карда натавонист. GPS-ро фаъол карда, назди тиреза ё берун аз бино санҷед.";
+    else if(code===3)nearbyStatus.textContent=lang==="ru"?"Определение местоположения заняло слишком много времени. Повторите попытку при включённом GPS.":lang==="en"?"Location detection timed out. Try again with GPS enabled.":"Муайян кардани ҷойгиршавӣ вақт гирифт. Бо GPS-и фаъол аз нав санҷед.";
+    else nearbyStatus.textContent=words.nearbyError+" ("+(code||"?")+")";
+  };
+  // Try a recent cached fix first; then request a fresh high-accuracy GPS fix.
+  navigator.geolocation.getCurrentPosition(finish,()=>{
+    if(completed)return;
+    navigator.geolocation.getCurrentPosition(finish,fail,{enableHighAccuracy:true,timeout:30000,maximumAge:0});
+  },{enableHighAccuracy:false,timeout:10000,maximumAge:120000});
 });
 resetNearbyButton?.addEventListener("click",()=>{
   customerPosition=null;
