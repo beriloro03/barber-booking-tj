@@ -545,8 +545,9 @@ function createBookingPanel(shop, shopServices, shopStaff) {
     const closeMinute=Number(hoursRow.closes_at.slice(0,2))*60+Number(hoursRow.closes_at.slice(3,5));
     if(hoursRow.is_closed||startMinute<openMinute||endMinute>closeMinute||endMinute>1440){status.textContent=words.outsideHours;submit.disabled=false;return;}
     const payload={barbershop_id:shop.id,service_id:selected.id,staff_id:staffSelect.value||null,customer_id:user.id,starts_at:startsAt.toISOString(),ends_at:endsAt.toISOString(),status:"pending",customer_name:nameInput.value.trim(),customer_phone:phoneInput.value.trim(),customer_note:noteInput.value.trim()||null};
-    const {error}=await customerSupabase.from("bookings").insert(payload);
+    const {data:createdBooking,error}=await customerSupabase.from("bookings").insert(payload).select("id").single();
     if(error){status.textContent=error.code==="23P01"?(words.timeBusy):error.code==="22023"?(error.message||words.bookingError):words.bookingError+" ("+error.message+")";submit.disabled=false;return;}
+    if(createdBooking?.id){customerSupabase.functions.invoke("telegram-notifications",{body:{action:"booking_created",booking_id:createdBooking.id}}).catch(()=>{});}
     status.textContent=words.bookingSent;form.reset();dateInput.min=localDateString();refreshStaffOptions();submit.disabled=false;await loadAvailableSlots();await loadMyBookings();
   });
   return {panel,open(serviceId){serviceSelect.value=serviceId;refreshStaffOptions();panel.hidden=false;panel.scrollIntoView({behavior:"smooth",block:"center"});}};
