@@ -654,7 +654,7 @@ async function loadAdvancedAnalytics(){
   const amount=document.createElement("span");amount.className="muted";amount.textContent=money(v.revenue)+" · "+v.count+" навбат";
   wrap.append(label,track);chart.append(wrap,amount);
  });
- const customers=new Set(rows.map(x=>x.customer_id).filter(Boolean));
+ const customers=new Set(rows.filter(x=>x.status!=="cancelled").map(x=>x.customer_id).filter(Boolean));
  let previousCustomers=new Set();
  try{
   let offset=0;
@@ -670,17 +670,20 @@ async function loadAdvancedAnalytics(){
  [["Муштариёни гуногун",customers.size],["Муштариёни нав",newCustomers],["Муштариёни баргашта",returning]].forEach(([label,value])=>{
   const el=document.createElement("div");el.className="service";const l=document.createElement("span");l.className="muted";l.textContent=label;const v=document.createElement("strong");v.className="stats-number";v.textContent=String(value);el.append(l,v);customersBox.append(el);
  });
- let reviewRows=[];
+ let reviewRows=[],reviewOffset=0;
  try{
-  const {data,error}=await supabase.from("reviews").select("rating,created_at").eq("barbershop_id",shop.id).eq("status","approved").gte("created_at",start.toISOString()).lt("created_at",end.toISOString()).order("created_at",{ascending:false}).limit(1000);
-  if(error)throw error;reviewRows=data||[];
+  while(true){
+   const {data,error}=await supabase.from("reviews").select("rating,created_at").eq("barbershop_id",shop.id).eq("status","approved").gte("created_at",start.toISOString()).lt("created_at",end.toISOString()).order("created_at",{ascending:false}).range(reviewOffset,reviewOffset+999);
+   if(error)throw error;
+   const page=data||[];reviewRows.push(...page);if(page.length<1000)break;reviewOffset+=page.length;
+  }
  }catch(error){note.textContent="Баҳоҳо бор нашуданд: "+(error.message||"хатои номаълум");return;}
  const ratingCount=reviewRows.length,ratingAverage=ratingCount?reviewRows.reduce((sum,x)=>sum+Number(x.rating||0),0)/ratingCount:0;
  [["Баҳои миёна",ratingCount?ratingAverage.toFixed(2)+" / 5":"—"],["Фикру мулоҳизаҳои нашршуда",ratingCount]].forEach(([label,value])=>{
   const el=document.createElement("div");el.className="service";const l=document.createElement("span");l.className="muted";l.textContent=label;const v=document.createElement("strong");v.className="stats-number";v.textContent=String(value);el.append(l,v);ratingsBox.append(el);
  });
  const hourCounts=new Map();
- rows.forEach(x=>{const hour=new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Dushanbe",hour:"2-digit",hourCycle:"h23"}).format(new Date(x.starts_at));hourCounts.set(hour,(hourCounts.get(hour)||0)+1);});
+ rows.filter(x=>x.status!=="cancelled").forEach(x=>{const hour=new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Dushanbe",hour:"2-digit",hourCycle:"h23"}).format(new Date(x.starts_at));hourCounts.set(hour,(hourCounts.get(hour)||0)+1);});
  const peakEntries=[...hourCounts.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).slice(0,5);
  if(!peakEntries.length){const p=document.createElement("p");p.className="muted";p.textContent="Маълумоти кофӣ нест.";peakBox.append(p);}
  peakEntries.forEach(([hour,count],index)=>{
