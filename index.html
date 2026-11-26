@@ -538,7 +538,9 @@
 
 
     .booking-auth{margin-top:14px;padding:16px;border:1px solid #cbd5df;border-radius:14px;background:#fff}.booking-auth h4{margin:0 0 6px}.booking-auth p{line-height:1.5}.booking-auth label{display:block;margin:10px 0 5px;font-weight:700}.booking-auth input{display:block;width:100%;min-height:46px;padding:10px 12px;border:1px solid #aebdca;border-radius:10px;font:inherit}.booking-auth button{display:block;width:100%;min-height:46px;margin-top:10px}.booking-auth[hidden]{display:none}
-</style>
+
+    .customer-auth-gate{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:18px;background:linear-gradient(145deg,rgba(35,19,73,.96),rgba(83,48,150,.96));overflow-y:auto}.customer-auth-card{width:min(100%,440px);padding:25px;border-radius:22px;background:#fff;box-shadow:0 24px 70px #14072c55;color:#211b31}.customer-auth-card h1{font-size:26px;line-height:1.2;margin:0 0 8px;color:#4d269e}.customer-auth-card p{line-height:1.55;color:#716b7e}.customer-auth-card label{display:block;margin:13px 0 6px;font-weight:700}.customer-auth-card input{width:100%;min-height:48px;padding:11px 13px;border:1px solid #d9d2e5;border-radius:11px;font:inherit}.customer-auth-card button{width:100%;min-height:48px;margin-top:11px;font-weight:750}.customer-auth-card .auth-secondary{background:#f4f0fb;color:#4d269e;border-color:#e2d8f2}.customer-auth-card .auth-message{min-height:28px;margin:13px 0 0;padding:10px;border-radius:10px;background:#f7f5fb;font-size:14px;overflow-wrap:anywhere}.customer-auth-gate[hidden]{display:none}
+  </style>
 </head>
 <body>
 <header><div class="nav">
@@ -603,7 +605,76 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.119.0";
 const SUPABASE_URL = "https://yjybilaaxqtzhlvaabwd.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_yyeO2kZv9yRQyLUOl7fG6Q_j_7ixPc1";
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-const customerSupabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, { auth: { storageKey: "barber-booking-customer-auth", autoRefreshToken: true, persistSession: true, detectSessionInUrl: false } });
+const customerSupabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, { auth: { storageKey: "barber-booking-customer-auth", autoRefreshToken: true, persistSession: true, detectSessionInUrl: true } });
+ 
+// Require one customer account before opening the platform. Supabase keeps the
+// verified session on this device, so returning customers are signed in automatically.
+const authGate=document.createElement("div");
+authGate.id="customerAuthGate";
+authGate.className="customer-auth-gate";
+authGate.setAttribute("role","dialog");
+authGate.setAttribute("aria-modal","true");
+authGate.setAttribute("aria-labelledby","customerAuthTitle");
+const authCard=document.createElement("section");authCard.className="customer-auth-card";
+const authTitle=document.createElement("h1");authTitle.id="customerAuthTitle";authTitle.textContent="Хуш омадед!";
+const authIntro=document.createElement("p");authIntro.textContent="Барои истифодаи сомона як бор ҳисоб созед. Дафъаҳои дигар бо ҳамон почта ва парол ворид мешавед.";
+const authEmailLabel=document.createElement("label");authEmailLabel.textContent="Почтаи электронӣ";
+const authEmail=document.createElement("input");authEmail.type="email";authEmail.autocomplete="email";authEmail.required=true;authEmail.placeholder="name@example.com";
+authEmailLabel.append(authEmail);
+const authPasswordLabel=document.createElement("label");authPasswordLabel.textContent="Парол (на камтар аз 12 аломат)";
+const authPassword=document.createElement("input");authPassword.type="password";authPassword.autocomplete="current-password";authPassword.required=true;authPassword.minLength=12;
+authPasswordLabel.append(authPassword);
+const authRegister=document.createElement("button");authRegister.type="button";authRegister.className="primary";authRegister.textContent="Сабти ном";
+const authLogin=document.createElement("button");authLogin.type="button";authLogin.className="auth-secondary";authLogin.textContent="Ворид шудан";
+const authMessage=document.createElement("p");authMessage.className="auth-message";authMessage.setAttribute("role","status");authMessage.setAttribute("aria-live","polite");authMessage.textContent="Агар бори аввал бошед, «Сабти ном»-ро интихоб кунед.";
+authCard.append(authTitle,authIntro,authEmailLabel,authPasswordLabel,authRegister,authLogin,authMessage);
+authGate.append(authCard);document.body.append(authGate);
+let customerAccessReady=false;
+const showCustomerSite=async(user)=>{
+  if(!user||user.is_anonymous||!(user.email_confirmed_at||user.confirmed_at))return false;
+  customerAccessReady=true;authGate.hidden=true;return true;
+};
+const setAuthBusy=busy=>{authRegister.disabled=busy;authLogin.disabled=busy;};
+authRegister.addEventListener("click",async()=>{
+  const email=authEmail.value.trim().toLowerCase(),password=authPassword.value;
+  if(!email||!authEmail.checkValidity()){authMessage.textContent="Почтаи электрониро дуруст ворид кунед.";authEmail.focus();return;}
+  if(password.length<12){authMessage.textContent="Парол бояд на камтар аз 12 аломат дошта бошад.";authPassword.focus();return;}
+  setAuthBusy(true);authMessage.textContent="Ҳисоб сохта шуда истодааст…";
+  try{
+    const {data:current}=await customerSupabase.auth.getUser();
+    const redirectTo=new URL("customer-account.html",location.href).href;
+    let result;
+    if(current?.user?.is_anonymous){
+      result=await customerSupabase.auth.updateUser({email,password},{emailRedirectTo:redirectTo});
+    }else{
+      result=await customerSupabase.auth.signUp({email,password,options:{emailRedirectTo:redirectTo}});
+    }
+    if(result.error)throw result.error;
+    if(await showCustomerSite(result.data?.user)){authMessage.textContent="Сабти ном муваффақ шуд.";return;}
+    authMessage.textContent="Пайванди тасдиқ ба почтаи шумо фиристода шуд. Почтаро кушоед, суроғаро тасдиқ кунед; баъд ба сомона бармегардед.";
+  }catch(error){authMessage.textContent="Сабти ном нашуд: "+(error?.message||"Хатои номаълум");}
+  finally{setAuthBusy(false);}
+});
+authLogin.addEventListener("click",async()=>{
+  const email=authEmail.value.trim().toLowerCase(),password=authPassword.value;
+  if(!email||!authEmail.checkValidity()||!password){authMessage.textContent="Почта ва паролро дуруст ворид кунед.";authEmail.focus();return;}
+  setAuthBusy(true);authMessage.textContent="Ворид шуда истодаед…";
+  try{
+    const {data,error}=await customerSupabase.auth.signInWithPassword({email,password});
+    if(error)throw error;
+    if(!await showCustomerSite(data?.user)){throw new Error("Аввал почтаи электрониро тасдиқ кунед.");}
+    authMessage.textContent="Воридшавӣ муваффақ шуд.";
+  }catch(error){authMessage.textContent="Ворид нашуд: "+(error?.message||"Хатои номаълум");}
+  finally{setAuthBusy(false);}
+});
+customerSupabase.auth.onAuthStateChange((_event,session)=>{
+  if(session?.user){showCustomerSite(session.user);}
+});
+customerSupabase.auth.getUser().then(({data,error})=>{
+  if(!error&&data?.user)showCustomerSite(data.user);
+  else{authGate.hidden=false;authEmail.focus();}
+}).catch(()=>{authGate.hidden=false;});
+
 
 const list = document.getElementById("shopList");
 const statusBox = document.getElementById("shopStatus");
