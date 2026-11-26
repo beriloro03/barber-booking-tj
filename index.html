@@ -823,6 +823,25 @@ function setLanguage(lang){
 }
 document.querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",()=>setLanguage(b.dataset.lang)));
 </script>
+<script>
+(function () {
+  const status = document.getElementById("customerGateStatus");
+  const login = document.getElementById("customerGateLogin");
+  const register = document.getElementById("customerGateRegister");
+  if (login) login.addEventListener("click", function () {
+    if (status) status.textContent = "Тугма пахш шуд. Санҷиши воридшавӣ оғоз нашуд — скрипти асосӣ бор нашудааст.";
+  }, { once: false });
+  if (register) register.addEventListener("click", function () {
+    if (status) status.textContent = "Тугма пахш шуд. Санҷиши сабти ном оғоз нашуд — скрипти асосӣ бор нашудааст.";
+  }, { once: false });
+  window.addEventListener("error", function (event) {
+    if (status && event && event.message) status.textContent = "Хатои JavaScript: " + event.message;
+  });
+  window.addEventListener("unhandledrejection", function (event) {
+    if (status) status.textContent = "Хатои боркунии сайт: " + (event.reason && event.reason.message ? event.reason.message : "хатои номаълум");
+  });
+})();
+</script>
 <script type="module">
 let createClient;
 try {
