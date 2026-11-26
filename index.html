@@ -824,7 +824,19 @@ function setLanguage(lang){
 document.querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",()=>setLanguage(b.dataset.lang)));
 </script>
 <script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/+esm";
+let createClient;
+try {
+  ({ createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/+esm"));
+} catch (primaryImportError) {
+  try {
+    ({ createClient } = await import("https://esm.sh/@supabase/supabase-js@2.119.0"));
+  } catch (fallbackImportError) {
+    const status = document.getElementById("customerGateStatus");
+    if (status) status.textContent = "Китобхонаи воридшавӣ бор нашуд. Интернетро санҷед ё сайтро баъдтар кушоед.";
+    console.error("Supabase client failed to load from both CDNs:", primaryImportError, fallbackImportError);
+    throw fallbackImportError;
+  }
+}
 
 const SUPABASE_URL = "https://yjybilaaxqtzhlvaabwd.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_yyeO2kZv9yRQyLUOl7fG6Q_j_7ixPc1";
