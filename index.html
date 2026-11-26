@@ -835,14 +835,14 @@ document.querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",(
     if (status) status.textContent = "Тугма пахш шуд. Санҷиши сабти ном оғоз нашуд — скрипти асосӣ бор нашудааст.";
   }, { once: false });
   window.addEventListener("error", function (event) {
-    if (status && event && event.message) status.textContent = "Хатои JavaScript: " + event.message;
-  });
+    if (status) status.textContent = "Хатои JavaScript: " + (event && event.message ? event.message : "скрипти асосӣ бор нашуд");
+  }, true);
   window.addEventListener("unhandledrejection", function (event) {
     if (status) status.textContent = "Хатои боркунии сайт: " + (event.reason && event.reason.message ? event.reason.message : "хатои номаълум");
   });
 })();
 </script>
-<script type="module">
+<script type="module" onerror="document.getElementById('customerGateStatus').textContent='Скрипти асосӣ бор нашуд. Эҳтимол хатои синтаксис ё маҳдудияти браузер аст.';">
 let createClient;
 try {
   ({ createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/+esm"));
