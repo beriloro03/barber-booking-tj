@@ -702,6 +702,56 @@
       .booking-step-controls{gap:11px}
     }
 
+    
+    /* Final typography normalization: natural-width Cyrillic and readable spacing. */
+    body,button,input,select,textarea{
+      font-family:Arial,"Noto Sans",sans-serif;
+      font-stretch:normal;
+      letter-spacing:normal;
+      word-spacing:normal;
+      font-kerning:normal;
+    }
+    body{font-size:16px;line-height:1.55}
+    h1,h2,h3,h4,p,label,button,a,small,strong,span{
+      font-stretch:normal;
+      letter-spacing:normal;
+      word-spacing:normal;
+      hyphens:none;
+      word-break:normal;
+      overflow-wrap:break-word;
+    }
+    .hero h1{line-height:1.2}
+    .lead,.section,.shop-card,.tile,footer{line-height:1.6}
+    .booking-panel,
+    .booking-panel *{
+      font-family:Arial,"Noto Sans",sans-serif;
+      font-stretch:normal;
+      letter-spacing:normal;
+      word-spacing:normal;
+      text-transform:none;
+    }
+    .booking-panel h4{font-size:21px;line-height:1.45;margin:0 0 12px}
+    .booking-panel>p,.booking-step-hint{font-size:16px;line-height:1.6}
+    .booking-progress-item{font-size:14px;line-height:1.45}
+    .booking-panel label{font-size:16px;line-height:1.5;gap:7px;margin:9px 0 13px}
+    .booking-panel input,.booking-panel select,.booking-panel textarea{
+      font-size:16px;line-height:1.5;min-height:50px;padding:12px 13px;
+    }
+    .booking-panel button,.booking-step-controls button{font-size:16px;line-height:1.5}
+    .booking-summary,.booking-summary-details p,.booking-panel .booking-status{
+      font-size:15px;line-height:1.6;
+    }
+    @media(max-width:560px){
+      body{font-size:16px}
+      .lead{font-size:17px;line-height:1.6}
+      .booking-panel{padding:17px 14px}
+      .booking-panel h4{font-size:20px}
+      .booking-progress-item{font-size:12px;line-height:1.4}
+      .booking-panel label{font-size:15px;line-height:1.55}
+      .booking-panel input,.booking-panel select,.booking-panel textarea{font-size:16px;min-height:50px}
+      .booking-step-hint{font-size:15px;line-height:1.65}
+    }
+
 </style>
 </head>
 <body class="customer-auth-pending">
