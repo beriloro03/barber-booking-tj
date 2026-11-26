@@ -1161,6 +1161,7 @@
     <div class="customer-panel-heading">
       <h2 id="myBookingsTitle">Навбатҳои ман</h2>
       <button type="button" id="refreshMyBookings">Навсозӣ</button>
+      <button type="button" id="customerLogout" class="customer-logout-btn" hidden>Баромадан аз ҳисоб</button>
     </div>
     <p class="muted" id="myBookingsIntro">Дархостҳои фиристодаатон ва ҳолати тасдиқи онҳоро бинед.</p>
     <div id="myBookingsList" class="my-bookings-list" aria-live="polite">Навбатҳо бор шуда истодаанд…</div>
@@ -1242,12 +1243,14 @@ const gatePassword = document.getElementById("customerGatePassword");
 const gateStatus = document.getElementById("customerGateStatus");
 const gateLogin = document.getElementById("customerGateLogin");
 const gateRegister = document.getElementById("customerGateRegister");
+const customerLogout = document.getElementById("customerLogout");
 const gateMessage = value => { gateStatus.textContent = value; };
 const customerIsVerified = user => Boolean(user && !user.is_anonymous && (user.email_confirmed_at || user.confirmed_at));
 let customerContentLoaded = false;
 function updateCustomerGate(user) {
   const allowed = customerIsVerified(user);
   gate.hidden = allowed;
+  customerLogout.hidden = !allowed;
   document.body.style.overflow = allowed ? "" : "hidden";
   if (allowed && !customerContentLoaded) {
     customerContentLoaded = true;
@@ -1256,6 +1259,21 @@ function updateCustomerGate(user) {
   }
   if (!allowed) setTimeout(() => gateEmail.focus(), 50);
 }
+customerLogout.addEventListener("click", async () => {
+  customerLogout.disabled = true;
+  try {
+    const { error } = await customerSupabase.auth.signOut({ scope: "local" });
+    if (error) throw error;
+    customerContentLoaded = false;
+    document.getElementById("myBookingsList").textContent = "Барои дидани навбатҳо ба ҳисоб ворид шавед.";
+    gateMessage("Шумо аз ҳисоб баромадед.");
+    updateCustomerGate(null);
+  } catch (error) {
+    document.getElementById("myBookingsList").textContent = "Аз ҳисоб баромадан муваффақ нашуд. Боз кӯшиш кунед.";
+  } finally {
+    customerLogout.disabled = false;
+  }
+});
 gateLogin.addEventListener("click", async () => {
   const email = gateEmail.value.trim().toLowerCase(), password = gatePassword.value;
   if (!gateEmail.checkValidity()) { gateMessage("Почтаи электрониро дуруст ворид кунед."); gateEmail.focus(); return; }
