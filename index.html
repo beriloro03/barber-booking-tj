@@ -657,6 +657,51 @@
       .booking-step-controls button{width:100%;min-height:54px}
     }
 
+    
+    /* Tajik Cyrillic readability inside the booking flow. */
+    .booking-panel,
+    .booking-panel *{
+      letter-spacing:normal;
+      word-spacing:.035em;
+      text-rendering:optimizeLegibility;
+    }
+    .booking-panel h4,
+    .booking-panel>p,
+    .booking-panel label,
+    .booking-step-hint,
+    .booking-progress-item,
+    .booking-summary,
+    .booking-summary-details p,
+    .booking-panel .booking-status{
+      line-height:1.75;
+      overflow-wrap:anywhere;
+      word-break:normal;
+      hyphens:none;
+    }
+    .booking-panel h4{margin-bottom:16px}
+    .booking-panel>p{margin-bottom:22px}
+    .booking-progress{gap:12px;margin:22px 0 26px}
+    .booking-progress-item{padding:13px 10px;min-height:64px}
+    .booking-step{gap:16px}
+    .booking-step-hint{padding:16px 18px;margin-bottom:10px}
+    .booking-panel label{gap:11px;margin:12px 0 18px;font-size:17px}
+    .booking-panel input,
+    .booking-panel select,
+    .booking-panel textarea{line-height:1.65;letter-spacing:normal}
+    .booking-summary-details p{padding:10px 0;gap:14px}
+    .booking-step-controls{gap:14px;margin-top:24px}
+    .booking-step-controls button{line-height:1.6;white-space:normal}
+    @media(max-width:560px){
+      .booking-panel h4{line-height:1.65}
+      .booking-progress{gap:8px}
+      .booking-progress-item{padding:11px 7px;min-height:62px;line-height:1.65}
+      .booking-step{gap:14px}
+      .booking-step-hint{padding:15px;line-height:1.8}
+      .booking-panel label{font-size:16px;line-height:1.8;margin-bottom:16px}
+      .booking-summary-details p{line-height:1.75;padding:9px 0}
+      .booking-step-controls{gap:11px}
+    }
+
 </style>
 </head>
 <body class="customer-auth-pending">
