@@ -752,7 +752,211 @@
       .booking-step-hint{font-size:15px;line-height:1.65}
     }
 
-</style>
+
+    /* Clean, consistent typography for the customer booking flow. */
+    .booking-panel,
+    .booking-panel * {
+      font-family: Arial, "Noto Sans", system-ui, sans-serif !important;
+      letter-spacing: normal !important;
+      word-spacing: normal !important;
+      text-rendering: auto;
+      hyphens: none;
+    }
+    .booking-panel {
+      color: #202b35;
+      line-height: 1.5;
+    }
+    .booking-panel > h4 {
+      font-size: clamp(20px, 4vw, 24px);
+      line-height: 1.35;
+      font-weight: 800;
+      margin: 0 0 9px;
+      overflow-wrap: break-word;
+    }
+    .booking-panel > p,
+    .booking-step-hint {
+      font-size: 15px;
+      line-height: 1.55;
+      overflow-wrap: break-word;
+    }
+    .booking-progress {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin: 18px 0 20px;
+    }
+    .booking-progress-item {
+      min-width: 0;
+      min-height: 52px;
+      padding: 9px 6px;
+      font-size: 13px;
+      line-height: 1.35;
+      font-weight: 750;
+      overflow-wrap: break-word;
+    }
+    .booking-step {
+      gap: 10px;
+    }
+    .booking-step-hint {
+      margin: 0 0 5px;
+      padding: 13px 14px;
+      border-radius: 13px;
+      font-weight: 600;
+    }
+    .booking-panel label {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 7px;
+      margin: 8px 0 13px;
+      color: #273746;
+      font-size: 16px;
+      line-height: 1.45;
+      font-weight: 700;
+      overflow-wrap: break-word;
+    }
+    .booking-panel input,
+    .booking-panel select,
+    .booking-panel textarea {
+      margin: 0;
+      min-height: 52px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-family: Arial, "Noto Sans", system-ui, sans-serif !important;
+      font-size: 16px;
+      line-height: 1.45;
+      letter-spacing: normal;
+      word-spacing: normal;
+    }
+    .booking-panel textarea {
+      min-height: 96px;
+    }
+    .booking-summary {
+      padding: 15px;
+      margin: 5px 0 12px;
+    }
+    .booking-summary > strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 16px;
+      line-height: 1.45;
+    }
+    .booking-summary-details p {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 7px 0;
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .booking-summary-details p strong {
+      max-width: 58%;
+      text-align: right;
+      line-height: 1.45;
+      overflow-wrap: break-word;
+    }
+    .booking-step-controls {
+      gap: 10px;
+      margin-top: 17px;
+    }
+    .booking-step-controls button,
+    .booking-panel .booking-step-controls button {
+      min-width: 0;
+      min-height: 50px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      font-size: 15px;
+      line-height: 1.4;
+      white-space: normal;
+    }
+    .booking-panel .booking-status {
+      margin-top: 12px;
+      padding: 11px 13px;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-wrap: break-word;
+    }
+    .booking-auth {
+      padding: 15px;
+      border-radius: 14px;
+    }
+    .booking-auth h4 {
+      font-size: 18px;
+      line-height: 1.4;
+      margin: 0 0 7px;
+    }
+    .booking-auth p {
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-wrap: break-word;
+    }
+    .booking-auth label {
+      display: block;
+      font-size: 15px;
+      line-height: 1.45;
+      margin: 10px 0 6px;
+    }
+    .booking-auth button {
+      min-height: 48px;
+      font-size: 15px;
+      line-height: 1.4;
+      white-space: normal;
+    }
+    @media (max-width: 560px) {
+      .booking-panel {
+        padding: 16px 14px;
+      }
+      .booking-progress {
+        gap: 5px;
+        margin: 15px 0 17px;
+      }
+      .booking-progress-item {
+        min-height: 50px;
+        padding: 8px 4px;
+        font-size: 12px;
+        line-height: 1.3;
+      }
+      .booking-step-hint {
+        padding: 12px;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      .booking-panel label {
+        font-size: 15px;
+        line-height: 1.4;
+        margin-bottom: 11px;
+      }
+      .booking-panel input,
+      .booking-panel select,
+      .booking-panel textarea {
+        min-height: 50px;
+        padding: 11px 12px;
+        font-size: 16px;
+      }
+      .booking-summary-details p {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 3px;
+      }
+      .booking-summary-details p strong {
+        max-width: 100%;
+        text-align: left;
+      }
+      .booking-step-controls {
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 14px;
+      }
+      .booking-step-controls button,
+      .booking-panel .booking-step-controls button {
+        width: 100%;
+        min-height: 50px;
+        font-size: 15px;
+      }
+    }
+
+  </style>
 </head>
 <body>
 <section class="customer-auth-gate" id="customerAuthGate" role="dialog" aria-modal="true" aria-labelledby="customerAuthTitle">
