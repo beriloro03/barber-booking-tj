@@ -541,7 +541,30 @@
     .booking-auth{margin-top:14px;padding:16px;border:1px solid #cbd5df;border-radius:14px;background:#fff}.booking-auth h4{margin:0 0 6px}.booking-auth p{line-height:1.5}.booking-auth label{display:block;margin:10px 0 5px;font-weight:700}.booking-auth input{display:block;width:100%;min-height:46px;padding:10px 12px;border:1px solid #aebdca;border-radius:10px;font:inherit}.booking-auth button{display:block;width:100%;min-height:46px;margin-top:10px}.booking-auth[hidden]{display:none}
 
     .customer-auth-gate{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:18px;background:linear-gradient(145deg,rgba(35,19,73,.96),rgba(83,48,150,.96));overflow-y:auto}.customer-auth-card{width:min(100%,440px);padding:25px;border-radius:22px;background:#fff;box-shadow:0 24px 70px #14072c55;color:#211b31}.customer-auth-card h1{font-size:26px;line-height:1.2;margin:0 0 8px;color:#4d269e}.customer-auth-card p{line-height:1.55;color:#716b7e}.customer-auth-card label{display:block;margin:13px 0 6px;font-weight:700}.customer-auth-card input{width:100%;min-height:48px;padding:11px 13px;border:1px solid #d9d2e5;border-radius:11px;font:inherit}.customer-auth-card button{width:100%;min-height:48px;margin-top:11px;font-weight:750}.customer-auth-card button[hidden]{display:none}.customer-auth-card .auth-secondary{background:#f4f0fb;color:#4d269e;border-color:#e2d8f2}.customer-auth-card .auth-message{min-height:28px;margin:13px 0 0;padding:10px;border-radius:10px;background:#f7f5fb;font-size:14px;overflow-wrap:anywhere}.customer-auth-gate[hidden]{display:none}body.customer-auth-pending>header,body.customer-auth-pending>main{visibility:hidden}
-  </style>
+  
+    /* Modern, calm service-card presentation for the customer directory. */
+    .shop-card{border:1px solid #e7e4ef!important;border-radius:22px!important;background:linear-gradient(180deg,#fff 0%,#fcfbff 100%);box-shadow:0 8px 26px rgba(38,24,74,.07);padding:clamp(16px,3vw,22px);transition:transform .18s ease,box-shadow .18s ease}
+    .shop-card:focus-within{outline:3px solid rgba(99,38,184,.18);outline-offset:2px}
+    .shop-card h3{font-size:clamp(20px,3vw,24px);line-height:1.25;letter-spacing:-.35px;color:#28213b;margin:0 0 8px}
+    .shop-card p{line-height:1.6}
+    .shop-card .service-list{margin-top:18px;padding:16px 0 0;border-top:1px solid #eeeaf5}
+    .shop-card .service-list h4{font-size:17px;font-weight:850;color:#34264d;margin:0 0 12px}
+    .shop-card .service-item{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #f0edf5}
+    .shop-card .service-item:last-child{border-bottom:0}
+    .shop-card .service-item>div{min-width:0}
+    .shop-card .service-item strong{display:inline-flex;align-items:center;color:#5725a5;font-size:16px;font-weight:850;white-space:nowrap}
+    .shop-card .service-meta{font-size:13px;line-height:1.45;color:#777184;margin-top:4px}
+    .shop-card .book-btn{width:auto;min-height:44px;margin:0;padding:10px 16px;border:0;border-radius:12px;background:linear-gradient(135deg,#7137c2,#51219b);color:#fff;font-size:14px;font-weight:800;box-shadow:0 5px 12px rgba(81,33,155,.18)}
+    .shop-card .book-btn:focus-visible,.shop-card button:focus-visible{outline:3px solid rgba(99,38,184,.3);outline-offset:3px}
+    .shop-card .hours-list,.shop-card .staff-list{padding-top:15px;border-top:1px solid #eeeaf5}
+    .shop-card .hours-list h4,.shop-card .staff-list h4{font-size:16px;font-weight:800;color:#34264d}
+    .shop-card .shop-feature-badge{border-radius:999px;background:#f0e9fb;color:#5725a5}
+    .shop-card .shop-open-status.is-open{background:#e8f7ef;color:#176b52}
+    @media(hover:hover){.shop-card:hover{transform:translateY(-2px);box-shadow:0 13px 32px rgba(38,24,74,.11)}}
+    @media(max-width:560px){.shop-card{border-radius:18px!important;padding:16px}.shop-card .service-item{grid-template-columns:minmax(0,1fr);gap:9px}.shop-card .service-item strong{font-size:16px}.shop-card .book-btn{width:100%;min-height:48px}.shop-card h3{font-size:21px}}
+    @media(prefers-reduced-motion:reduce){.shop-card{transition:none}.shop-card:hover{transform:none}}
+
+</style>
 </head>
 <body class="customer-auth-pending">
 <header><div class="nav">
