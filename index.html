@@ -564,6 +564,48 @@
     @media(max-width:560px){.shop-card{border-radius:18px!important;padding:16px}.shop-card .service-item{grid-template-columns:minmax(0,1fr);gap:9px}.shop-card .service-item strong{font-size:16px}.shop-card .book-btn{width:100%;min-height:48px}.shop-card h3{font-size:21px}}
     @media(prefers-reduced-motion:reduce){.shop-card{transition:none}.shop-card:hover{transform:none}}
 
+
+    /* Final typography and text-layout correction for Tajik Cyrillic and small screens. */
+    html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+    body,button,input,select,textarea{font-family:Arial,"Noto Sans",system-ui,sans-serif;letter-spacing:normal}
+    body{line-height:1.6;overflow-wrap:break-word;word-break:normal}
+    h1,h2,h3,h4,h5,h6,p,label,span,strong,a,small,li,button{
+      overflow-wrap:break-word;word-break:normal;hyphens:none;text-indent:0
+    }
+    h1,h2,h3,h4,h5,h6{letter-spacing:normal;line-height:1.3}
+    p,.lead,.muted,.notice,.shop-card p,.service-meta,.staff-meta,.booking-status,footer{
+      line-height:1.65;white-space:normal;overflow-wrap:anywhere
+    }
+    .nav,.lang,.actions,.directory-search-row,.nearby-tools,.directory-sort-row,
+    .service-item,.hours-row,.staff-profile,.customer-session-actions{
+      min-width:0;flex-wrap:wrap
+    }
+    .brand{white-space:normal;overflow-wrap:anywhere;line-height:1.35;letter-spacing:normal}
+    .hero,.tile,.shop-card,.booking-panel,.booking-auth,.customer-auth-card,
+    .my-booking-card,.notice{min-width:0;overflow-wrap:anywhere}
+    .shop-card .service-item{grid-template-columns:minmax(0,1fr);align-items:start}
+    .shop-card .service-item strong{white-space:normal;overflow-wrap:anywhere}
+    .shop-card .book-btn{width:100%;min-height:48px;white-space:normal;line-height:1.35}
+    .hours-row{align-items:flex-start}
+    .hours-row span,.hours-row strong{min-width:0;white-space:normal;overflow-wrap:anywhere}
+    button,a{line-height:1.4}
+    @media(max-width:560px){
+      main{padding-left:14px;padding-right:14px}
+      .nav{align-items:flex-start}
+      .brand{font-size:17px;max-width:55%}
+      .lang{justify-content:flex-end;flex:1}
+      .hero{padding:23px 18px}
+      h1{font-size:clamp(27px,8vw,36px);line-height:1.25;letter-spacing:normal}
+      .lead{font-size:17px;line-height:1.7}
+      .section h2{font-size:23px;line-height:1.35}
+      .shop-card h3{font-size:21px;line-height:1.35;letter-spacing:normal}
+      .shop-card p,.tile p,.muted{font-size:16px;line-height:1.7}
+      .service-meta,.staff-meta{font-size:15px;line-height:1.6}
+      .service-item{gap:10px}
+      .service-item .book-btn{width:100%}
+      footer{line-height:1.7}
+    }
+
 </style>
 </head>
 <body class="customer-auth-pending">
