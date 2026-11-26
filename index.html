@@ -628,7 +628,7 @@ const authRegister=document.createElement("button");authRegister.type="button";a
 const authLogin=document.createElement("button");authLogin.type="button";authLogin.className="auth-secondary";authLogin.textContent="Ворид шудан";
 const authMessage=document.createElement("p");authMessage.className="auth-message";authMessage.setAttribute("role","status");authMessage.setAttribute("aria-live","polite");authMessage.textContent="Агар бори аввал бошед, «Сабти ном»-ро интихоб кунед.";
 const authAccountLink=document.createElement("a");authAccountLink.href="customer-account.html";authAccountLink.textContent="Паролро фаромӯш кардед?";authAccountLink.style.display="block";authAccountLink.style.textAlign="center";authAccountLink.style.marginTop="14px";authAccountLink.style.color="#4d269e";authCard.append(authTitle,authIntro,authEmailLabel,authPasswordLabel,authRegister,authLogin,authMessage,authAccountLink);
-authGate.append(authCard);document.body.append(authGate);
+const authResend=document.createElement("button");authResend.type="button";authResend.className="auth-secondary";authResend.textContent="Пайвандро аз нав фиристед";authResend.hidden=true;authCard.append(authResend);\nauthGate.append(authCard);document.body.append(authGate);
 let customerAccessReady=false;
 const showCustomerSite=async(user)=>{
   if(!user||user.is_anonymous||!(user.email_confirmed_at||user.confirmed_at))return false;
@@ -651,11 +651,11 @@ authRegister.addEventListener("click",async()=>{
     }
     if(result.error)throw result.error;
     if(await showCustomerSite(result.data?.user)){authMessage.textContent="Сабти ном муваффақ шуд.";return;}
-    authMessage.textContent="Пайванди тасдиқ ба почтаи шумо фиристода шуд. Почтаро кушоед, суроғаро тасдиқ кунед; баъд ба сомона бармегардед.";
+    authMessage.textContent="Пайванди тасдиқ ба почтаи шумо фиристода шуд. Почтаро кушоед, суроғаро тасдиқ кунед; баъд ба сомона бармегардед.";authResend.hidden=false;
   }catch(error){authMessage.textContent="Сабти ном нашуд: "+(error?.message||"Хатои номаълум");}
   finally{setAuthBusy(false);}
 });
-authLogin.addEventListener("click",async()=>{
+authResend.addEventListener("click",async()=>{const email=authEmail.value.trim().toLowerCase();if(!email||!authEmail.checkValidity()){authMessage.textContent="Аввал почтаи электрониро дуруст ворид кунед.";authEmail.focus();return;}authResend.disabled=true;authMessage.textContent="Пайванди нав фиристода шуда истодааст…";try{const {error}=await customerSupabase.auth.resend({type:"signup",email,options:{emailRedirectTo:new URL("./",location.href).href}});if(error)throw error;authMessage.textContent="Пайванди нави тасдиқ фиристода шуд. Почтаи навтаринро кушоед.";}catch(error){authMessage.textContent="Фиристодан нашуд: "+(error?.message||"Хатои номаълум");}finally{authResend.disabled=false;}});\nauthLogin.addEventListener("click",async()=>{
   const email=authEmail.value.trim().toLowerCase(),password=authPassword.value;
   if(!email||!authEmail.checkValidity()||!password){authMessage.textContent="Почта ва паролро дуруст ворид кунед.";authEmail.focus();return;}
   setAuthBusy(true);authMessage.textContent="Ворид шуда истодаед…";
