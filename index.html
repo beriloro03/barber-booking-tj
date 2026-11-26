@@ -75,7 +75,7 @@
     .booking-panel input:focus,.booking-panel select:focus,.booking-panel textarea:focus{border-color:#7650c4;box-shadow:0 0 0 3px rgba(118,80,196,.13)}
     .booking-panel button{min-height:44px;padding:10px 16px}
     #refreshMyBookings{margin-top:6px}
-    .customer-session-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:8px 0 14px}.customer-logout-btn{background:#fff4f2!important;color:#9b2c20!important;border-color:#efc4bd!important;font-weight:750}.customer-logout-btn[hidden]{display:none}.customer-session-actions #customerSessionStatus{font-size:14px;color:var(--muted)}@media(max-width:560px){.customer-session-actions{flex-direction:column;align-items:stretch}.customer-session-actions button{width:100%}}
+    .customer-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.customer-panel-heading h2{margin:0}.customer-logout-btn{font:inherit;font-weight:700;border:1px solid #e0e3ed;border-radius:12px;padding:10px 14px;min-height:42px;background:#fff;color:#34364d;cursor:pointer}.customer-logout-btn[hidden]{display:none}.customer-session-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:8px 0 14px}.customer-session-actions #customerSessionStatus{font-size:14px;color:var(--muted)}@media(max-width:560px){.customer-panel-heading{align-items:stretch}.customer-panel-heading h2{flex:1}.customer-panel-heading .customer-logout-btn{width:auto}.customer-session-actions{flex-direction:column;align-items:stretch}.customer-session-actions button{width:100%}}
     .my-booking-card{padding:17px}
     .booking-state{display:inline-block;padding:6px 10px;border-radius:999px;background:#f0eaff}
     .notice,.shop-status{border-radius:16px;background:#fff}
@@ -568,7 +568,7 @@
     <div id="shopList" class="grid" aria-live="polite"></div>
     <div id="shopStatus" class="shop-status" role="status">Маълумот бор шуда истодааст…</div>
   </section>
-  <section class="section" id="myBookingsSection"><h2 id="myBookingsTitle">Навбатҳои ман</h2><p class="muted" id="myBookingsIntro">Дархостҳои фиристодаатон ва ҳолати тасдиқи онҳоро бинед.</p><div id="customerNotifications" class="my-bookings-list" aria-live="polite"></div><div class="customer-session-actions"><button type="button" id="refreshMyBookings">Навсозӣ</button><button type="button" id="customerLogoutBtn" class="customer-logout-btn" hidden>Баромадан аз ҳисоби муштарӣ</button><span id="customerSessionStatus" role="status" aria-live="polite"></span></div><div id="myBookingsList" class="my-bookings-list" aria-live="polite">Маълумот бор шуда истодааст…</div></section>
+  <section class="section" id="myBookingsSection"><div class="customer-panel-heading"><h2 id="myBookingsTitle">Навбатҳои ман</h2><button type="button" id="customerLogoutBtn" class="customer-logout-btn" hidden>Баромадан</button></div><p class="muted" id="myBookingsIntro">Дархостҳои фиристодаатон ва ҳолати тасдиқи онҳоро бинед.</p><div id="customerNotifications" class="my-bookings-list" aria-live="polite"></div><div class="customer-session-actions"><button type="button" id="refreshMyBookings">Навсозӣ</button><span id="customerSessionStatus" role="status" aria-live="polite"></span></div><div id="myBookingsList" class="my-bookings-list" aria-live="polite">Маълумот бор шуда истодааст…</div></section>
   <section class="section" id="how">
     <h2 id="servicesTitle">Имкониятҳои платформа</h2>
     <p class="muted" id="servicesIntro">Ҳадафи мо содда кардани ҷустуҷӯ ва навбатгирӣ аст.</p>
