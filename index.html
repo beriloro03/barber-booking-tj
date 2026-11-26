@@ -625,8 +625,8 @@ authEmailLabel.append(authEmail);
 const authPasswordLabel=document.createElement("label");authPasswordLabel.textContent="Парол (на камтар аз 12 аломат)";
 const authPassword=document.createElement("input");authPassword.type="password";authPassword.autocomplete="current-password";authPassword.required=true;authPassword.minLength=12;
 authPasswordLabel.append(authPassword);
-const authRegister=document.createElement("button");authRegister.type="button";authRegister.className="primary";authRegister.textContent="Ҳисоб сохтан";
-const authLogin=document.createElement("button");authLogin.type="button";authLogin.className="primary";authLogin.textContent="Ворид шудан";authLogin.hidden=true;
+const authRegister=document.createElement("button");authRegister.type="button";authRegister.className="primary";authRegister.textContent="Ҳисоб сохтан";authRegister.hidden=true;
+const authLogin=document.createElement("button");authLogin.type="button";authLogin.className="primary";authLogin.textContent="Ворид шудан";
 const authModeToggle=document.createElement("button");authModeToggle.type="button";authModeToggle.className="auth-secondary";authModeToggle.textContent="Бори аввал ҳастед? Сабти ном";
 let authMode="login";
 authModeToggle.addEventListener("click",()=>{
