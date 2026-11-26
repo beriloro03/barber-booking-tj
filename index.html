@@ -1689,6 +1689,10 @@ async function loadShops() {
     hoursByShop = {};
     staffByShop = {};
     reviewsByShop = {};
+    // Show active centers immediately; optional details must not keep the directory loading.
+    loadState = "ready";
+    refreshServiceFilter();
+    render();
     if (shops.length) {
       const { data: serviceData, error: serviceError } = await supabase
         .from("services")
