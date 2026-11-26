@@ -539,10 +539,10 @@
 
     .booking-auth{margin-top:14px;padding:16px;border:1px solid #cbd5df;border-radius:14px;background:#fff}.booking-auth h4{margin:0 0 6px}.booking-auth p{line-height:1.5}.booking-auth label{display:block;margin:10px 0 5px;font-weight:700}.booking-auth input{display:block;width:100%;min-height:46px;padding:10px 12px;border:1px solid #aebdca;border-radius:10px;font:inherit}.booking-auth button{display:block;width:100%;min-height:46px;margin-top:10px}.booking-auth[hidden]{display:none}
 
-    .customer-auth-gate{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:18px;background:linear-gradient(145deg,rgba(35,19,73,.96),rgba(83,48,150,.96));overflow-y:auto}.customer-auth-card{width:min(100%,440px);padding:25px;border-radius:22px;background:#fff;box-shadow:0 24px 70px #14072c55;color:#211b31}.customer-auth-card h1{font-size:26px;line-height:1.2;margin:0 0 8px;color:#4d269e}.customer-auth-card p{line-height:1.55;color:#716b7e}.customer-auth-card label{display:block;margin:13px 0 6px;font-weight:700}.customer-auth-card input{width:100%;min-height:48px;padding:11px 13px;border:1px solid #d9d2e5;border-radius:11px;font:inherit}.customer-auth-card button{width:100%;min-height:48px;margin-top:11px;font-weight:750}.customer-auth-card .auth-secondary{background:#f4f0fb;color:#4d269e;border-color:#e2d8f2}.customer-auth-card .auth-message{min-height:28px;margin:13px 0 0;padding:10px;border-radius:10px;background:#f7f5fb;font-size:14px;overflow-wrap:anywhere}.customer-auth-gate[hidden]{display:none}
+    .customer-auth-gate{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:18px;background:linear-gradient(145deg,rgba(35,19,73,.96),rgba(83,48,150,.96));overflow-y:auto}.customer-auth-card{width:min(100%,440px);padding:25px;border-radius:22px;background:#fff;box-shadow:0 24px 70px #14072c55;color:#211b31}.customer-auth-card h1{font-size:26px;line-height:1.2;margin:0 0 8px;color:#4d269e}.customer-auth-card p{line-height:1.55;color:#716b7e}.customer-auth-card label{display:block;margin:13px 0 6px;font-weight:700}.customer-auth-card input{width:100%;min-height:48px;padding:11px 13px;border:1px solid #d9d2e5;border-radius:11px;font:inherit}.customer-auth-card button{width:100%;min-height:48px;margin-top:11px;font-weight:750}.customer-auth-card .auth-secondary{background:#f4f0fb;color:#4d269e;border-color:#e2d8f2}.customer-auth-card .auth-message{min-height:28px;margin:13px 0 0;padding:10px;border-radius:10px;background:#f7f5fb;font-size:14px;overflow-wrap:anywhere}.customer-auth-gate[hidden]{display:none}body.customer-auth-pending>header,body.customer-auth-pending>main{visibility:hidden}
   </style>
 </head>
-<body>
+<body class="customer-auth-pending">
 <header><div class="nav">
   <div class="brand" id="brand">✂️ Сартарошхонаҳо</div>
   <div class="lang" aria-label="Language">
@@ -627,12 +627,12 @@ authPasswordLabel.append(authPassword);
 const authRegister=document.createElement("button");authRegister.type="button";authRegister.className="primary";authRegister.textContent="Сабти ном";
 const authLogin=document.createElement("button");authLogin.type="button";authLogin.className="auth-secondary";authLogin.textContent="Ворид шудан";
 const authMessage=document.createElement("p");authMessage.className="auth-message";authMessage.setAttribute("role","status");authMessage.setAttribute("aria-live","polite");authMessage.textContent="Агар бори аввал бошед, «Сабти ном»-ро интихоб кунед.";
-authCard.append(authTitle,authIntro,authEmailLabel,authPasswordLabel,authRegister,authLogin,authMessage);
+const authAccountLink=document.createElement("a");authAccountLink.href="customer-account.html";authAccountLink.textContent="Паролро фаромӯш кардед?";authAccountLink.style.display="block";authAccountLink.style.textAlign="center";authAccountLink.style.marginTop="14px";authAccountLink.style.color="#4d269e";authCard.append(authTitle,authIntro,authEmailLabel,authPasswordLabel,authRegister,authLogin,authMessage,authAccountLink);
 authGate.append(authCard);document.body.append(authGate);
 let customerAccessReady=false;
 const showCustomerSite=async(user)=>{
   if(!user||user.is_anonymous||!(user.email_confirmed_at||user.confirmed_at))return false;
-  customerAccessReady=true;authGate.hidden=true;return true;
+  customerAccessReady=true;authGate.hidden=true;document.body.classList.remove("customer-auth-pending");return true;
 };
 const setAuthBusy=busy=>{authRegister.disabled=busy;authLogin.disabled=busy;};
 authRegister.addEventListener("click",async()=>{
