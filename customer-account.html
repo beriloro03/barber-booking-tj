@@ -5,7 +5,7 @@
 </style></head>
 <body><header><div class="nav"><div class="brand">✂️ Сартарошхонаҳо · Муштарӣ</div><a href="./index.html">← Саҳифаи асосӣ</a></div></header>
 <main><section class="card"><h1>Панели муштарӣ</h1><p class="muted">Ба ҳисоби худ ворид шавед, навбатҳо ва огоҳиномаҳои худро бинед.</p></section>
-<section class="card" id="activeShopsCard"><h2>Марказҳои фаъол</h2><p class="muted">Ҳамаи марказҳое, ки ҳоло фаъоланд:</p><p class="shop-count" id="shopCount">Маълумот бор шуда истодааст…</p><div id="activeShops" aria-live="polite"></div><a class="primary" style="display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;border-radius:11px;background:var(--p);color:#fff;text-decoration:none;font-weight:700" href="./index.html#directory">Интихоби марказ ва гирифтани навбат →</a></section>
+<section class="card hidden" id="activeShopsCard"><h2>Марказҳои фаъол</h2><p class="muted">Марказҳои фаъол, соатҳои корӣ ва хизматрасониҳоро бинед. Барои навбатгирӣ марказро интихоб кунед:</p><p class="shop-count" id="shopCount">Маълумот бор шуда истодааст…</p><div id="activeShops" aria-live="polite"></div><a class="primary" style="display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;border-radius:11px;background:var(--p);color:#fff;text-decoration:none;font-weight:700" href="./index.html#directory">Интихоби марказ ва гирифтани навбат →</a></section>
 <section class="card" id="authCard"><h2>Воридшавӣ / Сабти ном</h2><label for="email">Почтаи электронӣ</label><input id="email" type="email" autocomplete="email" required placeholder="name@example.com"><label for="password">Парол (на камтар аз 12 аломат)</label><input id="password" type="password" autocomplete="current-password" minlength="12" required><div class="actions"><button class="primary" id="login">Ворид шудан</button><button id="register">Ҳисоб сохтан</button><button id="reset">Барқарор кардани парол</button></div><p class="status" id="authStatus" role="status">Бо ҳамон почта ва пароле ворид шавед, ки ҳангоми гирифтани навбат истифода кардед.</p></section>
 <section class="card hidden" id="accountCard"><div class="actions" style="justify-content:space-between;align-items:center"><h2>Навбатҳои ман</h2><button id="logout">Баромадан</button></div><button id="refresh" class="primary">Навсозии маълумот</button><div id="noticeList"></div><div id="bookingList" class="muted">Маълумот бор шуда истодааст…</div></section></main>
 <script type="module">
@@ -14,22 +14,36 @@ const db=createClient("https://yjybilaaxqtzhlvaabwd.supabase.co","sb_publishable
 const $=id=>document.getElementById(id),say=t=>$("authStatus").textContent=t;
 async function loadActiveShops(){
  const box=$("activeShops"),count=$("shopCount");
- const{data,error}=await db.from("barbershops").select("id,name,city,district,address").eq("is_active",true).order("name",{ascending:true});
+ count.textContent="Марказҳо бор шуда истодаанд…";
+ const{data,error}=await db.from("barbershops").select("id,name,city,district,address,phone").eq("is_active",true).order("name",{ascending:true});
  if(error){count.textContent="Марказҳо бор нашуданд. Интернетро санҷед ва саҳифаро нав кунед.";box.replaceChildren();return;}
- const rows=data||[];count.textContent="Ҳамагӣ "+rows.length+" маркази фаъол";
- box.replaceChildren();
+ const rows=data||[];count.textContent="Ҳамагӣ "+rows.length+" маркази фаъол";box.replaceChildren();
  if(!rows.length){const p=document.createElement("p");p.className="muted";p.textContent="Ҳоло маркази фаъол нест.";box.append(p);return;}
+ const ids=rows.map(x=>x.id);
+ const [hr,sr]=await Promise.all([
+  db.from("business_hours").select("barbershop_id,weekday,opens_at,closes_at,is_closed").in("barbershop_id",ids).order("weekday",{ascending:true}),
+  db.from("services").select("barbershop_id,name,price,duration_minutes").in("barbershop_id",ids).eq("is_active",true).order("name",{ascending:true})
+ ]);
+ const hm={},sm={};if(!hr.error)(hr.data||[]).forEach(x=>(hm[x.barbershop_id]??=[]).push(x));if(!sr.error)(sr.data||[]).forEach(x=>(sm[x.barbershop_id]??=[]).push(x));
+ const days=["Якшанбе","Душанбе","Сешанбе","Чоршанбе","Панҷшанбе","Ҷумъа","Шанбе"];
  for(const shop of rows){
   const item=document.createElement("article");item.className="shop-item";
   const name=document.createElement("strong");name.textContent=shop.name||"Марказ";item.append(name);
-  const place=[shop.city,shop.district,shop.address].filter(Boolean).join(" · ");
-  const address=document.createElement("p");address.textContent=place||"Суроға нишон дода нашудааст";item.append(address);
-  box.append(item);
+  const addr=document.createElement("p");addr.textContent=[shop.city,shop.district,shop.address].filter(Boolean).join(" · ")||"Суроға нишон дода нашудааст";item.append(addr);
+  const ht=document.createElement("p"),hs=document.createElement("strong");hs.textContent="Соатҳои корӣ";ht.append(hs);item.append(ht);
+  const hours=hm[shop.id]||[];
+  if(!hours.length){const p=document.createElement("p");p.textContent="Соатҳои корӣ сабт нашудаанд.";item.append(p);}
+  else for(const day of [1,2,3,4,5,6,0]){const row=hours.find(x=>Number(x.weekday)===day);if(row){const p=document.createElement("p");p.textContent=days[day]+": "+(row.is_closed?"Истироҳат":String(row.opens_at).slice(0,5)+"–"+String(row.closes_at).slice(0,5));item.append(p);}}
+  const st=document.createElement("p"),ss=document.createElement("strong");ss.textContent="Хизматҳо ва нархҳо";st.append(ss);item.append(st);
+  const services=sm[shop.id]||[];
+  if(!services.length){const p=document.createElement("p");p.textContent="Хизматрасониҳо сабт нашудаанд.";item.append(p);}
+  else for(const service of services){const p=document.createElement("p");p.textContent=service.name+" · "+Number(service.price).toLocaleString("tg-TJ")+" сомонӣ · "+service.duration_minutes+" дақ.";item.append(p);}
+  if(shop.phone){const p=document.createElement("p");p.textContent="Телефон: "+shop.phone;item.append(p);}
+  const book=document.createElement("a");book.href="./index.html#directory";book.textContent="Интихоби хизмат ва гирифтани навбат →";book.style.display="inline-block";book.style.marginTop="10px";item.append(book);box.append(item);
  }
 }
-loadActiveShops();
 const W={loading:"Маълумот бор шуда истодааст…",empty:"Ҳоло навбате надоред.",error:"Навбатҳо бор нашуданд. Интернетро санҷед.",pending:"Интизорӣ",confirmed:"Тасдиқшуда",cancelled:"Бекоршуда",completed:"Анҷомёфта",shop:"Марказ",service:"Хизмат",staff:"Корманд",price:"Нарх",status:"Ҳолат",move:"Тағйир додани вақт",cancel:"Бекор кардани навбат",confirmCancel:"Мехоҳед ин навбатро бекор кунед?",cancelError:"Навбат бекор нашуд.",date:"Санаи нав",time:"Вақти нав",choose:"Вақти дастрасро интихоб кунед",save:"Сабт кардан",close:"Пӯшидан"};
-function show(user){const ok=!!(user&&!user.is_anonymous&&(user.email_confirmed_at||user.confirmed_at));$("authCard").classList.toggle("hidden",ok);$("accountCard").classList.toggle("hidden",!ok);if(ok)loadBookings();}
+function show(user){const ok=!!(user&&!user.is_anonymous&&(user.email_confirmed_at||user.confirmed_at));$("authCard").classList.toggle("hidden",ok);$("activeShopsCard").classList.toggle("hidden",!ok);$("accountCard").classList.toggle("hidden",!ok);if(ok){loadActiveShops();loadBookings();}}
 $("login").onclick=async()=>{const email=$("email").value.trim().toLowerCase(),password=$("password").value;if(!$("email").checkValidity()||!password){say("Почта ва паролро дуруст ворид кунед.");return;}say("Ворид шуда истодаед…");const{data,error}=await db.auth.signInWithPassword({email,password});if(error){say("Ворид нашуд: "+error.message);return;}if(!data.user.email_confirmed_at&&!data.user.confirmed_at){say("Аввал почтаи электрониро тасдиқ кунед.");return;}show(data.user);};
 $("register").onclick=async()=>{const email=$("email").value.trim().toLowerCase(),password=$("password").value;if(!$("email").checkValidity()){say("Почтаи электрониро дуруст ворид кунед.");return;}if(password.length<12){say("Парол бояд на камтар аз 12 аломат дошта бошад.");return;}say("Ҳисоб сохта шуда истодааст…");const{data,error}=await db.auth.signUp({email,password,options:{emailRedirectTo:new URL("./customer-account.html",location.href).href}});if(error){say("Сабти ном нашуд: "+error.message);return;}if(data.user?.email_confirmed_at||data.user?.confirmed_at)show(data.user);else say("Пайванди тасдиқ ба почта фиристода шуд. Почтаро тасдиқ карда, ба ҳамин саҳифа баргардед.");};
 $("reset").onclick=async()=>{const email=$("email").value.trim().toLowerCase();if(!$("email").checkValidity()){say("Аввал почтаи электрониро дуруст ворид кунед.");return;}const{error}=await db.auth.resetPasswordForEmail(email,{redirectTo:new URL("./customer-reset-password.html",location.href).href});say(error?"Дархост иҷро нашуд: "+error.message:"Агар ин почта ҳисоб дошта бошад, пайванди барқароркунӣ фиристода мешавад.");};
