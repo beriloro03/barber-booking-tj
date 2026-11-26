@@ -761,18 +761,20 @@ function createBookingPanel(shop, shopServices, shopStaff) {
     : document.documentElement.lang==="en"
     ? {title:"Customer account",required:"Create an account or sign in before sending a booking.",email:"Email address",password:"Password (at least 12 characters)",register:"Create account",login:"Sign in",checking:"Please wait…",confirm:"Check your email and confirm the address. Then return here and sign in.",registered:"Account created. You can now sign in.",signed:"Signed in. Sending your booking…",badEmail:"Enter a valid email address.",badPassword:"Password must be at least 12 characters.",error:"Could not complete this action: ",help:"Register once. Next time, sign in with the same email and password."}
     : {title:"Ҳисоби муштарӣ",required:"Барои фиристодани фармоиш сабти ном кунед ё ворид шавед.",email:"Почтаи электронӣ",password:"Парол (на камтар аз 12 аломат)",register:"Сабти ном",login:"Ворид шудан",checking:"Лаҳзае интизор шавед…",confirm:"Почтаи электрониро кушоед ва суроғаро тасдиқ кунед. Баъд ба ҳамин саҳифа баргашта ворид шавед.",registered:"Ҳисоб сохта шуд. Акнун ворид шуда метавонед.",signed:"Ворид шудед. Фармоиш фиристода мешавад…",badEmail:"Почтаи электрониро дуруст ворид кунед.",badPassword:"Парол бояд на камтар аз 12 аломат дошта бошад.",error:"Амалиёт иҷро нашуд: ",help:"Як бор сабти ном кунед. Дафъаи дигар бо ҳамон почта ва парол ворид шавед."};
-  const authPanel=document.createElement("section");authPanel.className="booking-auth";authPanel.hidden=true;
+  const authPanel=document.createElement("section");authPanel.className="booking-auth";
   const authHeading=document.createElement("h4");authHeading.textContent=authWords.title;
   const authHelp=document.createElement("p");authHelp.textContent=authWords.help;
   const authEmail=document.createElement("input");authEmail.type="email";authEmail.autocomplete="email";authEmail.required=true;authEmail.placeholder="name@example.com";
   const authPassword=document.createElement("input");authPassword.type="password";authPassword.autocomplete="new-password";authPassword.minLength=12;authPassword.required=true;
   const setAuthPanelVisible=visible=>{authPanel.hidden=!visible;authEmail.disabled=!visible;authPassword.disabled=!visible;};
-  setAuthPanelVisible(false);
+  setAuthPanelVisible(true);
   const authEmailLabel=makeLabel(authWords.email,authEmail),authPasswordLabel=makeLabel(authWords.password,authPassword);
   const authRegister=document.createElement("button");authRegister.type="button";authRegister.className="primary";authRegister.textContent=authWords.register;
   const authLogin=document.createElement("button");authLogin.type="button";authLogin.textContent=authWords.login;
   const authStatus=document.createElement("p");authStatus.className="booking-status";authStatus.setAttribute("role","status");authStatus.setAttribute("aria-live","polite");
   authPanel.append(authHeading,authHelp,authEmailLabel,authPasswordLabel,authRegister,authLogin,authStatus);
+  stepThree.append(authPanel);
+  customerSupabase.auth.getUser().then(({data,error})=>{const existing=data?.user;if(!error&&existing&&!existing.is_anonymous&&(existing.email_confirmed_at||existing.confirmed_at))setAuthPanelVisible(false);}).catch(()=>{});
   authRegister.addEventListener("click",async()=>{
     const e=authEmail.value.trim().toLowerCase(),p=authPassword.value;
     if(!e||!authEmail.checkValidity()){authStatus.textContent=authWords.badEmail;authEmail.focus();return;}
@@ -803,7 +805,7 @@ function createBookingPanel(shop, shopServices, shopStaff) {
     if(data.user?.is_anonymous){authStatus.textContent=authWords.error+"ҳисоби доимӣ истифода нашуд.";authRegister.disabled=false;authLogin.disabled=false;return;}
     setAuthPanelVisible(false);status.textContent=authWords.signed;submit.disabled=false;back.disabled=false;form.requestSubmit();
   });
-  form.append(progress,stepOne,stepTwo,stepThree,controls,status,authPanel);
+  form.append(progress,stepOne,stepTwo,stepThree,controls,status);
   panel.append(heading,notice,form);
   next.addEventListener("click",()=>{
     const active=[stepOne,stepTwo,stepThree][currentStep];
