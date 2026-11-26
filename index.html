@@ -606,6 +606,57 @@
       footer{line-height:1.7}
     }
 
+
+    /* Booking form: more open spacing, clear hierarchy, and comfortable touch targets. */
+    .booking-panel{
+      display:block;margin-top:20px;padding:clamp(20px,4vw,30px);
+      border:1px solid #d9d0eb;border-radius:22px;
+      background:linear-gradient(180deg,#fff 0%,#faf8ff 100%);
+      box-shadow:0 12px 30px rgba(48,31,83,.08);
+    }
+    .booking-panel[hidden]{display:none}
+    .booking-panel>h4{font-size:clamp(21px,3vw,25px);line-height:1.35;color:#342052;margin:0 0 10px}
+    .booking-panel>p{font-size:16px;line-height:1.7;color:#625a70;margin:0 0 18px}
+    .booking-progress{gap:10px;margin:20px 0 22px}
+    .booking-progress-item{min-height:58px;display:flex;align-items:center;justify-content:center;padding:11px 9px;border-radius:14px;font-size:15px;line-height:1.4}
+    .booking-step{gap:12px}
+    .booking-step-hint{margin:0 0 5px;padding:15px 17px;border:1px solid #d8eadf;border-radius:14px;font-size:16px;line-height:1.7;font-weight:600}
+    .booking-panel label{display:flex;flex-direction:column;gap:9px;margin:8px 0 14px;font-size:16px;line-height:1.55;font-weight:750;color:#342b46}
+    .booking-panel input,.booking-panel select,.booking-panel textarea{
+      display:block;width:100%;min-width:0;min-height:56px;padding:14px 15px;
+      border:1.5px solid #cfc5df;border-radius:13px;background:#fff;
+      color:#211b31;font-size:16px;line-height:1.5;
+    }
+    .booking-panel textarea{min-height:110px;resize:vertical}
+    .booking-panel input:focus,.booking-panel select:focus,.booking-panel textarea:focus{
+      outline:3px solid rgba(99,38,184,.15);border-color:#6326b8;
+    }
+    .booking-summary{margin:8px 0 16px;padding:18px;border:1px solid #d8e9df;border-radius:16px;background:#f7fcf8}
+    .booking-summary>strong{font-size:17px;line-height:1.5;margin-bottom:12px}
+    .booking-summary-details p{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;padding:7px 0;font-size:15px;line-height:1.5}
+    .booking-summary-details p strong{text-align:right;overflow-wrap:anywhere}
+    .booking-step-controls{gap:12px;margin-top:20px}
+    .booking-step-controls button,.booking-panel .booking-step-controls button{
+      min-height:56px;padding:13px 18px;border-radius:13px;font-size:16px;font-weight:800;line-height:1.4
+    }
+    .booking-panel .booking-status{margin-top:16px;padding:12px 14px;border-radius:12px;background:#f1eef8;font-size:15px;line-height:1.65}
+    .booking-panel .booking-status:empty{display:none}
+    @media(max-width:560px){
+      .booking-panel{margin-top:16px;padding:18px 15px;border-radius:18px}
+      .booking-progress{gap:6px;margin:16px 0 18px}
+      .booking-progress-item{min-height:56px;padding:9px 5px;font-size:13px}
+      .booking-step{gap:10px}
+      .booking-step-hint{padding:13px;font-size:15px}
+      .booking-panel label{font-size:15px;gap:8px;margin-bottom:12px}
+      .booking-panel input,.booking-panel select,.booking-panel textarea{min-height:54px;padding:13px;font-size:16px}
+      .booking-panel textarea{min-height:100px}
+      .booking-summary{padding:14px}
+      .booking-summary-details p{grid-template-columns:minmax(0,1fr);gap:3px;font-size:15px}
+      .booking-summary-details p strong{text-align:left}
+      .booking-step-controls{flex-direction:column;gap:9px;margin-top:16px}
+      .booking-step-controls button{width:100%;min-height:54px}
+    }
+
 </style>
 </head>
 <body class="customer-auth-pending">
