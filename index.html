@@ -956,7 +956,95 @@
       }
     }
 
-  </style>
+  
+    /* Booking form redesign: readable layout and comfortable mobile controls. */
+    .shop-card{min-width:0;overflow:hidden}
+    .booking-panel{
+      width:100%;max-width:100%;min-width:0;padding:clamp(16px,3vw,24px);
+      margin-top:18px;border-radius:20px;background:#fff;
+      border:1px solid #cfe2d8;box-shadow:0 10px 28px rgba(24,65,48,.08);
+      overflow:hidden
+    }
+    .booking-panel[hidden]{display:none}
+    .booking-panel h4{font-size:clamp(20px,3vw,24px);line-height:1.35;margin:0 0 8px;color:#18352d}
+    .booking-panel>.service-meta{font-size:15px;line-height:1.6;margin:0 0 14px}
+    .booking-progress{
+      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;
+      margin:18px 0 20px;width:100%
+    }
+    .booking-progress-item{
+      min-width:0;min-height:58px;display:flex;align-items:center;justify-content:center;
+      padding:10px 8px;border:1px solid #d6e5dc;border-radius:13px;
+      background:#f8fbf9;color:#466356;text-align:center;
+      font-size:14px;font-weight:750;line-height:1.4;overflow-wrap:anywhere
+    }
+    .booking-progress-item.current{background:#176b52;border-color:#176b52;color:#fff}
+    .booking-progress-item.complete{background:#e3f3e9;border-color:#b9dfc8;color:#145c47}
+    .booking-step{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;min-width:0}
+    .booking-step[hidden]{display:none}
+    .booking-step-hint{
+      margin:0 0 4px;padding:13px 15px;border-radius:13px;
+      background:#edf7f0;color:#24523f;font-size:16px;line-height:1.6;font-weight:600
+    }
+    .booking-panel label{
+      display:flex;flex-direction:column;align-items:stretch;gap:7px;
+      min-width:0;margin:2px 0 8px;color:#263d32;font-size:16px;
+      font-weight:700;line-height:1.5;overflow-wrap:anywhere
+    }
+    .booking-panel input,.booking-panel select,.booking-panel textarea{
+      display:block;width:100%;max-width:100%;min-width:0;min-height:52px;
+      margin:0;padding:12px 14px;border:1px solid #cbded2;border-radius:12px;
+      background:#fff;color:#18352d;font:inherit;font-size:16px;line-height:1.4
+    }
+    .booking-panel textarea{min-height:100px;resize:vertical}
+    .booking-panel input:focus,.booking-panel select:focus,.booking-panel textarea:focus{
+      outline:3px solid rgba(23,107,82,.13);border-color:#176b52
+    }
+    .booking-summary{min-width:0;padding:16px;margin:2px 0 8px;border:1px solid #d5e8db;border-radius:14px;background:#f7fbf8}
+    .booking-summary>strong{font-size:17px;line-height:1.5}
+    .booking-summary-details p{
+      display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);
+      gap:10px;padding:8px 0;margin:0;border-top:1px solid #e5efe8;
+      font-size:15px;line-height:1.5;overflow-wrap:anywhere
+    }
+    .booking-summary-details p strong{text-align:right;overflow-wrap:anywhere}
+    .booking-step-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:18px}
+    .booking-step-controls button{
+      width:100%;min-width:0;min-height:52px;margin:0;padding:12px 14px;
+      border-radius:12px;font-size:16px;font-weight:750;line-height:1.35;white-space:normal
+    }
+    .booking-step-controls .booking-back{grid-column:1}
+    .booking-step-controls .booking-next,.booking-step-controls .booking-submit{grid-column:2}
+    .booking-step-controls button[hidden]{display:none}
+    .booking-status{margin-top:14px;padding:11px 13px;border-radius:11px;background:#f3f7f4;font-size:15px;line-height:1.6;overflow-wrap:anywhere}
+    .booking-status:empty{display:none}
+    .booking-auth{min-width:0;margin-top:16px;padding:16px;border:1px solid #d9e8de;border-radius:14px;background:#f9fcfa}
+    .booking-auth h4{margin-bottom:8px}
+    .booking-auth label{display:flex;flex-direction:column;gap:7px}
+    .booking-auth input{width:100%;min-width:0;min-height:50px}
+    .booking-auth button{min-height:48px;max-width:100%;white-space:normal}
+    @media(max-width:560px){
+      .booking-panel{padding:15px;border-radius:16px}
+      .booking-progress{gap:6px;margin:14px 0 17px}
+      .booking-progress-item{min-height:66px;padding:8px 5px;font-size:13px;line-height:1.35}
+      .booking-step{gap:11px}
+      .booking-step-hint{padding:12px;font-size:15px}
+      .booking-panel label{font-size:15px}
+      .booking-panel input,.booking-panel select,.booking-panel textarea{min-height:52px;font-size:16px}
+      .booking-step-controls{grid-template-columns:minmax(0,1fr);gap:9px}
+      .booking-step-controls .booking-back,.booking-step-controls .booking-next,.booking-step-controls .booking-submit{grid-column:1}
+      .booking-step-controls button{min-height:52px}
+      .booking-summary-details p{grid-template-columns:minmax(0,1fr);gap:3px}
+      .booking-summary-details p strong{text-align:left}
+      .booking-auth{padding:13px}
+    }
+    @media(max-width:360px){
+      .booking-progress-item{font-size:12px;padding:7px 3px}
+      .booking-panel{padding:12px}
+      .booking-step-hint{font-size:14px}
+    }
+
+</style>
 </head>
 <body>
 <section class="customer-auth-gate" id="customerAuthGate" role="dialog" aria-modal="true" aria-labelledby="customerAuthTitle">
