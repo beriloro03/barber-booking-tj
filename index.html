@@ -755,6 +755,19 @@
 </style>
 </head>
 <body>
+<section class="customer-auth-gate" id="customerAuthGate" role="dialog" aria-modal="true" aria-labelledby="customerAuthTitle">
+  <div class="customer-auth-card">
+    <h1 id="customerAuthTitle">Хуш омадед!</h1>
+    <p>Барои дидани сартарошхонаҳо, соатҳои корӣ ва гирифтани навбат аввал ба ҳисоби худ ворид шавед ё ҳисоби нав созед.</p>
+    <label for="customerGateEmail">Почтаи электронӣ</label>
+    <input id="customerGateEmail" type="email" autocomplete="email" required placeholder="name@example.com">
+    <label for="customerGatePassword">Парол (на камтар аз 12 аломат)</label>
+    <input id="customerGatePassword" type="password" autocomplete="current-password" minlength="12" required>
+    <button type="button" class="primary" id="customerGateLogin">Ворид шудан</button>
+    <button type="button" class="auth-secondary" id="customerGateRegister">Сабти ном / Ҳисоби нав</button>
+    <p class="auth-message" id="customerGateStatus" role="status" aria-live="polite">Агар бори аввал бошед, «Сабти ном»-ро пахш кунед.</p>
+  </div>
+</section>
 <header><div class="nav">
   <div class="brand" id="brand">✂️ Сартарошхонаҳо</div>
   <div class="lang" aria-label="Language">
@@ -818,8 +831,59 @@ const SUPABASE_URL = "https://yjybilaaxqtzhlvaabwd.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_yyeO2kZv9yRQyLUOl7fG6Q_j_7ixPc1";
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 const customerSupabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, { auth: { storageKey: "barber-booking-customer-auth", autoRefreshToken: true, persistSession: true, detectSessionInUrl: true } });
+
+// Ҳамаи муштариён пеш аз дидани каталог бояд ба ҳисоби худ ворид шаванд.
+const gate = document.getElementById("customerAuthGate");
+const gateEmail = document.getElementById("customerGateEmail");
+const gatePassword = document.getElementById("customerGatePassword");
+const gateStatus = document.getElementById("customerGateStatus");
+const gateLogin = document.getElementById("customerGateLogin");
+const gateRegister = document.getElementById("customerGateRegister");
+const gateMessage = value => { gateStatus.textContent = value; };
+const customerIsVerified = user => Boolean(user && !user.is_anonymous && (user.email_confirmed_at || user.confirmed_at));
+function updateCustomerGate(user) {
+  const allowed = customerIsVerified(user);
+  gate.hidden = allowed;
+  document.body.style.overflow = allowed ? "" : "hidden";
+  if (!allowed) setTimeout(() => gateEmail.focus(), 50);
+}
+gateLogin.addEventListener("click", async () => {
+  const email = gateEmail.value.trim().toLowerCase(), password = gatePassword.value;
+  if (!gateEmail.checkValidity()) { gateMessage("Почтаи электрониро дуруст ворид кунед."); gateEmail.focus(); return; }
+  if (!password) { gateMessage("Паролро ворид кунед."); gatePassword.focus(); return; }
+  gateLogin.disabled = gateRegister.disabled = true; gateMessage("Ба ҳисоб ворид шуда истодаед…");
+  const { data, error } = await customerSupabase.auth.signInWithPassword({ email, password });
+  gateLogin.disabled = gateRegister.disabled = false;
+  if (error) { gateMessage("Ворид нашуд: " + error.message); return; }
+  if (!customerIsVerified(data.user)) { gateMessage("Аввал почтаи электронии худро тасдиқ кунед, баъд ворид шавед."); await customerSupabase.auth.signOut({scope:"local"}); return; }
+  updateCustomerGate(data.user);
+});
+gateRegister.addEventListener("click", async () => {
+  const email = gateEmail.value.trim().toLowerCase(), password = gatePassword.value;
+  if (!gateEmail.checkValidity()) { gateMessage("Почтаи электрониро дуруст ворид кунед."); gateEmail.focus(); return; }
+  if (password.length < 12) { gateMessage("Парол бояд на камтар аз 12 аломат дошта бошад."); gatePassword.focus(); return; }
+  gateLogin.disabled = gateRegister.disabled = true; gateMessage("Ҳисоб сохта шуда истодааст…");
+  const redirectTo = new URL("./", location.href).href;
+  const { data: current } = await customerSupabase.auth.getUser();
+  let result;
+  if (current?.user?.is_anonymous) {
+    result = await customerSupabase.auth.updateUser({email, password}, {emailRedirectTo:redirectTo});
+  } else {
+    result = await customerSupabase.auth.signUp({email, password, options:{emailRedirectTo:redirectTo}});
+  }
+  gateLogin.disabled = gateRegister.disabled = false;
+  if (result.error) { gateMessage("Сабти ном нашуд: " + result.error.message); return; }
+  if (customerIsVerified(result.data?.user) && result.data?.session) {
+    updateCustomerGate(result.data.user);
+  } else {
+    gateMessage("Ҳисоб сохта шуд. Ба почтаи электронии худ даромада, пайванди тасдиқро пахш кунед. Баъд ба сайт баргардед ва ворид шавед.");
+  }
+});
+customerSupabase.auth.onAuthStateChange((_event, session) => updateCustomerGate(session?.user || null));
+customerSupabase.auth.getUser().then(({data,error}) => updateCustomerGate(error ? null : data?.user || null)).catch(() => updateCustomerGate(null));
+
  
-// Public browsing is open. Customer authentication is requested only in the booking flow.
+// Каталог ва навбатгирӣ пас аз воридшавии муштарӣ дастрас мешаванд.
 
 const list = document.getElementById("shopList");
 const statusBox = document.getElementById("shopStatus");
