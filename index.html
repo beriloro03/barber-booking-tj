@@ -783,7 +783,6 @@
     <p class="lead" id="lead">Марказҳои хизматрасонӣ, хизматҳо, нархҳо ва вақти қабулро дар як ҷой пайдо кунед. Платформа барои муштариёни Тоҷикистон.</p>
     <div class="actions">
       <a class="primary" href="#directory" id="customerBtn">Марказҳоро бинед</a>
-      <a class="owner-entry" href="customer-account.html" id="customerPanelBtn">Панели муштарӣ · Навбатҳои ман</a>
     </div>
   </section>
   <section class="section" id="directory">
@@ -841,10 +840,16 @@ const gateLogin = document.getElementById("customerGateLogin");
 const gateRegister = document.getElementById("customerGateRegister");
 const gateMessage = value => { gateStatus.textContent = value; };
 const customerIsVerified = user => Boolean(user && !user.is_anonymous && (user.email_confirmed_at || user.confirmed_at));
+let customerContentLoaded = false;
 function updateCustomerGate(user) {
   const allowed = customerIsVerified(user);
   gate.hidden = allowed;
   document.body.style.overflow = allowed ? "" : "hidden";
+  if (allowed && !customerContentLoaded) {
+    customerContentLoaded = true;
+    loadShops();
+    loadMyBookings();
+  }
   if (!allowed) setTimeout(() => gateEmail.focus(), 50);
 }
 gateLogin.addEventListener("click", async () => {
@@ -1793,8 +1798,7 @@ async function loadShops() {
   refreshServiceFilter();
   render();
 }
-loadShops();
-loadMyBookings();
+// Каталог ва навбатҳои муштарӣ танҳо баъди воридшавии тасдиқшуда бор мешаванд.
 </script>
   <script>
     if ("serviceWorker" in navigator) {
