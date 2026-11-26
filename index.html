@@ -856,34 +856,47 @@ gateLogin.addEventListener("click", async () => {
   const email = gateEmail.value.trim().toLowerCase(), password = gatePassword.value;
   if (!gateEmail.checkValidity()) { gateMessage("Почтаи электрониро дуруст ворид кунед."); gateEmail.focus(); return; }
   if (!password) { gateMessage("Паролро ворид кунед."); gatePassword.focus(); return; }
-  gateLogin.disabled = gateRegister.disabled = true; gateMessage("Ба ҳисоб ворид шуда истодаед…");
-  const { data, error } = await customerSupabase.auth.signInWithPassword({ email, password });
-  gateLogin.disabled = gateRegister.disabled = false;
-  if (error) { gateMessage("Ворид нашуд: " + error.message); return; }
-  if (!customerIsVerified(data.user)) { gateMessage("Аввал почтаи электронии худро тасдиқ кунед, баъд ворид шавед."); await customerSupabase.auth.signOut({scope:"local"}); return; }
-  updateCustomerGate(data.user);
+  gateLogin.disabled = gateRegister.disabled = true;
+  gateMessage("Ба ҳисоб ворид шуда истодаед…");
+  try {
+    const { data, error } = await customerSupabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    if (!customerIsVerified(data.user)) {
+      gateMessage("Аввал почтаи электронии худро тасдиқ кунед, баъд ворид шавед.");
+      await customerSupabase.auth.signOut({scope:"local"});
+      return;
+    }
+    updateCustomerGate(data.user);
+  } catch (error) {
+    gateMessage("Ворид нашуд: " + (error?.message || "Хатои пайвастшавӣ. Интернетро санҷед."));
+  } finally {
+    gateLogin.disabled = gateRegister.disabled = false;
+  }
 });
 gateRegister.addEventListener("click", async () => {
   const email = gateEmail.value.trim().toLowerCase(), password = gatePassword.value;
   if (!gateEmail.checkValidity()) { gateMessage("Почтаи электрониро дуруст ворид кунед."); gateEmail.focus(); return; }
   if (password.length < 12) { gateMessage("Парол бояд на камтар аз 12 аломат дошта бошад."); gatePassword.focus(); return; }
-  gateLogin.disabled = gateRegister.disabled = true; gateMessage("Ҳисоб сохта шуда истодааст…");
-  const redirectTo = new URL("./", location.href).href;
-  const { data: current } = await customerSupabase.auth.getUser();
-  let result;
-  if (current?.user?.is_anonymous) {
-    result = await customerSupabase.auth.updateUser({email, password}, {emailRedirectTo:redirectTo});
-  } else {
-    result = await customerSupabase.auth.signUp({email, password, options:{emailRedirectTo:redirectTo}});
-  }
-  gateLogin.disabled = gateRegister.disabled = false;
-  if (result.error) { gateMessage("Сабти ном нашуд: " + result.error.message); return; }
-  if (customerIsVerified(result.data?.user) && result.data?.session) {
-    updateCustomerGate(result.data.user);
-  } else {
-    gateMessage("Ҳисоб сохта шуд. Ба почтаи электронии худ даромада, пайванди тасдиқро пахш кунед. Баъд ба сайт баргардед ва ворид шавед.");
+  gateLogin.disabled = gateRegister.disabled = true;
+  gateMessage("Ҳисоб сохта шуда истодааст…");
+  try {
+    const redirectTo = new URL("./", location.href).href;
+    const { data, error } = await customerSupabase.auth.signUp({ email, password, options:{emailRedirectTo:redirectTo} });
+    if (error) throw error;
+    if (customerIsVerified(data?.user) && data?.session) {
+      updateCustomerGate(data.user);
+    } else {
+      gateMessage("Ҳисоб сохта шуд. Ба почтаи электронии худ даромада, пайванди тасдиқро пахш кунед. Баъд ба сайт баргардед ва ворид шавед.");
+    }
+  } catch (error) {
+    gateMessage("Сабти ном нашуд: " + (error?.message || "Хатои пайвастшавӣ. Интернетро санҷед."));
+  } finally {
+    gateLogin.disabled = gateRegister.disabled = false;
   }
 });
+[gateEmail, gatePassword].forEach(input => input.addEventListener("keydown", event => {
+  if (event.key === "Enter") gateLogin.click();
+}));
 customerSupabase.auth.onAuthStateChange((_event, session) => updateCustomerGate(session?.user || null));
 customerSupabase.auth.getUser().then(({data,error}) => updateCustomerGate(error ? null : data?.user || null)).catch(() => updateCustomerGate(null));
 
