@@ -915,12 +915,17 @@ authLogin.addEventListener("click",async()=>{
   finally{setAuthBusy(false);}
 });
 customerSupabase.auth.onAuthStateChange((_event,session)=>{
-  if(session?.user){showCustomerSite(session.user);}
+  if(session?.user){
+    // Run Supabase requests after the auth callback releases its internal lock.
+    window.setTimeout(()=>{showCustomerSite(session.user);},0);
+  }
   else{
     customerAccessReady=false;
     authGate.hidden=false;
     document.body.classList.add("customer-auth-pending");
     if(customerLogoutButton)customerLogoutButton.hidden=true;
+    const panelLink=document.getElementById("customerPanelBtn");
+    if(panelLink)panelLink.hidden=true;
   }
 });
 customerSupabase.auth.getUser().then(({data,error})=>{
