@@ -536,6 +536,8 @@
     .nearby-tools{display:flex;flex-wrap:wrap;gap:9px;margin-top:11px}.nearby-tools button{min-height:48px;padding:10px 14px;font-weight:750}.nearby-tools button[hidden]{display:none}@media(max-width:560px){.nearby-tools{flex-direction:column}.nearby-tools button{width:100%}}
     .directory-filter-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}.directory-filter-grid label{display:flex;flex-direction:column;gap:6px;font-weight:750;font-size:14px;color:#26364a}.directory-filter-grid label:has(input[type=checkbox]){flex-direction:row;align-items:center;justify-content:space-between;min-height:44px}.directory-filter-grid select,.directory-filter-grid input:not([type=checkbox]){width:100%;min-width:0;min-height:44px;padding:8px 10px;border:1px solid #aebdca;border-radius:10px;background:#fff;color:#102b49;font:inherit}.directory-filter-grid button{min-height:44px;align-self:end;font-weight:750}.favorite-toggle{min-height:42px;margin:8px 8px 8px 0;padding:9px 13px;border:1px solid #b8c8d8;border-radius:11px;background:#f5f8fc;color:#123b68;font-weight:800}.favorite-toggle[aria-pressed=true]{background:#fff3d8;border-color:#d5a83e;color:#77520a}.shop-open-status{display:inline-flex;padding:6px 10px;border-radius:999px;margin:4px 0 8px;font-size:14px;font-weight:800}.shop-open-status.is-open{background:#e2f5e9;color:#176b52}.shop-open-status.is-closed{background:#f1f3f5;color:#35485c}@media(max-width:560px){.directory-filter-grid{grid-template-columns:1fr 1fr}.directory-filter-grid button{grid-column:1/-1;width:100%}}\n    .directory-sort-row{display:flex;align-items:center;gap:10px;margin-top:13px;color:#26364a;font-weight:750}.directory-sort-row select{flex:1;min-width:0;min-height:46px;padding:9px 12px;border:1px solid #cbd5df;border-radius:12px;background:#fff;color:#102b49;font:inherit;font-size:16px}.shop-feature-badge{display:inline-flex;align-items:center;margin:2px 0 10px;padding:6px 11px;border-radius:999px;background:#e7f5ed;color:#176b52;font-size:13px;font-weight:850}.shop-distance{display:inline-flex;align-items:center;margin:7px 7px 7px 0!important;padding:7px 11px;border-radius:999px;background:#eaf2fb;color:#123b68!important;font-size:14px!important;font-weight:800}.shop-rating{display:inline-flex;align-items:center;margin:7px 0!important;padding:7px 11px;border-radius:999px;background:#fff5dc;color:#805b0c!important;font-size:14px!important;font-weight:800}.shop-card{position:relative;overflow:hidden}.shop-card:has(.shop-feature-badge){border:2px solid #176b52;box-shadow:0 10px 28px rgba(23,107,82,.12)}@media(max-width:560px){.directory-sort-row{align-items:stretch;flex-direction:column;gap:6px}.directory-sort-row select{width:100%}}
 
+
+    .booking-auth{margin-top:14px;padding:16px;border:1px solid #cbd5df;border-radius:14px;background:#fff}.booking-auth h4{margin:0 0 6px}.booking-auth p{line-height:1.5}.booking-auth label{display:block;margin:10px 0 5px;font-weight:700}.booking-auth input{display:block;width:100%;min-height:46px;padding:10px 12px;border:1px solid #aebdca;border-radius:10px;font:inherit}.booking-auth button{display:block;width:100%;min-height:46px;margin-top:10px}.booking-auth[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -753,7 +755,52 @@ function createBookingPanel(shop, shopServices, shopStaff) {
   serviceSelect.addEventListener("change",()=>{refreshStaffOptions();loadAvailableSlots();});
   staffSelect.addEventListener("change",loadAvailableSlots);
   timeInput.addEventListener("change",()=>{if(currentStep===2)updateSummary();});
-  form.append(progress,stepOne,stepTwo,stepThree,controls,status);
+  const authWords=document.documentElement.lang==="ru"
+    ? {title:"Аккаунт клиента",required:"Чтобы отправить запись, создайте аккаунт или войдите.",email:"Электронная почта",password:"Пароль (минимум 12 символов)",register:"Регистрация",login:"Войти",checking:"Проверяем…",confirm:"Проверьте почту и подтвердите адрес. Затем вернитесь сюда и войдите.",registered:"Аккаунт создан. Теперь можно войти.",signed:"Вход выполнен. Отправляем запись…",badEmail:"Введите корректный адрес электронной почты.",badPassword:"Пароль должен содержать не менее 12 символов.",error:"Не удалось выполнить действие: ",help:"Один раз зарегистрируйтесь. В следующий раз входите с теми же почтой и паролем."}
+    : document.documentElement.lang==="en"
+    ? {title:"Customer account",required:"Create an account or sign in before sending a booking.",email:"Email address",password:"Password (at least 12 characters)",register:"Create account",login:"Sign in",checking:"Please wait…",confirm:"Check your email and confirm the address. Then return here and sign in.",registered:"Account created. You can now sign in.",signed:"Signed in. Sending your booking…",badEmail:"Enter a valid email address.",badPassword:"Password must be at least 12 characters.",error:"Could not complete this action: ",help:"Register once. Next time, sign in with the same email and password."}
+    : {title:"Ҳисоби муштарӣ",required:"Барои фиристодани фармоиш сабти ном кунед ё ворид шавед.",email:"Почтаи электронӣ",password:"Парол (на камтар аз 12 аломат)",register:"Сабти ном",login:"Ворид шудан",checking:"Лаҳзае интизор шавед…",confirm:"Почтаи электрониро кушоед ва суроғаро тасдиқ кунед. Баъд ба ҳамин саҳифа баргашта ворид шавед.",registered:"Ҳисоб сохта шуд. Акнун ворид шуда метавонед.",signed:"Ворид шудед. Фармоиш фиристода мешавад…",badEmail:"Почтаи электрониро дуруст ворид кунед.",badPassword:"Парол бояд на камтар аз 12 аломат дошта бошад.",error:"Амалиёт иҷро нашуд: ",help:"Як бор сабти ном кунед. Дафъаи дигар бо ҳамон почта ва парол ворид шавед."};
+  const authPanel=document.createElement("section");authPanel.className="booking-auth";authPanel.hidden=true;
+  const authHeading=document.createElement("h4");authHeading.textContent=authWords.title;
+  const authHelp=document.createElement("p");authHelp.textContent=authWords.help;
+  const authEmail=document.createElement("input");authEmail.type="email";authEmail.autocomplete="email";authEmail.required=true;authEmail.placeholder="name@example.com";
+  const authPassword=document.createElement("input");authPassword.type="password";authPassword.autocomplete="new-password";authPassword.minLength=12;authPassword.required=true;
+  const authEmailLabel=makeLabel(authWords.email,authEmail),authPasswordLabel=makeLabel(authWords.password,authPassword);
+  const authRegister=document.createElement("button");authRegister.type="button";authRegister.className="primary";authRegister.textContent=authWords.register;
+  const authLogin=document.createElement("button");authLogin.type="button";authLogin.textContent=authWords.login;
+  const authStatus=document.createElement("p");authStatus.className="booking-status";authStatus.setAttribute("role","status");authStatus.setAttribute("aria-live","polite");
+  authPanel.append(authHeading,authHelp,authEmailLabel,authPasswordLabel,authRegister,authLogin,authStatus);
+  authRegister.addEventListener("click",async()=>{
+    const e=authEmail.value.trim().toLowerCase(),p=authPassword.value;
+    if(!e||!authEmail.checkValidity()){authStatus.textContent=authWords.badEmail;authEmail.focus();return;}
+    if(p.length<12){authStatus.textContent=authWords.badPassword;authPassword.focus();return;}
+    authRegister.disabled=true;authLogin.disabled=true;authStatus.textContent=authWords.checking;
+    const redirectTo=new URL("customer-account.html",location.href).href;
+    const {data:currentData}=await customerSupabase.auth.getUser();
+    let result;
+    if(currentData?.user?.is_anonymous){
+      result=await customerSupabase.auth.updateUser({email:e,password:p},{emailRedirectTo:redirectTo});
+    }else{
+      result=await customerSupabase.auth.signUp({email:e,password:p,options:{emailRedirectTo:redirectTo}});
+    }
+    if(result.error){authStatus.textContent=authWords.error+result.error.message;authRegister.disabled=false;authLogin.disabled=false;return;}
+    const createdUser=result.data?.user;
+    const hasConfirmedSession=Boolean(result.data?.session&&createdUser&&!createdUser.is_anonymous&&(createdUser.email_confirmed_at||createdUser.confirmed_at));
+    if(hasConfirmedSession){authPanel.hidden=true;status.textContent=authWords.signed;submit.disabled=false;back.disabled=false;form.requestSubmit();return;}
+    authStatus.textContent=authWords.confirm;
+    authRegister.disabled=false;authLogin.disabled=false;
+  });
+  authLogin.addEventListener("click",async()=>{
+    const e=authEmail.value.trim().toLowerCase(),p=authPassword.value;
+    if(!e||!authEmail.checkValidity()){authStatus.textContent=authWords.badEmail;authEmail.focus();return;}
+    if(!p){authStatus.textContent=authWords.badPassword;authPassword.focus();return;}
+    authRegister.disabled=true;authLogin.disabled=true;authStatus.textContent=authWords.checking;
+    const {data,error}=await customerSupabase.auth.signInWithPassword({email:e,password:p});
+    if(error){authStatus.textContent=authWords.error+error.message;authRegister.disabled=false;authLogin.disabled=false;return;}
+    if(data.user?.is_anonymous){authStatus.textContent=authWords.error+"ҳисоби доимӣ истифода нашуд.";authRegister.disabled=false;authLogin.disabled=false;return;}
+    authPanel.hidden=true;status.textContent=authWords.signed;submit.disabled=false;back.disabled=false;form.requestSubmit();
+  });
+  form.append(progress,stepOne,stepTwo,stepThree,controls,status,authPanel);
   panel.append(heading,notice,form);
   next.addEventListener("click",()=>{
     const active=[stepOne,stepTwo,stepThree][currentStep];
@@ -788,9 +835,15 @@ function createBookingPanel(shop, shopServices, shopStaff) {
         if(!verifyError&&verifiedData?.user?.id===savedSession.user?.id){user=verifiedData.user;}
         else{await customerSupabase.auth.signOut({scope:"local"});sessionError=verifyError;}
       }
-      if(!user){const signed=await customerSupabase.auth.signInAnonymously();user=signed.data?.user||signed.data?.session?.user||null;sessionError=signed.error;}
     } catch(authFailure){sessionError=authFailure;}
-    if(sessionError||!user){status.textContent=words.authError+(sessionError?.message?" ("+sessionError.message+")":"");submit.disabled=false;back.disabled=false;return;}
+    if(sessionError){status.textContent=words.authError+(sessionError?.message?" ("+sessionError.message+")":"");submit.disabled=false;back.disabled=false;return;}
+    if(!user||user.is_anonymous||!(user.email_confirmed_at||user.confirmed_at)){
+      authPanel.hidden=false;
+      authStatus.textContent=authWords.required;
+      submit.disabled=false;back.disabled=false;
+      authEmail.focus();
+      return;
+    }
     const endsAt=new Date(startsAt.getTime()+Number(selected.duration_minutes)*60000);
     const dayKey=dateInput.value;const weekday=new Date(dayKey+"T12:00:00Z").getUTCDay();
     const startMinute=Number(timeInput.value.slice(0,2))*60+Number(timeInput.value.slice(3,5));
