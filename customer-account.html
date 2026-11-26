@@ -1,83 +1,27 @@
 <!doctype html>
-<html lang="tg">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#176b52"><title>Ҳисоби муштарӣ — Сартарошхонаҳо</title>
+<html lang="tg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#5b3cc4"><title>Панели муштарӣ — Сартарошхонаҳо</title>
 <style>
-:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#18352d;background:#f1f8f4}*{box-sizing:border-box}body{margin:0;padding:20px}main{max-width:480px;margin:7vh auto;background:#fff;border:1px solid #d8e9df;border-radius:20px;padding:24px;box-shadow:0 8px 28px #18352d12}h1{font-size:25px;color:#176b52;margin:0 0 8px}p{line-height:1.6;color:#526b62}label{display:block;font-weight:650;margin:14px 0 6px}input{width:100%;padding:12px;border:1px solid #cfe4d7;border-radius:10px;font:inherit}button{width:100%;padding:12px;margin-top:12px;border:0;border-radius:10px;background:#176b52;color:white;font:inherit;font-weight:700;cursor:pointer}button.secondary{background:#edf6f0;color:#176b52;border:1px solid #cfe4d7}button:disabled{opacity:.6}#status{margin-top:14px;padding:12px;border-radius:10px;background:#f1f8f4;overflow-wrap:anywhere;line-height:1.5}.small{font-size:13px}a{color:#176b52}
-</style>
-</head>
-<body><main>
-<h1>Ҳисоби муштарӣ</h1>
-<p>Сартарошхонаҳоро бе сабти ном бин. Барои фармоиш як бор бо почтаи электронӣ ва парол сабти ном кун. Дафъаҳои дигар бо ҳамон маълумот ворид шав.</p>
-<label for="email">Почтаи электронӣ</label><input id="email" type="email" autocomplete="email" required placeholder="name@example.com">
-<label for="password">Парол (на камтар аз 12 аломат)</label><input id="password" type="password" minlength="12" autocomplete="new-password" required>
-<button id="save">Сабти ном / Пайваст кардани ҳисоби ҳозира</button>
-<button id="login" class="secondary">Ворид шудан ба ҳисоби мавҷуда</button>
-<button id="forgot" class="secondary">Паролро фаромӯш кардед?</button>
-<div id="status" role="status">Паролро на камтар аз 12 аломат интихоб кун. Агар қаблан сабти ном карда бошӣ, тугмаи «Ворид шудан»-ро пахш кун.</div>
-<p class="small">Парол ё рамзи тасдиқро ба каси дигар нафирист. <a href="./">Бозгашт ба сомона</a></p>
-</main>
+:root{font-family:Arial,"Noto Sans",system-ui,sans-serif;color:#20243a;background:#f6f7fb;--p:#5b3cc4;--line:#e5e7ef;--muted:#667085}*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#f8f7ff,#f4f6fa);min-height:100vh}header{background:#fff;border-bottom:1px solid var(--line)}.nav,main{max-width:850px;margin:auto;padding:16px}.nav{display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:800;color:var(--p)}a{color:var(--p);font-weight:700;text-decoration:none}main{padding-top:28px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;margin:14px 0;box-shadow:0 8px 24px #20243a0a}h1{font-size:clamp(25px,5vw,34px);margin:0 0 8px}h2{font-size:22px;margin:0 0 12px}.muted{color:var(--muted);line-height:1.6}label{display:block;font-weight:700;margin:12px 0 6px}input,select,button{font:inherit}input,select{width:100%;min-height:48px;padding:10px 12px;border:1px solid #cfd4e2;border-radius:10px;background:#fff}button{min-height:44px;padding:10px 14px;border:1px solid var(--line);border-radius:11px;background:#fff;color:#25243a;font-weight:700;cursor:pointer;margin:7px 7px 0 0}button.primary{background:var(--p);color:#fff;border-color:var(--p)}button:disabled{opacity:.6}.actions{display:flex;flex-wrap:wrap;gap:8px}.status{padding:12px;border-radius:10px;background:#f3f1fb;color:#4a3a78;overflow-wrap:anywhere;margin-top:12px}.booking{border:1px solid var(--line);border-radius:14px;padding:15px;margin:12px 0}.booking p{margin:7px 0;color:#596174}.state{font-weight:800;color:var(--p)!important}.hidden{display:none!important}.booking .reschedule{margin-top:10px;padding:14px;background:#f8f7ff;border-radius:12px}.booking .reschedule button{margin-top:10px}@media(max-width:520px){.card{padding:16px}}
+</style></head>
+<body><header><div class="nav"><div class="brand">✂️ Сартарошхонаҳо · Муштарӣ</div><a href="./index.html">← Саҳифаи асосӣ</a></div></header>
+<main><section class="card"><h1>Панели муштарӣ</h1><p class="muted">Ба ҳисоби худ ворид шавед, навбатҳо ва огоҳиномаҳои худро бинед.</p></section>
+<section class="card" id="authCard"><h2>Воридшавӣ / Сабти ном</h2><label for="email">Почтаи электронӣ</label><input id="email" type="email" autocomplete="email" required placeholder="name@example.com"><label for="password">Парол (на камтар аз 12 аломат)</label><input id="password" type="password" autocomplete="current-password" minlength="12" required><div class="actions"><button class="primary" id="login">Ворид шудан</button><button id="register">Ҳисоб сохтан</button><button id="reset">Барқарор кардани парол</button></div><p class="status" id="authStatus" role="status">Бо ҳамон почта ва пароле ворид шавед, ки ҳангоми гирифтани навбат истифода кардед.</p></section>
+<section class="card hidden" id="accountCard"><div class="actions" style="justify-content:space-between;align-items:center"><h2>Навбатҳои ман</h2><button id="logout">Баромадан</button></div><button id="refresh" class="primary">Навсозии маълумот</button><div id="noticeList"></div><div id="bookingList" class="muted">Маълумот бор шуда истодааст…</div></section></main>
 <script type="module">
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.119.0";
-const supabase=createClient("https://yjybilaaxqtzhlvaabwd.supabase.co","sb_publishable_yyeO2kZv9yRQyLUOl7fG6Q_j_7ixPc1",{auth:{storageKey:"barber-booking-customer-auth",autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
-const isEmailConfirmationCallback=location.hash.includes("access_token=")||new URLSearchParams(location.search).has("code");
-const email=document.getElementById("email"),password=document.getElementById("password"),status=document.getElementById("status");
-const save=document.getElementById("save"),login=document.getElementById("login"),forgot=document.getElementById("forgot");
-const say=t=>status.textContent=t;
-supabase.auth.onAuthStateChange((event,session)=>{
- if(session?.user&&!session.user.is_anonymous&&(session.user.email_confirmed_at||session.user.confirmed_at)){
-  say("Почта тасдиқ шуд. Ба сомона бармегардем…");
-  if(isEmailConfirmationCallback)location.replace("./#myBookingsSection");
- }
-});
-supabase.auth.getUser().then(({data,error})=>{
- if(!error&&data.user&&!data.user.is_anonymous){
-  say("Шумо ба ҳисоби муштарӣ ворид ҳастед. Навбатҳои худро дар сомона бинед.");
-  if(isEmailConfirmationCallback&&(data.user.email_confirmed_at||data.user.confirmed_at))location.replace("./#myBookingsSection");
- }
-});
-save.addEventListener("click",async()=>{
- const e=email.value.trim().toLowerCase(),p=password.value;
- if(!e||!email.checkValidity()){say("Почтаи электрониро дуруст ворид кун.");return;}
- if(p.length<12){say("Парол бояд на камтар аз 12 аломат дошта бошад.");return;}
- save.disabled=true;say("Ҳисоб сохта шуда истодааст…");
- const {data:currentData}=await supabase.auth.getUser();
- const redirectTo=new URL("customer-account.html",location.href).href;
- let result;
- if(currentData?.user?.is_anonymous){
-   result=await supabase.auth.updateUser({email:e,password:p},{emailRedirectTo:redirectTo});
- }else if(currentData?.user){
-   say("Шумо аллакай ба ҳисоби доимӣ ворид ҳастед. Барои истифодаи ҳисоби дигар аввал бароед.");
-   save.disabled=false;return;
- }else{
-   result=await supabase.auth.signUp({email:e,password:p,options:{emailRedirectTo:redirectTo}});
- }
- if(result.error){say("Сабти ном нашуд: "+result.error.message);save.disabled=false;return;}
- if(result.data?.session&&result.data?.user&&!result.data.user.is_anonymous&&(result.data.user.email_confirmed_at||result.data.user.confirmed_at)){
-   say("Сабти ном муваффақ шуд. Акнун навбатҳои худро бинед.");
-   location.href="./#myBookingsSection";return;
- }
- say("Дархости сабти ном фиристода шуд. Ба почтаи электронии худ даро ва пайванди тасдиқро кушо. Баъд ба сомона баргашта, бо ҳамон почта ва парол ворид шав.");
- save.disabled=false;
-});
-login.addEventListener("click",async()=>{
- const e=email.value.trim().toLowerCase(),p=password.value;
- if(!e||!email.checkValidity()||!p){say("Почта ва паролро ворид кун.");return;}
- login.disabled=true;say("Ворид шуда истодааст…");
- const {error}=await supabase.auth.signInWithPassword({email:e,password:p});
- if(error){say("Ворид нашуд: "+error.message);login.disabled=false;return;}
- say("Воридшавӣ муваффақ шуд. Навбатҳои худро дар сомона бин.");
- location.href="./#myBookingsSection";
-});
-forgot.addEventListener("click",async()=>{
- const e=email.value.trim().toLowerCase();
- if(!e||!email.checkValidity()){say("Аввал почтаи электрониро дуруст ворид кун.");return;}
- forgot.disabled=true;say("Дархости барқарорсозӣ фиристода мешавад…");
- const redirectTo=new URL("customer-reset-password.html",location.href).href;
- const {error}=await supabase.auth.resetPasswordForEmail(e,{redirectTo});
- if(error){say("Дархост фиристода нашуд: "+error.message);forgot.disabled=false;return;}
- say("Агар ин почта ҳисоб дошта бошад, пайванди иваз кардани парол ба он фиристода шуд. Почтаи воридотӣ ва ҷузвдони Spam-ро санҷ.");
- forgot.disabled=false;
-});
+import{createClient}from"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/+esm";
+const db=createClient("https://yjybilaaxqtzhlvaabwd.supabase.co","sb_publishable_yyeO2kZv9yRQyLUOl7fG6Q_j7ixPc1",{auth:{storageKey:"barber-booking-customer-auth",autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
+const $=id=>document.getElementById(id),say=t=>$("authStatus").textContent=t;
+const W={loading:"Маълумот бор шуда истодааст…",empty:"Ҳоло навбате надоред.",error:"Навбатҳо бор нашуданд. Интернетро санҷед.",pending:"Интизорӣ",confirmed:"Тасдиқшуда",cancelled:"Бекоршуда",completed:"Анҷомёфта",shop:"Марказ",service:"Хизмат",staff:"Корманд",price:"Нарх",status:"Ҳолат",move:"Тағйир додани вақт",cancel:"Бекор кардани навбат",confirmCancel:"Мехоҳед ин навбатро бекор кунед?",cancelError:"Навбат бекор нашуд.",date:"Санаи нав",time:"Вақти нав",choose:"Вақти дастрасро интихоб кунед",save:"Сабт кардан",close:"Пӯшидан"};
+function show(user){const ok=!!(user&&!user.is_anonymous&&(user.email_confirmed_at||user.confirmed_at));$("authCard").classList.toggle("hidden",ok);$("accountCard").classList.toggle("hidden",!ok);if(ok)loadBookings();}
+$("login").onclick=async()=>{const email=$("email").value.trim().toLowerCase(),password=$("password").value;if(!$("email").checkValidity()||!password){say("Почта ва паролро дуруст ворид кунед.");return;}say("Ворид шуда истодаед…");const{data,error}=await db.auth.signInWithPassword({email,password});if(error){say("Ворид нашуд: "+error.message);return;}if(!data.user.email_confirmed_at&&!data.user.confirmed_at){say("Аввал почтаи электрониро тасдиқ кунед.");return;}show(data.user);};
+$("register").onclick=async()=>{const email=$("email").value.trim().toLowerCase(),password=$("password").value;if(!$("email").checkValidity()){say("Почтаи электрониро дуруст ворид кунед.");return;}if(password.length<12){say("Парол бояд на камтар аз 12 аломат дошта бошад.");return;}say("Ҳисоб сохта шуда истодааст…");const{data,error}=await db.auth.signUp({email,password,options:{emailRedirectTo:new URL("./customer-account.html",location.href).href}});if(error){say("Сабти ном нашуд: "+error.message);return;}if(data.user?.email_confirmed_at||data.user?.confirmed_at)show(data.user);else say("Пайванди тасдиқ ба почта фиристода шуд. Почтаро тасдиқ карда, ба ҳамин саҳифа баргардед.");};
+$("reset").onclick=async()=>{const email=$("email").value.trim().toLowerCase();if(!$("email").checkValidity()){say("Аввал почтаи электрониро дуруст ворид кунед.");return;}const{error}=await db.auth.resetPasswordForEmail(email,{redirectTo:new URL("./customer-reset-password.html",location.href).href});say(error?"Дархост иҷро нашуд: "+error.message:"Агар ин почта ҳисоб дошта бошад, пайванди барқароркунӣ фиристода мешавад.");};
+$("logout").onclick=async()=>{const{error}=await db.auth.signOut({scope:"local"});if(error){alert(error.message);return;}location.reload();};$("refresh").onclick=loadBookings;
+async function loadBookings(){const{data:u,error:ue}=await db.auth.getUser();if(ue||!u.user){$("bookingList").textContent="Аввал ворид шавед.";return;}const user=u.user,box=$("bookingList");box.textContent=W.loading;const{data:rows,error}=await db.from("bookings").select("id,barbershop_id,service_id,barbershop_name_snapshot,service_name_snapshot,price_snapshot,starts_at,status,staff_id").eq("customer_id",user.id).order("starts_at",{ascending:false}).limit(50);if(error){box.textContent=W.error+" ("+error.message+")";return;}box.replaceChildren();if(!rows?.length){box.textContent=W.empty;return;}const ids=[...new Set(rows.map(x=>x.staff_id).filter(Boolean))];let names=new Map();if(ids.length){const{data}=await db.from("staff").select("id,full_name").in("id",ids);names=new Map((data||[]).map(x=>[x.id,x.full_name]));}
+for(const b of rows){const c=document.createElement("article");c.className="booking";const h=document.createElement("strong");h.textContent=b.service_name_snapshot||W.service;c.append(h);const p=t=>{const e=document.createElement("p");e.textContent=t;c.append(e);};p(W.shop+": "+(b.barbershop_name_snapshot||"—"));if(b.staff_id)p(W.staff+": "+(names.get(b.staff_id)||"—"));p(new Date(b.starts_at).toLocaleString("tg-TJ",{timeZone:"Asia/Dushanbe",dateStyle:"medium",timeStyle:"short"}));if(b.price_snapshot!==null)p(W.price+": "+Number(b.price_snapshot).toLocaleString()+" сомонӣ");const st=document.createElement("p");st.className="state";st.textContent=W.status+": "+(W[b.status]||b.status);c.append(st);
+if(["pending","confirmed"].includes(b.status)&&new Date(b.starts_at)>new Date()){const move=document.createElement("button");move.textContent=W.move;const cancel=document.createElement("button");cancel.textContent=W.cancel;c.append(move,cancel);const panel=document.createElement("div");panel.className="reschedule hidden";const d=document.createElement("input");d.type="date";d.min=new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Dushanbe"});d.value=new Date(b.starts_at).toLocaleDateString("en-CA",{timeZone:"Asia/Dushanbe"});const t=document.createElement("select");t.disabled=true;t.add(new Option(W.choose,""));const msg=document.createElement("p");msg.className="status";const save=document.createElement("button");save.className="primary";save.textContent=W.save;const close=document.createElement("button");close.textContent=W.close;panel.append(d,t,save,close,msg);c.append(panel);
+const slots=async()=>{t.replaceChildren(new Option(W.loading,""));t.disabled=true;const{data,error}=await db.rpc("get_available_booking_slots_for_staff",{p_barbershop_id:b.barbershop_id,p_service_id:b.service_id,p_staff_id:b.staff_id||null,p_booking_date:d.value});t.replaceChildren(new Option(error?"Хатои боркунӣ":W.choose,""));if(error){msg.textContent=W.error;return;}(data||[]).forEach(x=>{const v=String(x.slot_time).slice(0,5);t.add(new Option(v,v));});t.disabled=false;if(!data?.length)msg.textContent="Вақти холӣ нест.";};move.onclick=async()=>{panel.classList.toggle("hidden");if(!panel.classList.contains("hidden"))await slots();};d.onchange=slots;close.onclick=()=>panel.classList.add("hidden");save.onclick=async()=>{if(!d.value||!t.value){msg.textContent=W.choose;return;}const start=new Date(d.value+"T"+t.value+":00+05:00");if(start<=new Date()){msg.textContent="Вақт бояд дар оянда бошад.";return;}save.disabled=true;const{error}=await db.rpc("reschedule_my_booking",{p_booking_id:b.id,p_new_starts_at:start.toISOString()});save.disabled=false;if(error){msg.textContent="Вақт тағйир дода нашуд: "+error.message;return;}await loadBookings();};cancel.onclick=async()=>{if(!confirm(W.confirmCancel))return;cancel.disabled=true;const{error}=await db.rpc("cancel_my_booking",{p_booking_id:b.id});if(error){cancel.disabled=false;alert(W.cancelError+" "+error.message);return;}await loadBookings();};}
+box.append(c);}
+const{data:ns,error:ne}=await db.from("notifications").select("id,title,body,is_read,created_at").eq("recipient_id",user.id).order("created_at",{ascending:false}).limit(15);const nb=$("noticeList");nb.replaceChildren();const title=document.createElement("h2");title.textContent="Огоҳиномаҳо";nb.append(title);if(ne||!ns?.length){const p=document.createElement("p");p.className="muted";p.textContent="Огоҳиномаи нав нест.";nb.append(p);return;}for(const n of ns){const item=document.createElement("article");item.className="booking";const h=document.createElement("strong");h.textContent=n.title;const p=document.createElement("p");p.textContent=n.body;const d=document.createElement("p");d.textContent=new Date(n.created_at).toLocaleString("tg-TJ",{timeZone:"Asia/Dushanbe"});item.append(h,p,d);if(!n.is_read){const b=document.createElement("button");b.textContent="Хонда шуд";b.onclick=async()=>{const{error}=await db.from("notifications").update({is_read:true}).eq("id",n.id).eq("recipient_id",user.id);if(!error)loadBookings();};item.append(b);}nb.append(item);}}
+db.auth.onAuthStateChange((_e,s)=>{if(s?.user)show(s.user);});db.auth.getUser().then(({data,error})=>{if(!error&&data?.user)show(data.user);});
 </script></body></html>
