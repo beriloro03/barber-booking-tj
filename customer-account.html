@@ -2,6 +2,59 @@
 <html lang="tg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#5b3cc4"><title>Панели муштарӣ — Сартарошхонаҳо</title>
 <style>
 :root{font-family:Arial,"Noto Sans",system-ui,sans-serif;color:#20243a;background:#f6f7fb;--p:#5b3cc4;--line:#e5e7ef;--muted:#667085}*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#f8f7ff,#f4f6fa);min-height:100vh}header{background:#fff;border-bottom:1px solid var(--line)}.nav,main{max-width:850px;margin:auto;padding:16px}.nav{display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:800;color:var(--p)}a{color:var(--p);font-weight:700;text-decoration:none}main{padding-top:28px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;margin:14px 0;box-shadow:0 8px 24px #20243a0a}h1{font-size:clamp(25px,5vw,34px);margin:0 0 8px}h2{font-size:22px;margin:0 0 12px}.muted{color:var(--muted);line-height:1.6}label{display:block;font-weight:700;margin:12px 0 6px}input,select,button{font:inherit}input,select{width:100%;min-height:48px;padding:10px 12px;border:1px solid #cfd4e2;border-radius:10px;background:#fff}button{min-height:44px;padding:10px 14px;border:1px solid var(--line);border-radius:11px;background:#fff;color:#25243a;font-weight:700;cursor:pointer;margin:7px 7px 0 0}button.primary{background:var(--p);color:#fff;border-color:var(--p)}button:disabled{opacity:.6}.actions{display:flex;flex-wrap:wrap;gap:8px}.status{padding:12px;border-radius:10px;background:#f3f1fb;color:#4a3a78;overflow-wrap:anywhere;margin-top:12px}.booking{border:1px solid var(--line);border-radius:14px;padding:15px;margin:12px 0}.booking p{margin:7px 0;color:#596174}.state{font-weight:800;color:var(--p)!important}.hidden{display:none!important}.booking .reschedule{margin-top:10px;padding:14px;background:#f8f7ff;border-radius:12px}.booking .reschedule button{margin-top:10px}.shop-item{border:1px solid var(--line);border-radius:13px;padding:14px;margin:10px 0;background:#fff}.shop-item strong{display:block;font-size:17px}.shop-item p{margin:6px 0;color:var(--muted)}.shop-count{font-weight:800;color:var(--p)}@media(max-width:520px){.card{padding:16px}}
+
+/* Customer bookings: clearer mobile-first cards and rescheduling controls. */
+#accountCard > .actions { margin-bottom: 12px; }
+#bookingList { display:grid; gap:14px; margin-top:14px; }
+.booking {
+  background:linear-gradient(180deg,#fff 0%,#fcfbff 100%);
+  border:1px solid #e4def1;
+  border-radius:18px;
+  padding:17px;
+  margin:0;
+  box-shadow:0 7px 20px rgba(47,34,86,.055);
+  min-width:0;
+}
+.booking-title { display:block; font-size:18px; line-height:1.4; color:#29213f; margin-bottom:10px; overflow-wrap:anywhere; }
+.booking p { line-height:1.55; overflow-wrap:anywhere; }
+.booking .state {
+  display:inline-flex;
+  align-items:center;
+  width:fit-content;
+  max-width:100%;
+  padding:7px 11px;
+  border-radius:999px;
+  background:#f1edfb;
+  color:#5735a6;
+  font-size:13px;
+  margin-top:10px;
+}
+.booking .state-pending { background:#fff5df; color:#8a5b08; }
+.booking .state-confirmed { background:#e8f7ee; color:#176b3b; }
+.booking .state-cancelled { background:#fff0f0; color:#a33333; }
+.booking .state-completed { background:#edf1f7; color:#475467; }
+.booking-actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
+.booking-actions button { flex:1 1 180px; min-height:48px; margin:0; }
+.booking-actions .danger { border-color:#f0cccc; color:#a33333; background:#fff8f8; }
+.booking .reschedule {
+  margin-top:13px;
+  padding:16px;
+  border:1px solid #e2d9f4;
+  background:#f8f6fd;
+  border-radius:15px;
+}
+.reschedule-title { display:block; font-size:16px; margin-bottom:5px; color:#35245e; }
+.reschedule-label { display:block; font-size:14px; font-weight:700; margin:12px 0 6px; color:#343047; }
+.reschedule-label input,.reschedule-label select { display:block; width:100%; min-width:0; min-height:50px; margin-top:7px; font:inherit; padding:10px 12px; border:1px solid #d8d1e6; border-radius:11px; background:#fff; }
+.reschedule button { min-height:48px; }
+@media(max-width:520px) {
+  .booking { padding:15px; border-radius:16px; }
+  .booking-title { font-size:17px; }
+  .booking-actions { flex-direction:column; }
+  .booking-actions button { width:100%; flex-basis:auto; }
+  .booking .reschedule { padding:13px; }
+}
+
 </style></head>
 <body><header><div class="nav"><div class="brand">✂️ Сартарошхонаҳо · Муштарӣ</div><a href="./index.html">← Саҳифаи асосӣ</a></div></header>
 <main><section class="card"><h1>Панели муштарӣ</h1><p class="muted">Ба ҳисоби худ ворид шавед, навбатҳо ва огоҳиномаҳои худро бинед.</p></section>
@@ -49,8 +102,8 @@ $("register").onclick=async()=>{const email=$("email").value.trim().toLowerCase(
 $("reset").onclick=async()=>{const email=$("email").value.trim().toLowerCase();if(!$("email").checkValidity()){say("Аввал почтаи электрониро дуруст ворид кунед.");return;}const{error}=await db.auth.resetPasswordForEmail(email,{redirectTo:new URL("./customer-reset-password.html",location.href).href});say(error?"Дархост иҷро нашуд: "+error.message:"Агар ин почта ҳисоб дошта бошад, пайванди барқароркунӣ фиристода мешавад.");};
 $("logout").onclick=async()=>{const{error}=await db.auth.signOut({scope:"local"});if(error){alert(error.message);return;}location.reload();};$("refresh").onclick=loadBookings;
 async function loadBookings(){const{data:u,error:ue}=await db.auth.getUser();if(ue||!u.user){$("bookingList").textContent="Аввал ворид шавед.";return;}const user=u.user,box=$("bookingList");box.textContent=W.loading;const{data:rows,error}=await db.from("bookings").select("id,barbershop_id,service_id,barbershop_name_snapshot,service_name_snapshot,price_snapshot,starts_at,status,staff_id").eq("customer_id",user.id).order("starts_at",{ascending:false}).limit(50);if(error){box.textContent=W.error+" ("+error.message+")";return;}box.replaceChildren();if(!rows?.length){box.textContent=W.empty;return;}const ids=[...new Set(rows.map(x=>x.staff_id).filter(Boolean))];let names=new Map();if(ids.length){const{data}=await db.from("staff").select("id,full_name").in("id",ids);names=new Map((data||[]).map(x=>[x.id,x.full_name]));}
-for(const b of rows){const c=document.createElement("article");c.className="booking";const h=document.createElement("strong");h.textContent=b.service_name_snapshot||W.service;c.append(h);const p=t=>{const e=document.createElement("p");e.textContent=t;c.append(e);};p(W.shop+": "+(b.barbershop_name_snapshot||"—"));if(b.staff_id)p(W.staff+": "+(names.get(b.staff_id)||"—"));p(new Date(b.starts_at).toLocaleString("tg-TJ",{timeZone:"Asia/Dushanbe",dateStyle:"medium",timeStyle:"short"}));if(b.price_snapshot!==null)p(W.price+": "+Number(b.price_snapshot).toLocaleString()+" сомонӣ");const st=document.createElement("p");st.className="state";st.textContent=W.status+": "+(W[b.status]||b.status);c.append(st);
-if(["pending","confirmed"].includes(b.status)&&new Date(b.starts_at)>new Date()){const move=document.createElement("button");move.textContent=W.move;const cancel=document.createElement("button");cancel.textContent=W.cancel;c.append(move,cancel);const panel=document.createElement("div");panel.className="reschedule hidden";const d=document.createElement("input");d.type="date";d.min=new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Dushanbe"});d.value=new Date(b.starts_at).toLocaleDateString("en-CA",{timeZone:"Asia/Dushanbe"});const t=document.createElement("select");t.disabled=true;t.add(new Option(W.choose,""));const msg=document.createElement("p");msg.className="status";const save=document.createElement("button");save.className="primary";save.textContent=W.save;const close=document.createElement("button");close.textContent=W.close;panel.append(d,t,save,close,msg);c.append(panel);
+for(const b of rows){const c=document.createElement("article");c.className="booking";const h=document.createElement("strong");h.className="booking-title";h.textContent=b.service_name_snapshot||W.service;c.append(h);const p=t=>{const e=document.createElement("p");e.textContent=t;c.append(e);};p(W.shop+": "+(b.barbershop_name_snapshot||"—"));if(b.staff_id)p(W.staff+": "+(names.get(b.staff_id)||"—"));p(new Date(b.starts_at).toLocaleString("tg-TJ",{timeZone:"Asia/Dushanbe",dateStyle:"medium",timeStyle:"short"}));if(b.price_snapshot!==null)p(W.price+": "+Number(b.price_snapshot).toLocaleString()+" сомонӣ");const st=document.createElement("p");st.className="state state-"+b.status;st.textContent=W.status+": "+(W[b.status]||b.status);c.append(st);
+if(["pending","confirmed"].includes(b.status)&&new Date(b.starts_at)>new Date()){const actions=document.createElement("div");actions.className="booking-actions";const move=document.createElement("button");move.className="primary";move.textContent=W.move;const cancel=document.createElement("button");cancel.className="danger";cancel.textContent=W.cancel;actions.append(move,cancel);c.append(actions);const panel=document.createElement("div");panel.className="reschedule hidden";const d=document.createElement("input");d.type="date";d.min=new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Dushanbe"});d.value=new Date(b.starts_at).toLocaleDateString("en-CA",{timeZone:"Asia/Dushanbe"});const t=document.createElement("select");t.disabled=true;t.add(new Option(W.choose,""));const msg=document.createElement("p");msg.className="status";const save=document.createElement("button");save.className="primary";save.textContent=W.save;const close=document.createElement("button");close.textContent=W.close;const dateLabel=document.createElement("label");dateLabel.className="reschedule-label";dateLabel.textContent=W.date;dateLabel.append(d);const timeLabel=document.createElement("label");timeLabel.className="reschedule-label";timeLabel.textContent=W.time;timeLabel.append(t);const panelTitle=document.createElement("strong");panelTitle.className="reschedule-title";panelTitle.textContent=W.move;const panelHint=document.createElement("p");panelHint.className="muted";panelHint.textContent="Аввал санаи навро интихоб кунед, баъд вақти холиро интихоб намоед.";panel.append(panelTitle,panelHint,dateLabel,timeLabel,save,close,msg);c.append(panel);
 const slots=async()=>{t.replaceChildren(new Option(W.loading,""));t.disabled=true;const{data,error}=await db.rpc("get_available_booking_slots_for_staff",{p_barbershop_id:b.barbershop_id,p_service_id:b.service_id,p_staff_id:b.staff_id||null,p_booking_date:d.value});t.replaceChildren(new Option(error?"Хатои боркунӣ":W.choose,""));if(error){msg.textContent=W.error;return;}(data||[]).forEach(x=>{const v=String(x.slot_time).slice(0,5);t.add(new Option(v,v));});t.disabled=false;if(!data?.length)msg.textContent="Вақти холӣ нест.";};move.onclick=async()=>{panel.classList.toggle("hidden");if(!panel.classList.contains("hidden"))await slots();};d.onchange=slots;close.onclick=()=>panel.classList.add("hidden");save.onclick=async()=>{if(!d.value||!t.value){msg.textContent=W.choose;return;}const start=new Date(d.value+"T"+t.value+":00+05:00");if(start<=new Date()){msg.textContent="Вақт бояд дар оянда бошад.";return;}save.disabled=true;const{error}=await db.rpc("reschedule_my_booking",{p_booking_id:b.id,p_new_starts_at:start.toISOString()});save.disabled=false;if(error){msg.textContent="Вақт тағйир дода нашуд: "+error.message;return;}await loadBookings();};cancel.onclick=async()=>{if(!confirm(W.confirmCancel))return;cancel.disabled=true;const{error}=await db.rpc("cancel_my_booking",{p_booking_id:b.id});if(error){cancel.disabled=false;alert(W.cancelError+" "+error.message);return;}await loadBookings();};}
 box.append(c);}
 const{data:ns,error:ne}=await db.from("notifications").select("id,title,body,is_read,created_at").eq("recipient_id",user.id).order("created_at",{ascending:false}).limit(15);const nb=$("noticeList");nb.replaceChildren();const title=document.createElement("h2");title.textContent="Огоҳиномаҳо";nb.append(title);if(ne||!ns?.length){const p=document.createElement("p");p.className="muted";p.textContent="Огоҳиномаи нав нест.";nb.append(p);return;}for(const n of ns){const item=document.createElement("article");item.className="booking";const h=document.createElement("strong");h.textContent=n.title;const p=document.createElement("p");p.textContent=n.body;const d=document.createElement("p");d.textContent=new Date(n.created_at).toLocaleString("tg-TJ",{timeZone:"Asia/Dushanbe"});item.append(h,p,d);if(!n.is_read){const b=document.createElement("button");b.textContent="Хонда шуд";b.onclick=async()=>{const{error}=await db.from("notifications").update({is_read:true}).eq("id",n.id).eq("recipient_id",user.id);if(!error)loadBookings();};item.append(b);}nb.append(item);}}
