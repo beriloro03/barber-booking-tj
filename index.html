@@ -600,7 +600,7 @@ function setLanguage(lang){
 document.querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",()=>setLanguage(b.dataset.lang)));
 </script>
 <script type="module">
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.119.0";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/+esm";
 
 const SUPABASE_URL = "https://yjybilaaxqtzhlvaabwd.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_yyeO2kZv9yRQyLUOl7fG6Q_j_7ixPc1";
