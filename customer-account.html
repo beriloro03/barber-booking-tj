@@ -21,11 +21,21 @@
 <script type="module">
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.119.0";
 const supabase=createClient("https://yjybilaaxqtzhlvaabwd.supabase.co","sb_publishable_yyeO2kZv9yRQyLUOl7fG6Q_j_7ixPc1",{auth:{storageKey:"barber-booking-customer-auth",autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
+const isEmailConfirmationCallback=location.hash.includes("access_token=")||new URLSearchParams(location.search).has("code");
 const email=document.getElementById("email"),password=document.getElementById("password"),status=document.getElementById("status");
 const save=document.getElementById("save"),login=document.getElementById("login"),forgot=document.getElementById("forgot");
 const say=t=>status.textContent=t;
+supabase.auth.onAuthStateChange((event,session)=>{
+ if(session?.user&&!session.user.is_anonymous&&(session.user.email_confirmed_at||session.user.confirmed_at)){
+  say("Почта тасдиқ шуд. Ба сомона бармегардем…");
+  if(isEmailConfirmationCallback)location.replace("./#myBookingsSection");
+ }
+});
 supabase.auth.getUser().then(({data,error})=>{
- if(!error&&data.user&&!data.user.is_anonymous)say("Шумо ба ҳисоби муштарӣ ворид ҳастед. Навбатҳои худро дар сомона бинед.");
+ if(!error&&data.user&&!data.user.is_anonymous){
+  say("Шумо ба ҳисоби муштарӣ ворид ҳастед. Навбатҳои худро дар сомона бинед.");
+  if(isEmailConfirmationCallback&&(data.user.email_confirmed_at||data.user.confirmed_at))location.replace("./#myBookingsSection");
+ }
 });
 save.addEventListener("click",async()=>{
  const e=email.value.trim().toLowerCase(),p=password.value;
