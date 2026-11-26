@@ -981,7 +981,7 @@ function createBookingPanel(shop, shopServices, shopStaff) {
     ? {steps:["Услуга","Дата и время","Ваши данные"],next:"Далее",back:"Назад",summary:"Проверьте запись",staffAny:"Любой доступный сотрудник",hints:["Сначала выберите услугу и мастера.","Выберите день, затем свободное время.","Оставьте имя и номер телефона для подтверждения."],duration:"Длительность",step:"Шаг"}
     : document.documentElement.lang==="en"
     ? {steps:["Service","Date & time","Your details"],next:"Continue",back:"Back",summary:"Review your booking",staffAny:"Any available staff member",hints:["Choose the service and a barber.","Choose a date, then an available time.","Enter your name and phone number so the shop can confirm."],duration:"Duration",step:"Step"}
-    undefined
+    : {steps:["Хизмат","Сана ва вақт","Маълумоти шумо"],next:"Ба пеш",back:"Бозгашт",summary:"Маълумоти навбатро санҷед",staffAny:"Ҳар корманди дастрас",hints:["Аввал хизмат ва кормандро интихоб кунед.","Рӯз ва вақти холиро интихоб кунед.","Барои тасдиқ ном ва рақами телефонро ворид кунед."],duration:"Давомнокӣ",step:"Қадам"};
   const panel = document.createElement("section");
   panel.className = "booking-panel";
   panel.hidden = true;
