@@ -642,7 +642,7 @@ authRegister.addEventListener("click",async()=>{
   setAuthBusy(true);authMessage.textContent="Ҳисоб сохта шуда истодааст…";
   try{
     const {data:current}=await customerSupabase.auth.getUser();
-    const redirectTo=new URL("customer-account.html",location.href).href;
+    const redirectTo=new URL("./",location.href).href;
     let result;
     if(current?.user?.is_anonymous){
       result=await customerSupabase.auth.updateUser({email,password},{emailRedirectTo:redirectTo});
@@ -851,7 +851,7 @@ function createBookingPanel(shop, shopServices, shopStaff) {
     if(!e||!authEmail.checkValidity()){authStatus.textContent=authWords.badEmail;authEmail.focus();return;}
     if(p.length<12){authStatus.textContent=authWords.badPassword;authPassword.focus();return;}
     authRegister.disabled=true;authLogin.disabled=true;authStatus.textContent=authWords.checking;
-    const redirectTo=new URL("customer-account.html",location.href).href;
+    const redirectTo=new URL("./",location.href).href;
     const {data:currentData}=await customerSupabase.auth.getUser();
     let result;
     if(currentData?.user?.is_anonymous){
