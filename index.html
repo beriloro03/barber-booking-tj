@@ -1044,7 +1044,83 @@
       .booking-step-hint{font-size:14px}
     }
 
-</style>
+
+    /* Mobile-first directory and booking layout correction. */
+    #shopList.grid {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) !important;
+      width: 100%;
+      max-width: 760px;
+      margin-left: auto;
+      margin-right: auto;
+      align-items: start;
+    }
+    #shopList > .shop-card {
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+    }
+    #shopList .booking-panel {
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+    }
+    #shopList .booking-progress {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 7px;
+      width: 100%;
+    }
+    #shopList .booking-progress-item {
+      min-width: 0;
+      min-height: 54px;
+      padding: 9px 6px;
+      text-align: center;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: normal;
+      writing-mode: horizontal-tb !important;
+      text-orientation: mixed;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    #shopList .booking-step,
+    #shopList .booking-step-hint,
+    #shopList .booking-summary,
+    #shopList .booking-panel label {
+      min-width: 0;
+      width: 100%;
+      overflow-wrap: anywhere;
+      writing-mode: horizontal-tb !important;
+    }
+    #shopList .booking-panel input,
+    #shopList .booking-panel select,
+    #shopList .booking-panel textarea {
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      min-height: 50px;
+      font-size: 16px;
+    }
+    #shopList .booking-step-controls {
+      display: flex;
+      flex-direction: row;
+      gap: 9px;
+      width: 100%;
+    }
+    #shopList .booking-step-controls button {
+      flex: 1 1 0;
+      min-width: 0;
+      min-height: 50px;
+      white-space: normal;
+      writing-mode: horizontal-tb !important;
+    }
+    @media (max-width: 560px) {
+      #shopList .booking-progress-item { font-size: 12px; padding: 8px 4px; }
+      #shopList > .shop-card { padding: 16px; }
+    }
+
+  </style>
 </head>
 <body>
 <section class="customer-auth-gate" id="customerAuthGate" role="dialog" aria-modal="true" aria-labelledby="customerAuthTitle">
