@@ -64,7 +64,7 @@ forgot.addEventListener("click",async()=>{
  const e=email.value.trim().toLowerCase();
  if(!e||!email.checkValidity()){say("Аввал почтаи электрониро дуруст ворид кун.");return;}
  forgot.disabled=true;say("Дархости барқарорсозӣ фиристода мешавад…");
- const redirectTo=location.origin+location.pathname.replace(/customer-account\\.html$/,"customer-reset-password.html");
+ const redirectTo=new URL("customer-reset-password.html",location.href).href;
  const {error}=await supabase.auth.resetPasswordForEmail(e,{redirectTo});
  if(error){say("Дархост фиристода нашуд: "+error.message);forgot.disabled=false;return;}
  say("Агар ин почта ҳисоб дошта бошад, пайванди иваз кардани парол ба он фиристода шуд. Почтаи воридотӣ ва ҷузвдони Spam-ро санҷ.");
