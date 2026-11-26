@@ -9,13 +9,13 @@
 </head>
 <body><main>
 <h1>Ҳисоби муштарӣ</h1>
-<p>Ҳисоби меҳмониро бо почтаи электронӣ ва парол ҳифз кун. Ин кор имкон медиҳад, ки баъдтар аз нав ворид шуда, навбатҳоятро бинӣ.</p>
+<p>Сартарошхонаҳоро бе сабти ном бин. Барои фармоиш як бор бо почтаи электронӣ ва парол сабти ном кун. Дафъаҳои дигар бо ҳамон маълумот ворид шав.</p>
 <label for="email">Почтаи электронӣ</label><input id="email" type="email" autocomplete="email" required placeholder="name@example.com">
 <label for="password">Парол (на камтар аз 12 аломат)</label><input id="password" type="password" minlength="12" autocomplete="new-password" required>
-<button id="save">Пайваст кардани почта ба ҳисоби ҳозира</button>
+<button id="save">Сабти ном / Пайваст кардани ҳисоби ҳозира</button>
 <button id="login" class="secondary">Ворид шудан ба ҳисоби мавҷуда</button>
 <button id="forgot" class="secondary">Паролро фаромӯш кардед?</button>
-<div id="status" role="status">Агар ҳоло навбат фармоиш дода бошӣ, ин саҳифаро дар ҳамон браузер кушо, то ҳисоби меҳмонӣ ба почта пайваст шавад.</div>
+<div id="status" role="status">Паролро на камтар аз 12 аломат интихоб кун. Агар қаблан сабти ном карда бошӣ, тугмаи «Ворид шудан»-ро пахш кун.</div>
 <p class="small">Парол ё рамзи тасдиқро ба каси дигар нафирист. <a href="./">Бозгашт ба сомона</a></p>
 </main>
 <script type="module">
@@ -24,17 +24,31 @@ const supabase=createClient("https://yjybilaaxqtzhlvaabwd.supabase.co","sb_publi
 const email=document.getElementById("email"),password=document.getElementById("password"),status=document.getElementById("status");
 const save=document.getElementById("save"),login=document.getElementById("login"),forgot=document.getElementById("forgot");
 const say=t=>status.textContent=t;
+supabase.auth.getUser().then(({data,error})=>{
+ if(!error&&data.user&&!data.user.is_anonymous)say("Шумо ба ҳисоби муштарӣ ворид ҳастед. Навбатҳои худро дар сомона бинед.");
+});
 save.addEventListener("click",async()=>{
  const e=email.value.trim().toLowerCase(),p=password.value;
  if(!e||!email.checkValidity()){say("Почтаи электрониро дуруст ворид кун.");return;}
  if(p.length<12){say("Парол бояд на камтар аз 12 аломат дошта бошад.");return;}
- save.disabled=true;say("Ҳисоб ба почта пайваст шуда истодааст…");
- const {data,error}=await supabase.auth.getUser();
- if(error||!data.user){say("Ҳисоби меҳмонӣ ёфт нашуд. Аввал дар сомона як бор навбат фармоиш деҳ ё ба ҳисоби худ ворид шав.");save.disabled=false;return;}
- if(!data.user.is_anonymous){say("Ин браузер аллакай бо ҳисоби доимӣ ворид шудааст. Барои иваз кардани почта аз танзимоти ҳисоб истифода бар.");save.disabled=false;return;}
- const {error:linkError}=await supabase.auth.updateUser({email:e,password:p},{emailRedirectTo:location.origin+location.pathname});
- if(linkError){say("Пайваст нашуд: "+linkError.message);save.disabled=false;return;}
- say("Дархост фиристода шуд. Ба почтаи электронии худ даро ва пайванди тасдиқро кушо. То тасдиқ шудан аз ин браузер хориҷ нашав.");
+ save.disabled=true;say("Ҳисоб сохта шуда истодааст…");
+ const {data:currentData}=await supabase.auth.getUser();
+ const redirectTo=new URL("customer-account.html",location.href).href;
+ let result;
+ if(currentData?.user?.is_anonymous){
+   result=await supabase.auth.updateUser({email:e,password:p},{emailRedirectTo:redirectTo});
+ }else if(currentData?.user){
+   say("Шумо аллакай ба ҳисоби доимӣ ворид ҳастед. Барои истифодаи ҳисоби дигар аввал бароед.");
+   save.disabled=false;return;
+ }else{
+   result=await supabase.auth.signUp({email:e,password:p,options:{emailRedirectTo:redirectTo}});
+ }
+ if(result.error){say("Сабти ном нашуд: "+result.error.message);save.disabled=false;return;}
+ if(result.data?.session&&result.data?.user&&!result.data.user.is_anonymous&&(result.data.user.email_confirmed_at||result.data.user.confirmed_at)){
+   say("Сабти ном муваффақ шуд. Акнун навбатҳои худро бинед.");
+   location.href="./#myBookingsSection";return;
+ }
+ say("Дархости сабти ном фиристода шуд. Ба почтаи электронии худ даро ва пайванди тасдиқро кушо. Баъд ба сомона баргашта, бо ҳамон почта ва парол ворид шав.");
  save.disabled=false;
 });
 login.addEventListener("click",async()=>{
@@ -43,13 +57,14 @@ login.addEventListener("click",async()=>{
  login.disabled=true;say("Ворид шуда истодааст…");
  const {error}=await supabase.auth.signInWithPassword({email:e,password:p});
  if(error){say("Ворид нашуд: "+error.message);login.disabled=false;return;}
- say("Воридшавӣ муваффақ шуд. Навбатҳои худро дар сомона бин.");location.href="./#myBookingsSection";
+ say("Воридшавӣ муваффақ шуд. Навбатҳои худро дар сомона бин.");
+ location.href="./#myBookingsSection";
 });
 forgot.addEventListener("click",async()=>{
  const e=email.value.trim().toLowerCase();
  if(!e||!email.checkValidity()){say("Аввал почтаи электрониро дуруст ворид кун.");return;}
  forgot.disabled=true;say("Дархости барқарорсозӣ фиристода мешавад…");
- const redirectTo=location.origin+location.pathname.replace(/customer-account\.html$/,"customer-reset-password.html");
+ const redirectTo=location.origin+location.pathname.replace(/customer-account\\.html$/,"customer-reset-password.html");
  const {error}=await supabase.auth.resetPasswordForEmail(e,{redirectTo});
  if(error){say("Дархост фиристода нашуд: "+error.message);forgot.disabled=false;return;}
  say("Агар ин почта ҳисоб дошта бошад, пайванди иваз кардани парол ба он фиристода шуд. Почтаи воридотӣ ва ҷузвдони Spam-ро санҷ.");
