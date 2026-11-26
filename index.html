@@ -661,6 +661,7 @@ function createBookingPanel(shop, shopServices, shopStaff) {
   const progress = document.createElement("div"); progress.className = "booking-progress"; progress.setAttribute("aria-label",flow.steps.join(" — "));
   const progressItems = flow.steps.map((label,index)=>{const item=document.createElement("div");item.className="booking-progress-item";item.textContent=(index+1)+". "+label;progress.append(item);return item;});
   const form = document.createElement("form");
+  form.noValidate = true; // Validate the visible booking step in our own handler; hidden fields must not block it.
   const makeLabel = (txt, control) => { const label=document.createElement("label"); label.textContent=txt; label.append(control); return label; };
   const serviceSelect=document.createElement("select"); serviceSelect.required=true;
   shopServices.forEach(s=>{const o=document.createElement("option");o.value=s.id;o.textContent=s.name+" — "+s.duration_minutes+" "+words.minutes+" — "+Number(s.price).toLocaleString()+" "+words.somoni;serviceSelect.append(o);});
