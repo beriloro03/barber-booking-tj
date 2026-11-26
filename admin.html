@@ -112,6 +112,7 @@ a{color:#5740b8}
  .service-top{align-items:flex-start;flex-wrap:wrap}
 }
 
+.shop-gallery-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(115px,1fr));gap:10px;margin-top:14px}.shop-gallery-admin-item{border:1px solid var(--line);border-radius:12px;padding:8px;min-width:0}.shop-gallery-admin-item img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block}.shop-gallery-admin-item button{width:100%;margin-top:7px}.shop-gallery-admin-item .muted{font-size:12px;overflow-wrap:anywhere}
 </style></head>
 <body>
 <header><div><a href="./">← Сомонаи асосӣ</a><h1>Панели соҳибкор</h1><div class="muted">Идоракунии марказ ва хизматрасониҳо</div></div></header>
@@ -131,7 +132,7 @@ a{color:#5740b8}
 <button class="primary" type="submit" style="margin-top:14px">Сабти ном кардан</button>
 </form></section>
 <div id="status" role="status">Барои оғоз ворид шав.</div>
-<section id="dashboard" class="hidden">\n <nav id="ownerQuickNav" class="owner-quick-nav hidden" aria-label="Қисмҳои панели соҳибкор"><a href="#shopProfileCard">Маълумоти марказ</a><a href="#serviceCard">Хизматҳо ва нархҳо</a><a href="#staffCard">Кормандон</a><a href="#hoursCard">Соатҳои корӣ</a><a href="#bookingCard">Навбатҳо</a><a href="#reviewsCard">Баҳоҳо</a></nav>
+<section id="dashboard" class="hidden">\n <nav id="ownerQuickNav" class="owner-quick-nav hidden" aria-label="Қисмҳои панели соҳибкор"><a href="#shopProfileCard">Маълумоти марказ</a><a href="#serviceCard">Хизматҳо ва нархҳо</a><a href="#staffCard">Кормандон</a><a href="#galleryCard">Галерея</a><a href="#hoursCard">Соатҳои корӣ</a><a href="#bookingCard">Навбатҳо</a><a href="#reviewsCard">Баҳоҳо</a></nav>
 <section id="telegramCard" class="card hidden"><h2>Огоҳӣ дар Telegram</h2><p class="muted">Ботро ба ҳисоби соҳибкор пайваст кун, то ҳангоми навбати нав паём гирӣ.</p><p class="muted">Ҳисоботи моҳи гузашта ҳар 1-уми моҳ соати 09:10 (бо вақти Душанбе) ба ҳамин Telegram фиристода мешавад.</p><div class="row"><button id="telegramLinkBtn" class="primary" type="button">Пайваст кардани Telegram</button><button id="telegramSetupBtn" type="button">Фаъол кардани огоҳӣ</button></div><p id="telegramStatus" class="muted" role="status">Ҳоло Telegram пайваст нашудааст.</p></section>
 <div class="card" id="shopProfileCard"><div class="row"><h2 style="flex:2">Маълумоти марказ</h2><button id="logoutBtn" type="button">Баромадан</button></div>
 <form id="shopForm">
@@ -182,6 +183,7 @@ a{color:#5740b8}
 <div id="staffPhotoPreview" class="muted" style="margin-top:8px"></div>
 <div class="muted" style="margin-top:12px">Хизматҳои корманд</div><div id="staffServiceOptions"></div>
 <button class="primary" type="submit" style="margin-top:14px">Илова кардани корманд</button></form><div id="staffList"></div></div>
+<div id="galleryCard" class="card hidden"><h2>Галереяи корҳои марказ</h2><p class="muted">Аксҳои мӯйсаргирӣ ва корҳои беҳтарини марказро илова кун. Аксҳо дар саҳифаи марказ барои ҳамаи муштариён намоён мешаванд.</p><label for="galleryFiles">Интихоби аксҳо (JPG, PNG ё WEBP; ҳар кадом то 8 МБ)</label><input id="galleryFiles" type="file" accept="image/jpeg,image/png,image/webp" multiple><p id="galleryStatus" class="muted" role="status">Ҳоло акс илова нашудааст.</p><div id="galleryList" class="shop-gallery-admin-grid"></div></div>
 <div id="hoursCard" class="card hidden"><h2>Рӯзҳо ва соатҳои корӣ</h2><p class="muted">Марказ ҳамаи 7 рӯзи ҳафта кор мекунад. Соҳибкор метавонад барои ҳар рӯз соати оғоз ва анҷоми корро мустақилона интихоб кунад. Рӯзи истироҳат пешбинӣ нашудааст.</p><form id="hoursForm"><div id="hoursList"></div><button class="primary" type="submit" style="margin-top:14px">Сабт кардани соатҳои корӣ</button></form></div>
 <div id="bookingStatsCard" class="card hidden"><h2>Омори навбатҳо</h2><p class="muted">Омори навбатҳо барои имрӯз.</p><div id="bookingStats" class="stats-grid"><div class="service">Ҳисоб шуда истодааст…</div></div></div>
 <div id="staffBookingStatsCard" class="card hidden"><h2>Навбатҳо аз рӯи корманд</h2><p class="muted">Шумора аз рӯи 100 навбати охирин ҳисоб мешавад.</p><div id="staffBookingStats" class="stats-grid"></div></div>
@@ -239,9 +241,9 @@ async function loadShop(){
  if(userError||!userData.user){showDashboard(false);status("Лутфан ворид шав.",true);return;}
  const {data,error}=await supabase.from("barbershops").select("id,name,description,address,city,district,phone,latitude,longitude").eq("owner_id",userData.user.id).limit(1).maybeSingle();
  if(error){status("Марказ бор карда нашуд: "+error.message,true);return;}
- if(!data){shop=null;$("ownerQuickNav").classList.add("hidden");$("telegramCard").classList.add("hidden");$("shopForm").reset();$("serviceCard").classList.add("hidden");$("staffCard").classList.add("hidden");$("bookingCard").classList.add("hidden");$("bookingStatsCard").classList.add("hidden");$("revenueStatsCard").classList.add("hidden");$("monthlyStaffReportCard").classList.add("hidden");$("hoursCard").classList.add("hidden");showDashboard(true);status("Ҳисоби соҳибкор омода аст. Маълумоти маркази худро пур карда, сабт кун. Марказ то санҷиш дар рӯйхати умумӣ намоён намешавад.");return;}
+ if(!data){shop=null;$("ownerQuickNav").classList.add("hidden");$("telegramCard").classList.add("hidden");$("shopForm").reset();$("serviceCard").classList.add("hidden");$("staffCard").classList.add("hidden");$("galleryCard").classList.add("hidden");$("bookingCard").classList.add("hidden");$("bookingStatsCard").classList.add("hidden");$("revenueStatsCard").classList.add("hidden");$("monthlyStaffReportCard").classList.add("hidden");$("hoursCard").classList.add("hidden");showDashboard(true);status("Ҳисоби соҳибкор омода аст. Маълумоти маркази худро пур карда, сабт кун. Марказ то санҷиш дар рӯйхати умумӣ намоён намешавад.");return;}
  shop=data;$("ownerQuickNav").classList.remove("hidden");startOwnerNotificationRealtime(userData.user.id);$("telegramCard").classList.remove("hidden");$("shopName").value=data.name||"";$("shopDescription").value=data.description||"";$("shopCity").value=data.city||"";$("shopDistrict").value=data.district||"";$("shopAddress").value=data.address||"";$("shopPhone").value=data.phone||"";$("shopLatitude").value=data.latitude??"";$("shopLongitude").value=data.longitude??"";
- showDashboard(true);$("serviceCard").classList.remove("hidden");$("bookingCard").classList.remove("hidden");$("hoursCard").classList.remove("hidden");$("reviewsCard").classList.remove("hidden");status("Марказ бор шуд. Тағйиротро танҳо соҳиби ин марказ сабт карда метавонад.");await loadServices();$("staffCard").classList.remove("hidden");await loadStaff();await loadBusinessHours();await loadBookings();await loadReviews();
+ showDashboard(true);$("serviceCard").classList.remove("hidden");$("bookingCard").classList.remove("hidden");$("hoursCard").classList.remove("hidden");$("reviewsCard").classList.remove("hidden");$("galleryCard").classList.remove("hidden");status("Марказ бор шуд. Тағйиротро танҳо соҳиби ин марказ сабт карда метавонад.");await loadServices();$("staffCard").classList.remove("hidden");await loadStaff();await loadGallery();await loadBusinessHours();await loadBookings();await loadReviews();
 }
 async function loadServices(){
  if(!shop)return;
@@ -395,6 +397,42 @@ $("staffForm").addEventListener("submit",async event=>{
  editingStaffId=null;$("staffForm").reset();$("staffForm").querySelector('button[type="submit"]').textContent="Илова кардани корманд";$("staffPhotoPreview").textContent="";button.disabled=false;status("Профили корманд сабт шуд.");await loadStaff();
 });
 
+
+async function loadGallery(){
+ if(!shop)return;
+ const box=$("galleryList"),note=$("galleryStatus");box.replaceChildren();
+ const {data,error}=await supabase.from("shop_gallery").select("id,image_url,storage_path,caption,created_at").eq("barbershop_id",shop.id).order("created_at",{ascending:false});
+ if(error){note.textContent="Галерея бор нашуд: "+error.message;return;}
+ if(!data||!data.length){note.textContent="Ҳоло акс илова нашудааст.";return;}
+ note.textContent="Аксҳо: "+data.length;
+ data.forEach(item=>{
+  const card=document.createElement("div");card.className="shop-gallery-admin-item";
+  const img=document.createElement("img");img.src=item.image_url;img.alt=item.caption||"Кори марказ";img.loading="lazy";card.append(img);
+  const remove=document.createElement("button");remove.type="button";remove.className="danger";remove.textContent="Нест кардан";
+  remove.addEventListener("click",async()=>{if(!confirm("Ин акс аз галерея нест карда шавад?"))return;remove.disabled=true;const {error:rowError}=await supabase.from("shop_gallery").delete().eq("id",item.id).eq("barbershop_id",shop.id);if(rowError){status("Акс нест нашуд: "+rowError.message,true);remove.disabled=false;return;}const {error:fileError}=await supabase.storage.from("shop-gallery").remove([item.storage_path]);if(fileError)status("Сабти акс нест шуд, аммо файли нигоҳдорӣ пок нашуд: "+fileError.message,true);else status("Акс аз галерея нест карда шуд.");await loadGallery();});
+  card.append(remove);box.append(card);
+ });
+}
+$("galleryFiles").addEventListener("change",async()=>{
+ const input=$("galleryFiles"),files=[...(input.files||[])];if(!files.length)return;
+ const note=$("galleryStatus");const allowed=["image/jpeg","image/png","image/webp"];
+ const invalid=files.find(f=>!allowed.includes(f.type)||f.size>8*1024*1024);
+ if(invalid){note.textContent="Ҳамаи аксҳо бояд JPG, PNG ё WEBP ва ҳар кадом то 8 МБ бошанд.";input.value="";return;}
+ input.disabled=true;let uploaded=0;
+ for(const file of files){
+  const ext=file.type==="image/png"?"png":file.type==="image/webp"?"webp":"jpg";
+  const path=shop.id+"/"+Date.now()+"-"+Math.random().toString(36).slice(2,9)+"."+ext;
+  const {error:uploadError}=await supabase.storage.from("shop-gallery").upload(path,file,{contentType:file.type,cacheControl:"3600",upsert:false});
+  if(uploadError){note.textContent="Акс бор нашуд: "+uploadError.message;continue;}
+  const {data:urlData}=supabase.storage.from("shop-gallery").getPublicUrl(path);
+  const {error:insertError}=await supabase.from("shop_gallery").insert({barbershop_id:shop.id,storage_path:path,image_url:urlData.publicUrl});
+  if(insertError){await supabase.storage.from("shop-gallery").remove([path]);note.textContent="Акс сабт нашуд: "+insertError.message;continue;}
+  uploaded++;
+ }
+ input.value="";input.disabled=false;
+ if(uploaded)status(uploaded+" акс ба галерея илова шуд.");
+ await loadGallery();
+});
 async function loadBusinessHours(){
  if(!shop)return;
  const days=[{id:1,name:"Душанбе"},{id:2,name:"Сешанбе"},{id:3,name:"Чоршанбе"},{id:4,name:"Панҷшанбе"},{id:5,name:"Ҷумъа"},{id:6,name:"Шанбе"},{id:0,name:"Якшанбе"}];
@@ -943,7 +981,7 @@ $("loadMonthlyReportBtn").addEventListener("click",loadMonthlyStaffReport);
 $("loadCalendarBtn").addEventListener("click",loadBookingCalendar);
 $("calendarStaffFilter").addEventListener("change",loadBookingCalendar);
 $("calendarStatusFilter").addEventListener("change",loadBookingCalendar);
-$("shopForm").addEventListener("submit",async e=>{e.preventDefault();const latValue=$("shopLatitude").value.trim(),lngValue=$("shopLongitude").value.trim();const hasLat=latValue!==""&&lngValue!=="";const updates={name:$("shopName").value.trim(),description:$("shopDescription").value.trim()||null,city:$("shopCity").value.trim()||null,district:$("shopDistrict").value.trim()||null,address:$("shopAddress").value.trim()||null,phone:$("shopPhone").value.trim()||null,latitude:hasLat?Number(latValue):null,longitude:hasLat?Number(lngValue):null};if(!updates.name){status("Номи марказро навис.",true);return;}let result;if(shop){result=await supabase.from("barbershops").update(updates).eq("id",shop.id).select("id,name,description,address,city,phone,latitude,longitude").maybeSingle();}else{const {data:userData,error:userError}=await supabase.auth.getUser();if(userError||!userData.user){status("Аввал ба ҳисоб ворид шав.",true);return;}const {data:existingShop,error:existingShopError}=await supabase.from("barbershops").select("id").eq("owner_id",userData.user.id).maybeSingle();if(existingShopError){status("Санҷиши маркази мавҷуда ноком шуд. Боз кӯшиш кун.",true);return;}if(existingShop){status("Шумо аллакай як сартарошхона доред. Бо ҳамин ҳисоб маркази дуюм илова карда намешавад.",true);return;}result=await supabase.from("barbershops").insert({...updates,owner_id:userData.user.id,is_active:false}).select("id,name,description,address,city,phone,latitude,longitude").single();}if(result.error){status("Маълумот сабт нашуд: "+result.error.message,true);return;}if(!result.data){status("Марказ сабт нашуд. Иҷозати соҳибро санҷ.",true);return;}shop=result.data;$("ownerQuickNav").classList.remove("hidden");$("telegramCard").classList.remove("hidden");$("serviceCard").classList.remove("hidden");$("bookingCard").classList.remove("hidden");status("Марказ сабт шуд. Он то санҷиш аз ҷониби маъмури платформа дар рӯйхати умумӣ намоён намешавад.");await loadServices();$("staffCard").classList.remove("hidden");await loadStaff();await loadBookings();});
+$("shopForm").addEventListener("submit",async e=>{e.preventDefault();const latValue=$("shopLatitude").value.trim(),lngValue=$("shopLongitude").value.trim();const hasLat=latValue!==""&&lngValue!=="";const updates={name:$("shopName").value.trim(),description:$("shopDescription").value.trim()||null,city:$("shopCity").value.trim()||null,district:$("shopDistrict").value.trim()||null,address:$("shopAddress").value.trim()||null,phone:$("shopPhone").value.trim()||null,latitude:hasLat?Number(latValue):null,longitude:hasLat?Number(lngValue):null};if(!updates.name){status("Номи марказро навис.",true);return;}let result;if(shop){result=await supabase.from("barbershops").update(updates).eq("id",shop.id).select("id,name,description,address,city,phone,latitude,longitude").maybeSingle();}else{const {data:userData,error:userError}=await supabase.auth.getUser();if(userError||!userData.user){status("Аввал ба ҳисоб ворид шав.",true);return;}const {data:existingShop,error:existingShopError}=await supabase.from("barbershops").select("id").eq("owner_id",userData.user.id).maybeSingle();if(existingShopError){status("Санҷиши маркази мавҷуда ноком шуд. Боз кӯшиш кун.",true);return;}if(existingShop){status("Шумо аллакай як сартарошхона доред. Бо ҳамин ҳисоб маркази дуюм илова карда намешавад.",true);return;}result=await supabase.from("barbershops").insert({...updates,owner_id:userData.user.id,is_active:false}).select("id,name,description,address,city,phone,latitude,longitude").single();}if(result.error){status("Маълумот сабт нашуд: "+result.error.message,true);return;}if(!result.data){status("Марказ сабт нашуд. Иҷозати соҳибро санҷ.",true);return;}shop=result.data;$("ownerQuickNav").classList.remove("hidden");$("telegramCard").classList.remove("hidden");$("serviceCard").classList.remove("hidden");$("bookingCard").classList.remove("hidden");status("Марказ сабт шуд. Он то санҷиш аз ҷониби маъмури платформа дар рӯйхати умумӣ намоён намешавад.");await loadServices();$("staffCard").classList.remove("hidden");$("galleryCard").classList.remove("hidden");await loadStaff();await loadGallery();await loadBookings();});
 
 let shopMapInstance=null,shopMapMarker=null,shopMapLoading=null,shopMapAccuracyCircle=null;
 function setShopMapPoint(lat,lng,options={}){
