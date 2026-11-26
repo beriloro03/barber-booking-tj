@@ -769,7 +769,8 @@
     <h1 id="headline">Сартарошхонаи мувофиқро ёбед. Навбати худро осон гиред.</h1>
     <p class="lead" id="lead">Марказҳои хизматрасонӣ, хизматҳо, нархҳо ва вақти қабулро дар як ҷой пайдо кунед. Платформа барои муштариёни Тоҷикистон.</p>
     <div class="actions">
-      <a class="primary" href="#directory" id="customerBtn">Марказҳоро бинед</a>\n      <a class="owner-entry" href="admin.html" id="ownerEntry">Панели сартарошхона</a>
+      <a class="primary" href="#directory" id="customerBtn">Марказҳоро бинед</a>
+      <a class="owner-entry" href="#myBookingsSection" id="customerPanelBtn">Панели муштарӣ · Навбатҳои ман</a>\n      <a class="owner-entry" href="admin.html" id="ownerEntry">Панели сартарошхона</a>
     </div>
   </section>
   <section class="section" id="directory">
@@ -859,6 +860,9 @@ const showCustomerSite=async(user)=>{
   if(!user||user.is_anonymous||!(user.email_confirmed_at||user.confirmed_at))return false;
   customerAccessReady=true;authGate.hidden=true;document.body.classList.remove("customer-auth-pending");
   if(customerLogoutButton)customerLogoutButton.hidden=false;
+  const panelLink=document.getElementById("customerPanelBtn");
+  if(panelLink)panelLink.hidden=false;
+  await loadMyBookings();
   return true;
 };
 if(customerLogoutButton){
@@ -911,6 +915,12 @@ authLogin.addEventListener("click",async()=>{
 });
 customerSupabase.auth.onAuthStateChange((_event,session)=>{
   if(session?.user){showCustomerSite(session.user);}
+  else{
+    customerAccessReady=false;
+    authGate.hidden=false;
+    document.body.classList.add("customer-auth-pending");
+    if(customerLogoutButton)customerLogoutButton.hidden=true;
+  }
 });
 customerSupabase.auth.getUser().then(({data,error})=>{
   if(!error&&data?.user)showCustomerSite(data.user);
