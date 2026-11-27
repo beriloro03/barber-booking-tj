@@ -1120,7 +1120,8 @@
       #shopList > .shop-card { padding: 16px; }
     }
 
-  .shop-gallery{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.shop-gallery h4{margin:0 0 10px;font-size:16px}.shop-gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}.shop-gallery-grid a{display:block;overflow:hidden;border-radius:12px}.shop-gallery-grid img{display:block;width:100%;aspect-ratio:1;object-fit:cover;transition:transform .2s}.shop-gallery-grid a:focus img,.shop-gallery-grid a:hover img{transform:scale(1.04)}
+  .shop-gallery{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.shop-gallery h4{margin:0 0 10px;font-size:16px}.service-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:7px;margin-top:9px}.service-photo-grid a{display:block;min-width:0}.service-photo-grid img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:9px;border:1px solid #e5e8f1}.service-photo-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin-top:10px}.service-photo-admin-item img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}.service-photo-admin-item button{width:100%;margin-top:5px}
+.shop-gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}.shop-gallery-grid a{display:block;overflow:hidden;border-radius:12px}.shop-gallery-grid img{display:block;width:100%;aspect-ratio:1;object-fit:cover;transition:transform .2s}.shop-gallery-grid a:focus img,.shop-gallery-grid a:hover img{transform:scale(1.04)}
 </style>
 </head>
 <body>
@@ -2113,6 +2114,12 @@ function render() {
         const serviceName = document.createElement("strong");
         serviceName.textContent = service.name;
         details.append(serviceName);
+        const servicePhotos=(galleryByShop[shop.id]||[]).filter(photo=>photo.service_id===service.id);
+        if(servicePhotos.length){
+          const photoGrid=document.createElement("div");photoGrid.className="service-photo-grid";
+          servicePhotos.forEach((photo,photoIndex)=>{const link=document.createElement("a");link.href=photo.image_url;link.target="_blank";link.rel="noopener";link.setAttribute("aria-label",(document.documentElement.lang==="ru"?"Фото услуги ":document.documentElement.lang==="en"?"Service photo ":"Акси хизмат ")+(photoIndex+1));const img=document.createElement("img");img.src=photo.image_url;img.alt=service.name+" — "+(photoIndex+1);img.loading="lazy";link.append(img);photoGrid.append(link);});
+          details.append(photoGrid);
+        }
         const meta = document.createElement("div");
         meta.className = "service-meta";
         meta.textContent = service.duration_minutes + " " + words.minutes;
@@ -2232,7 +2239,7 @@ async function loadShops() {
       const {data:hoursData,error:hoursError}=await supabase.from("business_hours").select("barbershop_id,weekday,opens_at,closes_at,is_closed").in("barbershop_id",shops.map(shop=>shop.id)).order("weekday",{ascending:true});
       if(hoursError){console.error("Supabase business_hours query failed:",hoursError.message);}
       else {(hoursData||[]).forEach(row=>{if(!hoursByShop[row.barbershop_id])hoursByShop[row.barbershop_id]=[];hoursByShop[row.barbershop_id].push(row);});}
-      const {data:galleryData,error:galleryError}=await supabase.from("shop_gallery").select("id,barbershop_id,image_url,caption,created_at").in("barbershop_id",shops.map(shop=>shop.id)).order("created_at",{ascending:false}).limit(500);
+      const {data:galleryData,error:galleryError}=await supabase.from("shop_gallery").select("id,barbershop_id,service_id,image_url,caption,created_at").in("barbershop_id",shops.map(shop=>shop.id)).order("created_at",{ascending:false}).limit(500);
       if(galleryError){console.error("Supabase shop gallery query failed:",galleryError.message);}
       else{(galleryData||[]).forEach(photo=>{if(!galleryByShop[photo.barbershop_id])galleryByShop[photo.barbershop_id]=[];galleryByShop[photo.barbershop_id].push(photo);});}
       const {data:staffData,error:staffError}=await supabase.from("staff").select("id,barbershop_id,full_name,bio,photo_url").in("barbershop_id",shops.map(shop=>shop.id)).eq("is_active",true).order("full_name",{ascending:true});
