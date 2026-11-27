@@ -75,6 +75,7 @@
     .booking-panel input:focus,.booking-panel select:focus,.booking-panel textarea:focus{border-color:#7650c4;box-shadow:0 0 0 3px rgba(118,80,196,.13)}
     .booking-panel button{min-height:44px;padding:10px 16px}
     #refreshMyBookings{margin-top:6px}
+    .customer-notifications-panel{margin:14px 0 18px;padding:16px;border:1px solid #e7dfcf;border-radius:16px;background:#fffdf8}.customer-notifications-panel h3{margin:0 0 10px;font-size:17px;color:var(--ink)}.customer-notifications-list{display:grid;gap:10px;min-width:0}.customer-notifications-list .my-booking-card{margin:0}
     .customer-panel-heading{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.customer-panel-heading h2{flex:2;margin:0}.customer-logout-btn{flex:1;font:inherit;font-weight:700;border:1px solid #e0e3ed;border-radius:12px;padding:10px 14px;min-height:42px;background:#fff;color:#34364d;cursor:pointer;transition:transform .16s,box-shadow .16s,border-color .16s}.customer-logout-btn[hidden]{display:none}@media(hover:hover){.customer-logout-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(32,36,58,.08)}}.customer-session-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:8px 0 14px}.customer-session-actions #customerSessionStatus{font-size:14px;color:var(--muted)}@media(max-width:560px){.customer-panel-heading{align-items:center}.customer-panel-heading h2{flex:2}.customer-panel-heading .customer-logout-btn{flex:1;width:auto}.customer-session-actions{flex-direction:column;align-items:stretch}.customer-session-actions button{width:100%}}
     .my-booking-card{padding:17px}
     .booking-state{display:inline-block;padding:6px 10px;border-radius:999px;background:#f0eaff}
@@ -1177,6 +1178,10 @@
       <button type="button" id="customerLogout" class="customer-logout-btn" hidden>Баромадан аз ҳисоб</button>
     </div>
     <p class="muted" id="myBookingsIntro">Дархостҳои фиристодаатон ва ҳолати тасдиқи онҳоро бинед.</p>
+    <div class="customer-notifications-panel">
+      <h3 id="customerNotificationsTitle">🔔 Огоҳиномаҳо</h3>
+      <div id="customerNotifications" class="customer-notifications-list" aria-live="polite">Барои дидани огоҳиномаҳо ба ҳисоби худ ворид шавед.</div>
+    </div>
     <div id="myBookingsList" class="my-bookings-list" aria-live="polite">Навбатҳо бор шуда истодаанд…</div>
   </section>
   <section class="section" id="how">
