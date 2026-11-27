@@ -79,6 +79,9 @@
     .customer-notifications-panel{margin:14px 0 18px;padding:16px;border:1px solid #e7dfcf;border-radius:16px;background:#fffdf8}.customer-notifications-panel h3{margin:0 0 10px;font-size:17px;color:var(--ink)}.customer-notifications-list{display:grid;gap:10px;min-width:0}.customer-notifications-list .my-booking-card{margin:0}
     .customer-panel-heading{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.customer-panel-heading h2{flex:2;margin:0}.customer-logout-btn{flex:1;font:inherit;font-weight:700;border:1px solid #e0e3ed;border-radius:12px;padding:10px 14px;min-height:42px;background:#fff;color:#34364d;cursor:pointer;transition:transform .16s,box-shadow .16s,border-color .16s}.customer-logout-btn[hidden]{display:none}@media(hover:hover){.customer-logout-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(32,36,58,.08)}}.customer-session-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:8px 0 14px}.customer-session-actions #customerSessionStatus{font-size:14px;color:var(--muted)}@media(max-width:560px){.customer-panel-heading{align-items:center}.customer-panel-heading h2{flex:2}.customer-panel-heading .customer-logout-btn{flex:1;width:auto}.customer-session-actions{flex-direction:column;align-items:stretch}.customer-session-actions button{width:100%}}
     .my-booking-card{padding:17px}
+    .booking-history-section{margin:18px 0 24px}
+    .booking-history-section>h3{font-size:19px;margin:0 0 10px;color:var(--ink)}
+    .booking-history-section>.my-bookings-list{margin-top:0}
     .booking-state{display:inline-block;padding:6px 10px;border-radius:999px;background:#f0eaff}
     .notice,.shop-status{border-radius:16px;background:#fff}
     footer{padding-top:12px}
@@ -1663,6 +1666,21 @@ async function loadMyBookings() {
   let assignedStaffNames=new Map();
   if(assignedStaffIds.length){const {data:staffRows,error:staffError}=await customerSupabase.from("staff").select("id,full_name").in("id",assignedStaffIds);if(!staffError)assignedStaffNames=new Map((staffRows||[]).map(person=>[person.id,person.full_name]));}
   box.replaceChildren();
+  const currentLang=document.documentElement.lang||"tg";
+  const historyLabels=currentLang==="ru"
+    ?{upcoming:"Предстоящие записи",history:"История записей",emptyUpcoming:"Нет предстоящих записей.",emptyHistory:"История пока пуста."}
+    :currentLang==="en"
+      ?{upcoming:"Upcoming appointments",history:"Appointment history",emptyUpcoming:"No upcoming appointments.",emptyHistory:"Your history is empty."}
+      :{upcoming:"Навбатҳои оянда",history:"Таърихи навбатҳо",emptyUpcoming:"Навбати оянда надоред.",emptyHistory:"Таърихи навбатҳо ҳоло холӣ аст."};
+  const upcomingSection=document.createElement("section");
+  const historySection=document.createElement("section");
+  upcomingSection.className=historySection.className="booking-history-section";
+  const upcomingHeading=document.createElement("h3");upcomingHeading.textContent=historyLabels.upcoming;
+  const historyHeading=document.createElement("h3");historyHeading.textContent=historyLabels.history;
+  const upcomingList=document.createElement("div");upcomingList.className="my-bookings-list";
+  const historyList=document.createElement("div");historyList.className="my-bookings-list";
+  upcomingSection.append(upcomingHeading,upcomingList);
+  historySection.append(historyHeading,historyList);
   bookings.forEach(b=>{
     const card=document.createElement("article");card.className="my-booking-card";
     const title=document.createElement("strong");title.textContent=b.service_name_snapshot||words.serviceLabel;card.append(title);
@@ -1796,8 +1814,11 @@ async function loadMyBookings() {
       });
       card.append(cancelButton);
     }
-    box.append(card);
+    const isUpcoming=(b.status==="pending"||b.status==="confirmed")&&new Date(b.starts_at)>new Date();
+    (isUpcoming?upcomingList:historyList).append(card);
   });
+  if(upcomingList.childElementCount){box.append(upcomingSection);}else{const empty=document.createElement("p");empty.className="muted";empty.textContent=historyLabels.emptyUpcoming;upcomingSection.append(empty);box.append(upcomingSection);}
+  if(historyList.childElementCount){box.append(historySection);}else{const empty=document.createElement("p");empty.className="muted";empty.textContent=historyLabels.emptyHistory;historySection.append(empty);box.append(historySection);}
 }
 document.getElementById("refreshMyBookings")?.addEventListener("click",loadMyBookings);
 
