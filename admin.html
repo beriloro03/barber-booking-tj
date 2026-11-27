@@ -445,7 +445,7 @@ $("staffForm").addEventListener("submit",async event=>{
 async function loadGallery(){
  if(!shop)return;
  const box=$("galleryList"),note=$("galleryStatus");box.replaceChildren();
- const {data,error}=await supabase.from("shop_gallery").select("id,image_url,storage_path,caption,created_at").eq("barbershop_id",shop.id).order("created_at",{ascending:false});
+ const {data,error}=await supabase.from("shop_gallery").select("id,image_url,storage_path,caption,created_at").eq("barbershop_id",shop.id).is("service_id",null).order("created_at",{ascending:false});
  if(error){note.textContent="Галерея бор нашуд: "+error.message;return;}
  if(!data||!data.length){note.textContent="Ҳоло акс илова нашудааст.";return;}
  note.textContent="Аксҳо: "+data.length;
