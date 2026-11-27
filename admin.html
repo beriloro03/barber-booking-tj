@@ -183,6 +183,7 @@ a{color:#5740b8}
 <label for="serviceName">Номи хизмат</label><input id="serviceName" required maxlength="120">
 <label for="serviceDescription">Тавсиф (ихтиёрӣ)</label><input id="serviceDescription" maxlength="300">
 <div class="row"><div><label for="serviceDuration">Давомнокӣ (дақиқа)</label><input id="serviceDuration" type="number" min="5" max="480" value="30" required></div><div><label for="servicePrice">Нарх (сомонӣ)</label><input id="servicePrice" type="number" min="0" step="0.01" value="0" required></div></div>
+<div class="service" style="margin-top:12px"><strong>🎁 Аксия (ихтиёрӣ)</strong><p class="muted">Агар тахфиф лозим набошад, ин майдонҳоро холӣ гузор.</p><label for="serviceDiscountPrice">Нархи тахфифшуда (сомонӣ)</label><input id="serviceDiscountPrice" type="number" min="0" step="0.01" placeholder="Масалан: 30"><div class="row"><div><label for="serviceDiscountStarts">Оғози аксия</label><input id="serviceDiscountStarts" type="datetime-local"></div><div><label for="serviceDiscountEnds">Анҷоми аксия</label><input id="serviceDiscountEnds" type="datetime-local"></div></div></div>
 <label for="servicePhotos">Аксҳои хизмат (то 10 дона, JPG/PNG/WEBP; ҳар кадом то 8 МБ)</label><input id="servicePhotos" type="file" accept="image/jpeg,image/png,image/webp" multiple><p id="servicePhotoStatus" class="muted" role="status">Метавонӣ ҳангоми илова кардани хизмат аксҳоро ҳам интихоб кунӣ.</p><div id="servicePhotoPreview" class="service-photo-preview-grid"></div>
 <button class="primary" type="submit" style="margin-top:14px">Илова кардани хизмат</button>
 </form><div id="serviceList"></div></div>
@@ -213,6 +214,7 @@ const $=id=>document.getElementById(id);
 let shop=null,editingServiceId=null,editingStaffId=null,monthlyReportRows=[],monthlyReportMonth="",analyticsRows=[];
 let unreadBookingIds=new Set(),ownerNotificationChannel=null;
 function status(message,isError=false){$("status").textContent=message;$("status").style.background=isError?"#fff0f1":"#f1edfa";$("status").style.color=isError?"#9b1c31":"#716b7e";}
+function toLocalDateTimeInput(value){if(!value)return "";const d=new Date(value);if(Number.isNaN(d.getTime()))return "";const pad=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes());}
 
 async function loadOwnerNotifications(userId){
  if(!shop)return;
@@ -272,7 +274,7 @@ async function loadServicePhotos(serviceId, host){
 }
 async function loadServices(){
  if(!shop)return;
- const {data,error}=await supabase.from("services").select("id,name,description,duration_minutes,price,is_active").eq("barbershop_id",shop.id).order("name");
+ const {data,error}=await supabase.from("services").select("id,name,description,duration_minutes,price,discount_price,discount_starts_at,discount_ends_at,is_active").eq("barbershop_id",shop.id).order("name");
  const box=$("serviceList");box.replaceChildren();
  if(error){status("Хизматҳо бор нашуданд: "+error.message,true);return;}
  if(!data.length){const p=document.createElement("p");p.className="muted";p.textContent="Ҳоло хизмат нест.";box.append(p);return;}
@@ -282,6 +284,7 @@ async function loadServices(){
   const title=document.createElement("strong");title.textContent=s.name+" — "+Number(s.price).toLocaleString()+" сомонӣ";
   const meta=document.createElement("span");meta.className="muted";meta.textContent=s.duration_minutes+" дақ.";
   top.append(title,meta);card.append(top);
+  if(s.discount_price!==null&&s.discount_price!==undefined&&s.discount_starts_at&&s.discount_ends_at){const d=document.createElement("p");d.className="muted";d.textContent="🎁 Нархи аксия: "+Number(s.discount_price).toLocaleString()+" сомонӣ · "+new Date(s.discount_starts_at).toLocaleString("tg-TJ")+" — "+new Date(s.discount_ends_at).toLocaleString("tg-TJ");card.append(d);}
   if(s.description){const d=document.createElement("p");d.className="muted";d.textContent=s.description;card.append(d);}
   const photoArea=document.createElement("div");photoArea.className="service-photo-admin";
   const photoLabel=document.createElement("label");photoLabel.textContent="Аксҳои ин хизмат (то 10 дона, JPG/PNG/WEBP, ҳар кадом то 8 МБ)";
@@ -314,7 +317,7 @@ async function loadServices(){
   photoArea.append(photoLabel,input,photoStatus,photoList);card.append(photoArea);
   loadServicePhotos(s.id,photoList);
   const actions=document.createElement("div");actions.className="row";
-  const edit=document.createElement("button");edit.type="button";edit.textContent="Таҳрир";edit.addEventListener("click",()=>{editingServiceId=s.id;$("serviceName").value=s.name;$("serviceDescription").value=s.description||"";$("serviceDuration").value=s.duration_minutes;$("servicePrice").value=s.price;$("serviceForm").querySelector("button[type=submit]").textContent="Сабт кардани тағйирот";$("serviceName").focus();});
+  const edit=document.createElement("button");edit.type="button";edit.textContent="Таҳрир";edit.addEventListener("click",()=>{editingServiceId=s.id;$("serviceName").value=s.name;$("serviceDescription").value=s.description||"";$("serviceDuration").value=s.duration_minutes;$("servicePrice").value=s.price;$("serviceDiscountPrice").value=s.discount_price??"";$("serviceDiscountStarts").value=toLocalDateTimeInput(s.discount_starts_at);$("serviceDiscountEnds").value=toLocalDateTimeInput(s.discount_ends_at);$("serviceForm").querySelector("button[type=submit]").textContent="Сабт кардани тағйирот";$("serviceName").focus();});
   const del=document.createElement("button");del.type="button";del.className="danger";del.textContent="Нест кардан";del.addEventListener("click",async()=>{if(!confirm("Ин хизматро нест кунем?"))return;const {error}=await supabase.from("services").delete().eq("id",s.id).eq("barbershop_id",shop.id);if(error)status("Нест карда нашуд: "+error.message,true);else{status("Хизмат нест карда шуд.");await loadServices();}});
   actions.append(edit,del);card.append(actions);box.append(card);
  });
@@ -1258,7 +1261,10 @@ $("serviceForm").addEventListener("submit",async e=>{
   if(countError){servicePhotoStatus.textContent="Шумораи аксҳо санҷида нашуд: "+countError.message;return;}
   if(existing.length+files.length>10){servicePhotoStatus.textContent="Барои ин хизмат танҳо "+Math.max(0,10-existing.length)+" акси дигар илова кардан мумкин аст.";return;}
  }
- const payload={barbershop_id:shop.id,name:$("serviceName").value.trim(),description:$("serviceDescription").value.trim()||null,duration_minutes:Number($("serviceDuration").value),price:Number($("servicePrice").value),is_active:true};
+ const basePrice=Number($("servicePrice").value),discountText=$("serviceDiscountPrice").value.trim(),discountStartText=$("serviceDiscountStarts").value.trim(),discountEndText=$("serviceDiscountEnds").value.trim();
+ const hasDiscount=Boolean(discountText||discountStartText||discountEndText);let discountPrice=null,discountStartsAt=null,discountEndsAt=null;
+ if(hasDiscount){discountPrice=Number(discountText);const startDate=new Date(discountStartText),endDate=new Date(discountEndText);if(!discountText||!discountStartText||!discountEndText||!Number.isFinite(discountPrice)||discountPrice<0||discountPrice>=basePrice||Number.isNaN(startDate.getTime())||Number.isNaN(endDate.getTime())||startDate>=endDate){status("Барои аксия нархи тахфифшуда ва ҳар ду сана лозим аст. Нархи тахфифшуда бояд аз нархи асосӣ камтар бошад.",true);return;}discountStartsAt=startDate.toISOString();discountEndsAt=endDate.toISOString();}
+ const payload={barbershop_id:shop.id,name:$("serviceName").value.trim(),description:$("serviceDescription").value.trim()||null,duration_minutes:Number($("serviceDuration").value),price:basePrice,discount_price:discountPrice,discount_starts_at:discountStartsAt,discount_ends_at:discountEndsAt,is_active:true};
  const submitButton=$("serviceForm").querySelector("button[type=submit]");submitButton.disabled=true;
  let result;
  if(serviceIdBeforeSave){result=await supabase.from("services").update(payload).eq("id",serviceIdBeforeSave).eq("barbershop_id",shop.id).select("id").single();}
