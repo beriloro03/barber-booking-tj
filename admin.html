@@ -1012,12 +1012,13 @@ async function loadBookings(){
    saveTime.addEventListener("click",async()=>{
     if(!timeInput.value){status("Сана ва вақти навро интихоб кун.",true);return;}
     const newStart=new Date(timeInput.value+":00+05:00");
-    if(!Number.isFinite(newStart.getTime())||newStart<=new Date()){status("Вақти нав бояд дар оянда бошад.",true);return;}
+    if(!Number.isFinite(newStart.getTime())){status("Сана ё вақти интихобшуда нодуруст аст.",true);return;}
     const duration=Math.max(1,Math.round((new Date(b.ends_at).getTime()-new Date(b.starts_at).getTime())/60000));
     const newEnd=new Date(newStart.getTime()+duration*60000);
     saveTime.disabled=true;
-    const {error}=await supabase.from("bookings").update({starts_at:newStart.toISOString(),ends_at:newEnd.toISOString()}).eq("id",b.id).eq("barbershop_id",shop.id).in("status",["pending","confirmed"]);
+    const {data:updatedBooking,error}=await supabase.from("bookings").update({starts_at:newStart.toISOString(),ends_at:newEnd.toISOString()}).eq("id",b.id).eq("barbershop_id",shop.id).in("status",["pending","confirmed"]).select("id,starts_at,ends_at").maybeSingle();
     if(error){status("Вақти нав сабт нашуд: "+error.message,true);saveTime.disabled=false;return;}
+    if(!updatedBooking){status("Навбат тағйир наёфт: сабти мувофиқ ёфт нашуд. Рӯйхатро нав кун ва боз санҷ.",true);saveTime.disabled=false;return;}
     status("Вақти нав сабт шуд. Ба муштарӣ огоҳинома фиристода шуд.");
     await loadBookings();
    });
