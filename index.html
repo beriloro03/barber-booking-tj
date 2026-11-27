@@ -65,6 +65,7 @@
     .service-list,.staff-list,.hours-list{border-color:#eee9f5}
     .service-item{align-items:center;flex-wrap:wrap}
     .service-item>div{min-width:0}
+    .service-price-block{display:flex;flex-direction:column;align-items:flex-end;gap:3px;min-width:88px}.service-price-old{font-size:13px;color:var(--muted);text-decoration:line-through}.service-discount-badge{display:inline-block;padding:3px 7px;border-radius:999px;background:#e5f5e9;color:#176b52;font-size:12px;font-weight:800}
     .service-item strong{color:#5930a9}
     .staff-item{padding:12px 0}
     .staff-item strong{font-size:15px}
@@ -1385,6 +1386,8 @@ function dushanbeDateString(date) {
   const part = type => parts.find(item => item.type === type)?.value || "";
   return part("year")+"-"+part("month")+"-"+part("day");
 }
+function getEffectiveServicePrice(service){const now=Date.now(),starts=Date.parse(service.discount_starts_at||""),ends=Date.parse(service.discount_ends_at||""),discount=Number(service.discount_price);return service.discount_price!==null&&service.discount_price!==undefined&&Number.isFinite(discount)&&Number.isFinite(starts)&&Number.isFinite(ends)&&now>=starts&&now<ends&&discount>=0&&discount<Number(service.price)?discount:Number(service.price);}
+function isServiceDiscountActive(service){return getEffectiveServicePrice(service)<Number(service.price);}
 function createBookingPanel(shop, shopServices, shopStaff) {
   const words = languageCopy();
   const flow = document.documentElement.lang==="ru"
@@ -1403,7 +1406,7 @@ function createBookingPanel(shop, shopServices, shopStaff) {
   form.noValidate = true; // Validate the visible booking step in our own handler; hidden fields must not block it.
   const makeLabel = (txt, control) => { const label=document.createElement("label"); label.textContent=txt; label.append(control); return label; };
   const serviceSelect=document.createElement("select"); serviceSelect.required=true;
-  shopServices.forEach(s=>{const o=document.createElement("option");o.value=s.id;o.textContent=s.name+" — "+s.duration_minutes+" "+words.minutes+" — "+Number(s.price).toLocaleString()+" "+words.somoni;serviceSelect.append(o);});
+  shopServices.forEach(s=>{const o=document.createElement("option");o.value=s.id;const active=isServiceDiscountActive(s),price=getEffectiveServicePrice(s);o.textContent=s.name+" — "+s.duration_minutes+" "+words.minutes+" — "+price.toLocaleString()+" "+words.somoni+(active?" · "+(document.documentElement.lang==="ru"?"Акция":document.documentElement.lang==="en"?"Sale":"Аксия"):"");serviceSelect.append(o);});
   const staffSelect=document.createElement("select");
   const staffLabel=makeLabel(words.staffLabel,staffSelect);
   const refreshStaffOptions=()=>{
@@ -1461,7 +1464,7 @@ function createBookingPanel(shop, shopServices, shopStaff) {
       [words.staffLabel,staffSelect.value?staff:flow.staffAny],
       [words.dateLabel,dateInput.value||"—"],
       [words.timeLabel,timeInput.value||"—"],
-      [words.priceLabel,selected?Number(selected.price).toLocaleString()+" "+words.somoni:"—"],
+      [words.priceLabel,selected?getEffectiveServicePrice(selected).toLocaleString()+" "+words.somoni:"—"],
       [flow.duration,selected?selected.duration_minutes+" "+words.minutes:"—"]
     ];
     summaryDetails.replaceChildren();
@@ -2140,9 +2143,10 @@ function render() {
         meta.className = "service-meta";
         meta.textContent = service.duration_minutes + " " + words.minutes;
         details.append(meta);
-        const price = document.createElement("strong");
-        price.textContent = Number(service.price).toLocaleString() + " " + words.somoni;
-        item.append(details, price);
+        const priceBlock=document.createElement("div");priceBlock.className="service-price-block";
+        const price=document.createElement("strong");const effectivePrice=getEffectiveServicePrice(service);price.textContent=effectivePrice.toLocaleString()+" "+words.somoni;
+        if(isServiceDiscountActive(service)){const oldPrice=document.createElement("del");oldPrice.className="service-price-old";oldPrice.textContent=Number(service.price).toLocaleString()+" "+words.somoni;const badge=document.createElement("span");badge.className="service-discount-badge";badge.textContent=document.documentElement.lang==="ru"?"Акция":document.documentElement.lang==="en"?"Sale":"Аксия";priceBlock.append(oldPrice,price,badge);}else{priceBlock.append(price);}
+        item.append(details,priceBlock);
         const bookButton=document.createElement("button");bookButton.type="button";bookButton.className="book-btn";bookButton.dataset.serviceId=service.id;bookButton.textContent=words.book;item.append(bookButton);
         serviceSection.append(item);
       });
@@ -2237,7 +2241,7 @@ async function loadShops() {
     if (shops.length) {
       const { data: serviceData, error: serviceError } = await supabase
         .from("services")
-        .select("id,barbershop_id,name,description,duration_minutes,price")
+        .select("id,barbershop_id,name,description,duration_minutes,price,discount_price,discount_starts_at,discount_ends_at")
         .in("barbershop_id", shops.map(shop => shop.id))
         .eq("is_active", true)
         .order("name", { ascending: true });
