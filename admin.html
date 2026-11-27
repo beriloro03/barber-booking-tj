@@ -113,6 +113,14 @@ a{color:#5740b8}
 }
 
 .shop-gallery-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(115px,1fr));gap:10px;margin-top:14px}.shop-gallery-admin-item{border:1px solid var(--line);border-radius:12px;padding:8px;min-width:0}.shop-gallery-admin-item img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block}.shop-gallery-admin-item button{width:100%;margin-top:7px}.shop-gallery-admin-item .muted{font-size:12px;overflow-wrap:anywhere}
+
+/* Service photo thumbnails in the owner panel: keep uploaded images compact. */
+.service-photo-admin{width:100%;min-width:0;overflow:hidden}
+.service-photo-admin-grid{display:grid;width:100%;max-width:320px;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:9px}
+.service-photo-admin-item{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:10px;padding:6px;background:#fff}
+.service-photo-admin-item img{display:block;width:100%;height:68px;max-height:68px;aspect-ratio:1;object-fit:cover;border-radius:7px}
+.service-photo-admin-item button{width:100%;min-width:0;margin-top:6px;padding:7px 3px;font-size:12px;white-space:normal}
+@media(max-width:380px){.service-photo-admin-grid{grid-template-columns:repeat(3,minmax(0,1fr));max-width:270px}.service-photo-admin-item img{height:68px;max-height:68px}}
 </style></head>
 <body>
 <header><div><a href="./">← Сомонаи асосӣ</a><h1>Панели соҳибкор</h1><div class="muted">Идоракунии марказ ва хизматрасониҳо</div></div></header>
