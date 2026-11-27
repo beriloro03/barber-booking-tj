@@ -120,7 +120,9 @@ a{color:#5740b8}
 .service-photo-admin-item{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:10px;padding:6px;background:#fff}
 .service-photo-admin-item img{display:block;width:100%;height:68px;max-height:68px;aspect-ratio:1;object-fit:cover;border-radius:7px}
 .service-photo-admin-item button{width:100%;min-width:0;margin-top:6px;padding:7px 3px;font-size:12px;white-space:normal}
-@media(max-width:380px){.service-photo-admin-grid{grid-template-columns:repeat(3,minmax(0,1fr));max-width:270px}.service-photo-admin-item img{height:68px;max-height:68px}}
+.service-photo-preview-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;max-width:320px;margin-top:8px}
+.service-photo-preview-grid img{display:block;width:100%;height:68px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+@media(max-width:380px){.service-photo-admin-grid,.service-photo-preview-grid{grid-template-columns:repeat(3,minmax(0,1fr));max-width:270px}.service-photo-admin-item img,.service-photo-preview-grid img{height:68px;max-height:68px}}
 </style></head>
 <body>
 <header><div><a href="./">← Сомонаи асосӣ</a><h1>Панели соҳибкор</h1><div class="muted">Идоракунии марказ ва хизматрасониҳо</div></div></header>
@@ -181,6 +183,7 @@ a{color:#5740b8}
 <label for="serviceName">Номи хизмат</label><input id="serviceName" required maxlength="120">
 <label for="serviceDescription">Тавсиф (ихтиёрӣ)</label><input id="serviceDescription" maxlength="300">
 <div class="row"><div><label for="serviceDuration">Давомнокӣ (дақиқа)</label><input id="serviceDuration" type="number" min="5" max="480" value="30" required></div><div><label for="servicePrice">Нарх (сомонӣ)</label><input id="servicePrice" type="number" min="0" step="0.01" value="0" required></div></div>
+<label for="servicePhotos">Аксҳои хизмат (то 10 дона, JPG/PNG/WEBP; ҳар кадом то 8 МБ)</label><input id="servicePhotos" type="file" accept="image/jpeg,image/png,image/webp" multiple><p id="servicePhotoStatus" class="muted" role="status">Метавонӣ ҳангоми илова кардани хизмат аксҳоро ҳам интихоб кунӣ.</p><div id="servicePhotoPreview" class="service-photo-preview-grid"></div>
 <button class="primary" type="submit" style="margin-top:14px">Илова кардани хизмат</button>
 </form><div id="serviceList"></div></div>
 <div id="staffCard" class="card hidden"><h2>Кормандони марказ</h2><p class="muted">Номи кормандро илова кун ва хизматҳоеро интихоб намо, ки ӯ иҷро мекунад. Маълумот дар сомонаи муштариён нишон дода мешавад.</p>
@@ -1229,7 +1232,56 @@ $("hoursForm").addEventListener("submit",async e=>{
  if(error){status("Соатҳои корӣ сабт нашуданд: "+error.message,true);return;}
  status("Соатҳои кории интихобкардаи соҳибкор барои ҳамаи 7 рӯз сабт шуданд.");
 });
-$("serviceForm").addEventListener("submit",async e=>{e.preventDefault();if(!shop)return;const payload={barbershop_id:shop.id,name:$("serviceName").value.trim(),description:$("serviceDescription").value.trim()||null,duration_minutes:Number($("serviceDuration").value),price:Number($("servicePrice").value),is_active:true};let result;if(editingServiceId){result=await supabase.from("services").update(payload).eq("id",editingServiceId).eq("barbershop_id",shop.id);}else{result=await supabase.from("services").insert(payload);}if(result.error){status("Хизмат сабт нашуд: "+result.error.message,true);return;}editingServiceId=null;$("serviceForm").reset();$("serviceDuration").value=30;$("servicePrice").value=0;$("serviceForm").querySelector("button[type=submit]").textContent="Илова кардани хизмат";status("Хизмат сабт шуд.");await loadServices();});
+const servicePhotoInput=$("servicePhotos");
+const servicePhotoPreview=$("servicePhotoPreview");
+const servicePhotoStatus=$("servicePhotoStatus");
+servicePhotoInput.addEventListener("change",()=>{
+ servicePhotoPreview.replaceChildren();
+ const files=[...(servicePhotoInput.files||[])];
+ if(files.length>10){servicePhotoStatus.textContent="Ҳадди аксҳо 10 дона аст.";servicePhotoInput.value="";return;}
+ const allowed=["image/jpeg","image/png","image/webp"];
+ const invalid=files.find(file=>!allowed.includes(file.type)||file.size>8*1024*1024);
+ if(invalid){servicePhotoStatus.textContent="Файл бояд JPG, PNG ё WEBP ва то 8 МБ бошад.";servicePhotoInput.value="";return;}
+ files.forEach(file=>{const img=document.createElement("img");img.alt=file.name;img.src=URL.createObjectURL(file);img.onload=()=>URL.revokeObjectURL(img.src);servicePhotoPreview.append(img);});
+ servicePhotoStatus.textContent=files.length?files.length+" акс интихоб шуд.":"Акс интихоб нашудааст.";
+});
+$("serviceForm").addEventListener("submit",async e=>{
+ e.preventDefault();if(!shop)return;
+ const files=[...(servicePhotoInput.files||[])],allowed=["image/jpeg","image/png","image/webp"];
+ if(files.length>10){servicePhotoStatus.textContent="Ҳадди аксҳо 10 дона аст.";return;}
+ const invalid=files.find(file=>!allowed.includes(file.type)||file.size>8*1024*1024);
+ if(invalid){servicePhotoStatus.textContent="Файл бояд JPG, PNG ё WEBP ва то 8 МБ бошад.";return;}
+ const serviceIdBeforeSave=editingServiceId;
+ if(serviceIdBeforeSave&&files.length){
+  servicePhotoStatus.textContent="Шумораи аксҳои мавҷуда санҷида мешавад…";
+  const {data:existing,error:countError}=await supabase.from("shop_gallery").select("id").eq("barbershop_id",shop.id).eq("service_id",serviceIdBeforeSave);
+  if(countError){servicePhotoStatus.textContent="Шумораи аксҳо санҷида нашуд: "+countError.message;return;}
+  if(existing.length+files.length>10){servicePhotoStatus.textContent="Барои ин хизмат танҳо "+Math.max(0,10-existing.length)+" акси дигар илова кардан мумкин аст.";return;}
+ }
+ const payload={barbershop_id:shop.id,name:$("serviceName").value.trim(),description:$("serviceDescription").value.trim()||null,duration_minutes:Number($("serviceDuration").value),price:Number($("servicePrice").value),is_active:true};
+ const submitButton=$("serviceForm").querySelector("button[type=submit]");submitButton.disabled=true;
+ let result;
+ if(serviceIdBeforeSave){result=await supabase.from("services").update(payload).eq("id",serviceIdBeforeSave).eq("barbershop_id",shop.id).select("id").single();}
+ else{result=await supabase.from("services").insert(payload).select("id").single();}
+ if(result.error||!result.data){status("Хизмат сабт нашуд: "+(result.error?.message||"ID-и хизмат гирифта нашуд."),true);submitButton.disabled=false;return;}
+ const savedServiceId=result.data.id;
+ let uploaded=0,uploadErrors=[];
+ for(const file of files){
+  const ext=file.type==="image/png"?"png":file.type==="image/webp"?"webp":"jpg";
+  const path=shop.id+"/services/"+savedServiceId+"/"+Date.now()+"-"+Math.random().toString(36).slice(2,9)+"."+ext;
+  const {error:uploadError}=await supabase.storage.from("shop-gallery").upload(path,file,{contentType:file.type,cacheControl:"3600",upsert:false});
+  if(uploadError){uploadErrors.push(file.name+": "+uploadError.message);continue;}
+  const {data:urlData}=supabase.storage.from("shop-gallery").getPublicUrl(path);
+  const {error:insertError}=await supabase.from("shop_gallery").insert({barbershop_id:shop.id,service_id:savedServiceId,storage_path:path,image_url:urlData.publicUrl});
+  if(insertError){await supabase.storage.from("shop-gallery").remove([path]);uploadErrors.push(file.name+": "+insertError.message);continue;}
+  uploaded++;
+ }
+ editingServiceId=null;$("serviceForm").reset();$("serviceDuration").value=30;$("servicePrice").value=0;servicePhotoPreview.replaceChildren();servicePhotoStatus.textContent="Метавонӣ ҳангоми илова кардани хизмат аксҳоро ҳам интихоб кунӣ.";submitButton.textContent="Илова кардани хизмат";submitButton.disabled=false;
+ if(uploadErrors.length){status("Хизмат сабт шуд. "+uploaded+" акс бор шуд; "+uploadErrors.length+" акс бор нашуд: "+uploadErrors[0],true);}
+ else if(uploaded){status("Хизмат сабт шуд ва "+uploaded+" акс илова шуд.");}
+ else{status("Хизмат сабт шуд.");}
+ await loadServices();
+});
 
 $("telegramLinkBtn").addEventListener("click",async()=>{if(!shop){$("telegramStatus").textContent="Аввал маълумоти марказро сабт кун.";return;}const button=$("telegramLinkBtn");button.disabled=true;$("telegramStatus").textContent="Рамзи пайвастшавӣ сохта мешавад…";try{const {data,error}=await supabase.rpc("create_telegram_link_code",{p_barbershop_id:shop.id});if(error)throw error;const link="https://t.me/SartaroshkhonahoTJ_bot?start="+data;$("telegramStatus").textContent="Истинодро кушо ва дар Telegram Start-ро пахш кун. Рамз 15 дақиқа амал мекунад.";window.open(link,"_blank","noopener");}catch(error){$("telegramStatus").textContent="Хато: "+(error.message||"рамз сохта нашуд");}finally{button.disabled=false;}});
 $("telegramSetupBtn").addEventListener("click",async()=>{const button=$("telegramSetupBtn");button.disabled=true;$("telegramStatus").textContent="Огоҳӣ фаъол карда мешавад…";try{const {data,error}=await supabase.functions.invoke("telegram-notifications",{body:{action:"setup"}});if(error)throw error;if(!data||!data.ok)throw new Error(data?.description||"Webhook фаъол нашуд");$("telegramStatus").textContent="Webhook фаъол шуд. Акнун Telegram-ро пайваст кун."; }catch(error){$("telegramStatus").textContent="Хато: "+(error.message||"танзим нашуд");}finally{button.disabled=false;}});
