@@ -997,6 +997,32 @@ async function loadBookings(){
   const state=document.createElement("p");state.className="muted";state.textContent="Ҳолат: "+({pending:"Интизор",confirmed:"Тасдиқшуда",cancelled:"Радшуда",completed:"Анҷомёфта"}[b.status]||b.status);card.append(state);
   if(b.status==="pending"||b.status==="confirmed"){
    const actions=document.createElement("div");actions.className="row";
+   const reschedule=document.createElement("button");reschedule.type="button";reschedule.textContent="Тағйир додани вақт";
+   const editor=document.createElement("div");editor.className="service hidden";editor.style.marginTop="10px";
+   const editorLabel=document.createElement("label");editorLabel.textContent="Сана ва вақти нави навбат";
+   const timeInput=document.createElement("input");timeInput.type="datetime-local";timeInput.required=true;timeInput.style.width="100%";timeInput.style.minHeight="48px";
+   const currentParts=new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Dushanbe",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(new Date(b.starts_at));
+   timeInput.value=currentParts.replace(" ","T").slice(0,16);
+   const editorActions=document.createElement("div");editorActions.className="row";
+   const saveTime=document.createElement("button");saveTime.type="button";saveTime.className="primary";saveTime.textContent="Сабт кардани вақти нав";
+   const cancelTime=document.createElement("button");cancelTime.type="button";cancelTime.textContent="Бекор";
+   editor.append(editorLabel,timeInput,editorActions);editorActions.append(saveTime,cancelTime);
+   reschedule.addEventListener("click",()=>{editor.classList.toggle("hidden");});
+   cancelTime.addEventListener("click",()=>{editor.classList.add("hidden");});
+   saveTime.addEventListener("click",async()=>{
+    if(!timeInput.value){status("Сана ва вақти навро интихоб кун.",true);return;}
+    const newStart=new Date(timeInput.value+":00+05:00");
+    if(!Number.isFinite(newStart.getTime())||newStart<=new Date()){status("Вақти нав бояд дар оянда бошад.",true);return;}
+    const duration=Math.max(1,Math.round((new Date(b.ends_at).getTime()-new Date(b.starts_at).getTime())/60000));
+    const newEnd=new Date(newStart.getTime()+duration*60000);
+    saveTime.disabled=true;
+    const {error}=await supabase.from("bookings").update({starts_at:newStart.toISOString(),ends_at:newEnd.toISOString()}).eq("id",b.id).eq("barbershop_id",shop.id).in("status",["pending","confirmed"]);
+    if(error){status("Вақти нав сабт нашуд: "+error.message,true);saveTime.disabled=false;return;}
+    status("Вақти нав сабт шуд. Ба муштарӣ огоҳинома фиристода шуд.");
+    await loadBookings();
+   });
+   actions.append(reschedule);
+
    if(b.status==="pending"){
     const accept=document.createElement("button");accept.type="button";accept.className="primary";accept.textContent="Тасдиқ кардан";
     accept.addEventListener("click",async()=>{accept.disabled=true;const {error}=await supabase.from("bookings").update({status:"confirmed"}).eq("id",b.id).eq("barbershop_id",shop.id);if(error){status("Дархост тасдиқ нашуд: "+error.message,true);accept.disabled=false;}else{status("Дархост тасдиқ шуд.");await loadBookings();}});
@@ -1009,7 +1035,7 @@ async function loadBookings(){
    }
    const reject=document.createElement("button");reject.type="button";reject.className="danger";reject.textContent="Рад кардан";
    reject.addEventListener("click",async()=>{if(!confirm("Ин дархост рад карда шавад?"))return;reject.disabled=true;const {error}=await supabase.from("bookings").update({status:"cancelled"}).eq("id",b.id).eq("barbershop_id",shop.id);if(error){status("Дархост рад карда нашуд: "+error.message,true);reject.disabled=false;}else{status("Дархост рад карда шуд.");await loadBookings();}});
-   actions.append(reject);card.append(actions);
+   actions.append(reject);card.append(actions,editor);
   }
   box.append(card);
  });
