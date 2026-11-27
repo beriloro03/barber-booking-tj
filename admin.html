@@ -245,6 +245,20 @@ async function loadShop(){
  shop=data;$("ownerQuickNav").classList.remove("hidden");startOwnerNotificationRealtime(userData.user.id);$("telegramCard").classList.remove("hidden");$("shopName").value=data.name||"";$("shopDescription").value=data.description||"";$("shopCity").value=data.city||"";$("shopDistrict").value=data.district||"";$("shopAddress").value=data.address||"";$("shopPhone").value=data.phone||"";$("shopLatitude").value=data.latitude??"";$("shopLongitude").value=data.longitude??"";
  showDashboard(true);$("serviceCard").classList.remove("hidden");$("bookingCard").classList.remove("hidden");$("hoursCard").classList.remove("hidden");$("reviewsCard").classList.remove("hidden");$("galleryCard").classList.remove("hidden");status("Марказ бор шуд. Тағйиротро танҳо соҳиби ин марказ сабт карда метавонад.");await loadServices();$("staffCard").classList.remove("hidden");await loadStaff();await loadGallery();await loadBusinessHours();await loadBookings();await loadReviews();
 }
+async function loadServicePhotos(serviceId, host){
+ const {data,error}=await supabase.from("shop_gallery").select("id,image_url,storage_path,caption").eq("barbershop_id",shop.id).eq("service_id",serviceId).order("created_at",{ascending:false});
+ if(error){const p=document.createElement("p");p.className="muted";p.textContent="Аксҳо бор нашуданд: "+error.message;host.append(p);return;}
+ const grid=document.createElement("div");grid.className="service-photo-admin-grid";
+ (data||[]).forEach(photo=>{
+  const item=document.createElement("div");item.className="service-photo-admin-item";
+  const img=document.createElement("img");img.src=photo.image_url;img.alt="Акси хизмат";img.loading="lazy";item.append(img);
+  const remove=document.createElement("button");remove.type="button";remove.className="danger";remove.textContent="Нест кардан";
+  remove.addEventListener("click",async()=>{if(!confirm("Ин акси хизмат нест карда шавад?"))return;remove.disabled=true;const {error:rowError}=await supabase.from("shop_gallery").delete().eq("id",photo.id).eq("barbershop_id",shop.id).eq("service_id",serviceId);if(rowError){status("Акс нест нашуд: "+rowError.message,true);remove.disabled=false;return;}const {error:fileError}=await supabase.storage.from("shop-gallery").remove([photo.storage_path]);if(fileError)status("Сабти акс нест шуд, аммо файл пок нашуд: "+fileError.message,true);else status("Акс нест карда шуд.");await loadServices();});
+  item.append(remove);grid.append(item);
+ });
+ host.append(grid);
+ const count=document.createElement("p");count.className="muted";count.textContent="Аксҳо: "+(data||[]).length+" / 10";host.prepend(count);
+}
 async function loadServices(){
  if(!shop)return;
  const {data,error}=await supabase.from("services").select("id,name,description,duration_minutes,price,is_active").eq("barbershop_id",shop.id).order("name");
@@ -258,6 +272,36 @@ async function loadServices(){
   const meta=document.createElement("span");meta.className="muted";meta.textContent=s.duration_minutes+" дақ.";
   top.append(title,meta);card.append(top);
   if(s.description){const d=document.createElement("p");d.className="muted";d.textContent=s.description;card.append(d);}
+  const photoArea=document.createElement("div");photoArea.className="service-photo-admin";
+  const photoLabel=document.createElement("label");photoLabel.textContent="Аксҳои ин хизмат (то 10 дона, JPG/PNG/WEBP, ҳар кадом то 8 МБ)";
+  const input=document.createElement("input");input.type="file";input.accept="image/jpeg,image/png,image/webp";input.multiple=true;
+  const photoStatus=document.createElement("p");photoStatus.className="muted";photoStatus.textContent="Барои ин хизмат ҳоло акс илова кардан мумкин аст.";
+  const photoList=document.createElement("div");
+  input.addEventListener("change",async()=>{
+   const files=[...(input.files||[])];if(!files.length)return;
+   const {data:existing,error:countError}=await supabase.from("shop_gallery").select("id").eq("barbershop_id",shop.id).eq("service_id",s.id);
+   if(countError){photoStatus.textContent="Санҷиши шумораи аксҳо нашуд: "+countError.message;input.value="";return;}
+   if(existing.length+files.length>10){photoStatus.textContent="Ҳадди аксҳо 10 дона аст. Ҳоло "+existing.length+" акс ҳаст.";input.value="";return;}
+   const allowed=["image/jpeg","image/png","image/webp"];
+   const invalid=files.find(f=>!allowed.includes(f.type)||f.size>8*1024*1024);
+   if(invalid){photoStatus.textContent="Аксҳо бояд JPG, PNG ё WEBP ва ҳар кадом то 8 МБ бошанд.";input.value="";return;}
+   input.disabled=true;let uploaded=0;
+   for(const file of files){
+    const ext=file.type==="image/png"?"png":file.type==="image/webp"?"webp":"jpg";
+    const path=shop.id+"/services/"+s.id+"/"+Date.now()+"-"+Math.random().toString(36).slice(2,9)+"."+ext;
+    const {error:uploadError}=await supabase.storage.from("shop-gallery").upload(path,file,{contentType:file.type,cacheControl:"3600",upsert:false});
+    if(uploadError){photoStatus.textContent="Акс бор нашуд: "+uploadError.message;continue;}
+    const {data:urlData}=supabase.storage.from("shop-gallery").getPublicUrl(path);
+    const {error:insertError}=await supabase.from("shop_gallery").insert({barbershop_id:shop.id,service_id:s.id,storage_path:path,image_url:urlData.publicUrl});
+    if(insertError){await supabase.storage.from("shop-gallery").remove([path]);photoStatus.textContent="Акс сабт нашуд: "+insertError.message;continue;}
+    uploaded++;
+   }
+   input.value="";input.disabled=false;
+   if(uploaded)status(uploaded+" акс ба хизмат илова шуд.");
+   await loadServices();
+  });
+  photoArea.append(photoLabel,input,photoStatus,photoList);card.append(photoArea);
+  loadServicePhotos(s.id,photoList);
   const actions=document.createElement("div");actions.className="row";
   const edit=document.createElement("button");edit.type="button";edit.textContent="Таҳрир";edit.addEventListener("click",()=>{editingServiceId=s.id;$("serviceName").value=s.name;$("serviceDescription").value=s.description||"";$("serviceDuration").value=s.duration_minutes;$("servicePrice").value=s.price;$("serviceForm").querySelector("button[type=submit]").textContent="Сабт кардани тағйирот";$("serviceName").focus();});
   const del=document.createElement("button");del.type="button";del.className="danger";del.textContent="Нест кардан";del.addEventListener("click",async()=>{if(!confirm("Ин хизматро нест кунем?"))return;const {error}=await supabase.from("services").delete().eq("id",s.id).eq("barbershop_id",shop.id);if(error)status("Нест карда нашуд: "+error.message,true);else{status("Хизмат нест карда шуд.");await loadServices();}});
