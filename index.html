@@ -82,6 +82,10 @@
     .booking-history-section{margin:18px 0 24px}
     .booking-history-section>h3{font-size:19px;margin:0 0 10px;color:var(--ink)}
     .booking-history-section>.my-bookings-list{margin-top:0}
+    .booking-history-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:12px 0}
+    .booking-history-filters label{display:grid;gap:5px;font-size:14px;font-weight:650;color:var(--muted)}
+    .booking-history-filters input,.booking-history-filters select{width:100%;min-height:44px;padding:9px 11px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);font:inherit}
+    .booking-history-empty-filter{margin:10px 0;color:var(--muted)}
     .booking-state{display:inline-block;padding:6px 10px;border-radius:999px;background:#f0eaff}
     .notice,.shop-status{border-radius:16px;background:#fff}
     footer{padding-top:12px}
@@ -1670,8 +1674,8 @@ async function loadMyBookings() {
   const historyLabels=currentLang==="ru"
     ?{upcoming:"Предстоящие записи",history:"История записей",emptyUpcoming:"Нет предстоящих записей.",emptyHistory:"История пока пуста."}
     :currentLang==="en"
-      ?{upcoming:"Upcoming appointments",history:"Appointment history",emptyUpcoming:"No upcoming appointments.",emptyHistory:"Your history is empty."}
-      :{upcoming:"Навбатҳои оянда",history:"Таърихи навбатҳо",emptyUpcoming:"Навбати оянда надоред.",emptyHistory:"Таърихи навбатҳо ҳоло холӣ аст."};
+      ?{upcoming:"Upcoming appointments",history:"Appointment history",emptyUpcoming:"No upcoming appointments.",emptyHistory:"Your history is empty.",search:"Search by center",searchPlaceholder:"Enter center name…",status:"Appointment status",allStatuses:"All statuses",completed:"Completed",cancelled:"Cancelled",sort:"Sort by date",newest:"Newest first",oldest:"Oldest first",noMatches:"No appointments match these filters."}
+      :{upcoming:"Навбатҳои оянда",history:"Таърихи навбатҳо",emptyUpcoming:"Навбати оянда надоред.",emptyHistory:"Таърихи навбатҳо ҳоло холӣ аст.",search:"Ҷустуҷӯ аз рӯйи марказ",searchPlaceholder:"Номи марказро нависед…",status:"Ҳолати навбат",allStatuses:"Ҳамаи ҳолатҳо",completed:"Анҷомшуда",cancelled:"Бекоршуда",sort:"Тартиби сана",newest:"Навтарин аввал",oldest:"Қадимтарин аввал",noMatches:"Бо ин филтрҳо навбат ёфт нашуд."};
   const upcomingSection=document.createElement("section");
   const historySection=document.createElement("section");
   upcomingSection.className=historySection.className="booking-history-section";
@@ -1679,6 +1683,7 @@ async function loadMyBookings() {
   const historyHeading=document.createElement("h3");historyHeading.textContent=historyLabels.history;
   const upcomingList=document.createElement("div");upcomingList.className="my-bookings-list";
   const historyList=document.createElement("div");historyList.className="my-bookings-list";
+  const historyCards=[];
   upcomingSection.append(upcomingHeading,upcomingList);
   historySection.append(historyHeading,historyList);
   bookings.forEach(b=>{
@@ -1815,10 +1820,40 @@ async function loadMyBookings() {
       card.append(cancelButton);
     }
     const isUpcoming=(b.status==="pending"||b.status==="confirmed")&&new Date(b.starts_at)>new Date();
-    (isUpcoming?upcomingList:historyList).append(card);
+    if(isUpcoming){upcomingList.append(card);}else{historyCards.push({booking:b,card});}
   });
   if(upcomingList.childElementCount){box.append(upcomingSection);}else{const empty=document.createElement("p");empty.className="muted";empty.textContent=historyLabels.emptyUpcoming;upcomingSection.append(empty);box.append(upcomingSection);}
-  if(historyList.childElementCount){box.append(historySection);}else{const empty=document.createElement("p");empty.className="muted";empty.textContent=historyLabels.emptyHistory;historySection.append(empty);box.append(historySection);}
+  const filterWrap=document.createElement("div");filterWrap.className="booking-history-filters";
+  const searchLabel=document.createElement("label");searchLabel.textContent=historyLabels.search;
+  const searchInput=document.createElement("input");searchInput.type="search";searchInput.placeholder=historyLabels.searchPlaceholder;searchLabel.append(searchInput);
+  const statusLabel=document.createElement("label");statusLabel.textContent=historyLabels.status;
+  const statusSelect=document.createElement("select");
+  [{value:"all",text:historyLabels.allStatuses},{value:"completed",text:historyLabels.completed},{value:"cancelled",text:historyLabels.cancelled}].forEach(item=>{const option=document.createElement("option");option.value=item.value;option.textContent=item.text;statusSelect.append(option);});
+  statusLabel.append(statusSelect);
+  const sortLabel=document.createElement("label");sortLabel.textContent=historyLabels.sort;
+  const sortSelect=document.createElement("select");
+  [{value:"newest",text:historyLabels.newest},{value:"oldest",text:historyLabels.oldest}].forEach(item=>{const option=document.createElement("option");option.value=item.value;option.textContent=item.text;sortSelect.append(option);});
+  sortLabel.append(sortSelect);
+  filterWrap.append(searchLabel,statusLabel,sortLabel);
+  historySection.insertBefore(filterWrap,historyList);
+  const renderFilteredHistory=()=>{
+    const query=searchInput.value.trim().toLocaleLowerCase();
+    const status=statusSelect.value;
+    const filtered=historyCards.filter(item=>{
+      const shopName=String(item.booking.barbershop_name_snapshot||"").toLocaleLowerCase();
+      return (!query||shopName.includes(query))&&(status==="all"||item.booking.status===status);
+    }).sort((a,b)=>sortSelect.value==="oldest"?new Date(a.booking.starts_at)-new Date(b.booking.starts_at):new Date(b.booking.starts_at)-new Date(a.booking.starts_at));
+    historyList.replaceChildren();
+    filtered.forEach(item=>historyList.append(item.card));
+    let empty=historySection.querySelector(".booking-history-empty-filter");
+    if(!filtered.length){if(!empty){empty=document.createElement("p");empty.className="booking-history-empty-filter";historySection.insertBefore(empty,historyList);}empty.textContent=historyCards.length?historyLabels.noMatches:historyLabels.emptyHistory;}
+    else if(empty)empty.remove();
+  };
+  searchInput.addEventListener("input",renderFilteredHistory);
+  statusSelect.addEventListener("change",renderFilteredHistory);
+  sortSelect.addEventListener("change",renderFilteredHistory);
+  renderFilteredHistory();
+  box.append(historySection);
 }
 document.getElementById("refreshMyBookings")?.addEventListener("click",loadMyBookings);
 
