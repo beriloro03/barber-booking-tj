@@ -1672,7 +1672,7 @@ async function loadMyBookings() {
   box.replaceChildren();
   const currentLang=document.documentElement.lang||"tg";
   const historyLabels=currentLang==="ru"
-    ?{upcoming:"Предстоящие записи",history:"История записей",emptyUpcoming:"Нет предстоящих записей.",emptyHistory:"История пока пуста."}
+    ?{upcoming:"Предстоящие записи",history:"История записей",emptyUpcoming:"Нет предстоящих записей.",emptyHistory:"История пока пуста.",search:"Поиск по названию центра",searchPlaceholder:"Введите название центра…",status:"Статус записи",allStatuses:"Все статусы",completed:"Завершённые",cancelled:"Отменённые",sort:"Сортировка по дате",newest:"Сначала новые",oldest:"Сначала старые",noMatches:"По этим фильтрам записи не найдены."}
     :currentLang==="en"
       ?{upcoming:"Upcoming appointments",history:"Appointment history",emptyUpcoming:"No upcoming appointments.",emptyHistory:"Your history is empty.",search:"Search by center",searchPlaceholder:"Enter center name…",status:"Appointment status",allStatuses:"All statuses",completed:"Completed",cancelled:"Cancelled",sort:"Sort by date",newest:"Newest first",oldest:"Oldest first",noMatches:"No appointments match these filters."}
       :{upcoming:"Навбатҳои оянда",history:"Таърихи навбатҳо",emptyUpcoming:"Навбати оянда надоред.",emptyHistory:"Таърихи навбатҳо ҳоло холӣ аст.",search:"Ҷустуҷӯ аз рӯйи марказ",searchPlaceholder:"Номи марказро нависед…",status:"Ҳолати навбат",allStatuses:"Ҳамаи ҳолатҳо",completed:"Анҷомшуда",cancelled:"Бекоршуда",sort:"Тартиби сана",newest:"Навтарин аввал",oldest:"Қадимтарин аввал",noMatches:"Бо ин филтрҳо навбат ёфт нашуд."};
